@@ -83,11 +83,7 @@ const productMenuGroup: MenuGroup = {
   items: [
     { text: 'Ürünler', path: '/products', icon: <ShoppingCartIcon /> },
     { text: 'Kategori', path: '/products/categories', icon: <CategoryIcon /> },
-    { text: 'Varyantlar', path: '/products/variants', icon: <VariantsIcon /> },
-    { text: 'Ürün Seçenekleri', path: '/products/options', icon: <ProductOptionsIcon /> },
-    { text: 'Marka', path: '/products/brands', icon: <BrandIcon /> },
-    { text: 'Ürün Özellikleri', path: '/products/features', icon: <ProductFeaturesIcon /> },
-    { text: 'Ürün Sınıfları', path: '/products/classes', icon: <ProductClassesIcon /> },
+
   ]
 };
 
