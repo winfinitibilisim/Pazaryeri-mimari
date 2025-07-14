@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -14,9 +14,11 @@ import {
   InputAdornment,
   Select,
   MenuItem,
-  FormControl
+  FormControl,
 } from '@mui/material';
 import { Close as CloseIcon, Refresh as RefreshIcon, TouchApp as TouchAppIcon } from '@mui/icons-material';
+import { useLanguage } from '../../contexts/LanguageContext';
+import CategorySelectionModal from './CategorySelectionModal';
 
 interface QuickAddProductModalProps {
   open: boolean;
@@ -24,10 +26,19 @@ interface QuickAddProductModalProps {
 }
 
 const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClose }) => {
+  const { language, setLanguage, t } = useLanguage();
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('');
+
+  const handleLanguageChange = () => {
+    const newLang = language === 'tr' ? 'en' : 'tr';
+    setLanguage(newLang);
+  };
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>
-        Hızlı Ürün Ekle
+        {t('quickAddProduct.title')}
         <IconButton
           aria-label="close"
           onClick={onClose}
@@ -46,12 +57,14 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
           <TextField
             required
             fullWidth
-            label="Ad"
+            label={t('quickAddProduct.name')}
             margin="normal"
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <img src="https://flagcdn.com/w20/tr.png" alt="TR Flag" />
+                  <IconButton onClick={handleLanguageChange} size="small">
+                    <img src={`https://flagcdn.com/w20/${language === 'tr' ? 'tr' : 'gb'}.png`} alt="Flag" />
+                  </IconButton>
                 </InputAdornment>
               ),
             }}
@@ -59,7 +72,23 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
           <TextField
             required
             fullWidth
-            label="Kategori"
+            label={t('quickAddProduct.category')}
+            value={selectedCategory}
+            margin="normal"
+            InputProps={{
+              readOnly: true,
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton size="small" onClick={() => setCategoryModalOpen(true)}>
+                    <TouchAppIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <TextField
+            fullWidth
+            label={t('quickAddProduct.brand')}
             margin="normal"
             InputProps={{
               endAdornment: (
@@ -72,23 +101,9 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
             }}
           />
           <TextField
-            fullWidth
-            label="Marka"
-            margin="normal"
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton size="small">
-                    <TouchAppIcon />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          <TextField
             required
             fullWidth
-            label="Stok Kodu"
+            label={t('quickAddProduct.stockCode')}
             margin="normal"
             InputProps={{
               endAdornment: (
@@ -102,7 +117,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
           />
           <TextField
             fullWidth
-            label="Barkod"
+            label={t('quickAddProduct.barcode')}
             margin="normal"
             InputProps={{
               endAdornment: (
@@ -115,7 +130,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
             }}
           />
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-            <TextField fullWidth label="Satış Fiyatı" margin="normal" defaultValue="0" />
+            <TextField fullWidth label={t('quickAddProduct.sellingPrice')} margin="normal" defaultValue="0" />
             <FormControl sx={{ minWidth: 80 }}>
               <Select defaultValue="$">
                 <MenuItem value="$">$</MenuItem>
@@ -125,7 +140,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
             </FormControl>
           </Box>
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-            <TextField fullWidth label="Alış Fiyatı" margin="normal" defaultValue="0" />
+            <TextField fullWidth label={t('quickAddProduct.purchasePrice')} margin="normal" defaultValue="0" />
             <FormControl sx={{ minWidth: 80 }}>
               <Select defaultValue="$">
                 <MenuItem value="$">$</MenuItem>
@@ -137,23 +152,31 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
 
           <FormControl component="fieldset" margin="normal">
             <RadioGroup row defaultValue="Aktif">
-              <FormControlLabel value="Aktif" control={<Radio />} label="Aktif" />
-              <FormControlLabel value="Pasif" control={<Radio />} label="Pasif" />
-              <FormControlLabel value="Ürünü Gizle" control={<Radio />} label="Ürünü Gizle" />
-              <FormControlLabel value="Sadece Katalog" control={<Radio />} label="Sadece Katalog" />
-              <FormControlLabel value="Arşiv" control={<Radio />} label="Arşiv" />
+              <FormControlLabel value="Aktif" control={<Radio />} label={t('quickAddProduct.status.active')} />
+              <FormControlLabel value="Pasif" control={<Radio />} label={t('quickAddProduct.status.passive')} />
+              <FormControlLabel value="Ürünü Gizle" control={<Radio />} label={t('quickAddProduct.status.hideProduct')} />
+              <FormControlLabel value="Sadece Katalog" control={<Radio />} label={t('quickAddProduct.status.catalogOnly')} />
+              <FormControlLabel value="Arşiv" control={<Radio />} label={t('quickAddProduct.status.archive')} />
             </RadioGroup>
           </FormControl>
         </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="error" variant="contained">
-          Vazgeç
+          {t('quickAddProduct.cancel')}
         </Button>
         <Button onClick={onClose} variant="contained" disabled>
-          Ekle
+          {t('quickAddProduct.add')}
         </Button>
       </DialogActions>
+      <CategorySelectionModal
+        open={categoryModalOpen}
+        onClose={() => setCategoryModalOpen(false)}
+        onSelect={(category) => {
+          setSelectedCategory(category);
+          setCategoryModalOpen(false);
+        }}
+      />
     </Dialog>
   );
 };
