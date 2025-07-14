@@ -6,6 +6,8 @@ import {
   DialogActions,
   Button,
   IconButton,
+  Box,
+  TextField,
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -36,7 +38,14 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
         </IconButton>
       </DialogTitle>
       <DialogContent dividers>
-        {/* Form content will be added here step-by-step */}
+        <Box component="form" noValidate autoComplete="off" sx={{ mt: 1 }}>
+          <TextField
+            required
+            fullWidth
+            label={t('quickAddProduct.name')}
+            margin="normal"
+          />
+        </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="error" variant="contained">
