@@ -29,7 +29,7 @@ import {
 } from '@mui/icons-material';
 
 import ExportButton from '../components/common/ExportButton';
-import PrintButton from '../components/common/PrintButton';
+import QuickAddProductModal from '../components/common/QuickAddProductModal';
 import AccordionFilter from '../components/common/AccordionFilter';
 import { productFilterConfig } from '../utils/filterConfigs';
 import ProductDetailModal from '../components/common/ProductDetailModal';
@@ -68,6 +68,7 @@ const ProductsPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
   const [detailModalOpen, setDetailModalOpen] = useState<boolean>(false);
+  const [quickAddModalOpen, setQuickAddModalOpen] = useState<boolean>(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [advancedFilters, setAdvancedFilters] = useState<Record<string, any>>({});
   
@@ -452,7 +453,14 @@ const ProductsPage: React.FC = () => {
             
             <ExportButton onClick={handleExport} />
             
-            <PrintButton onClick={handlePrint} />
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setQuickAddModalOpen(true)}
+              sx={{ ml: 1 }}
+            >
+              Hızlı Ekle
+            </Button>
             
             <Button
               variant="contained"
@@ -668,6 +676,12 @@ const ProductsPage: React.FC = () => {
         open={detailModalOpen}
         onClose={handleCloseDetailModal}
         product={selectedProduct}
+      />
+
+      {/* Hızlı Ürün Ekleme Modalı */}
+      <QuickAddProductModal
+        open={quickAddModalOpen}
+        onClose={() => setQuickAddModalOpen(false)}
       />
     </Box>
   );
