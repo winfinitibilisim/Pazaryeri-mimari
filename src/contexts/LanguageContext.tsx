@@ -65,7 +65,6 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
 
   // The translation function 't'
   const t = useCallback((key: string, options?: { [key: string]: string | number }): string => {
-    // Navigate nested keys like 'profile.logout'
     const keys = key.split('.');
     let result: any = translations;
 
@@ -73,15 +72,16 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
       result = result?.[k];
       if (result === undefined) {
         console.warn(`Translation not found for key: ${key}`);
-        return key; // Return the key itself if not found
+        return key;
       }
     }
 
-    // Replace placeholders like {{count}}
     if (typeof result === 'string' && options) {
-      return Object.entries(options).reduce((acc, [optKey, optValue]) => {
-        return acc.replace(`{{${optKey}}}`, String(optValue));
-      }, result);
+      let translatedString = result;
+      for (const [optKey, optValue] of Object.entries(options)) {
+        translatedString = translatedString.replace(`{{${optKey}}}`, String(optValue));
+      }
+      return translatedString;
     }
 
     return typeof result === 'string' ? result : key;
