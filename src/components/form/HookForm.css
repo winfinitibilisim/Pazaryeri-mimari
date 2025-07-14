@@ -1,0 +1,62 @@
+.hook-form {
+  padding: 16px;
+}
+
+.form-section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  margin-bottom: 16px !important;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Responsive grid layout */
+@media (min-width: 600px) {
+  .form-section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .form-group {
+    margin-bottom: 0;
+  }
+  
+  .section-title {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Hata durumunda input stilleri */
+.error-input {
+  border-color: #d32f2f !important;
+  background-color: rgba(211, 47, 47, 0.04);
+}
+
+.error-input:focus {
+  box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.2) !important;
+}
+
+/* Yardımcı metin stili */
+.helper-text {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+.required {
+  color: #d32f2f;
+  margin-left: 2px;
+}

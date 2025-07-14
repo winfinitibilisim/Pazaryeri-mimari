@@ -1,0 +1,15 @@
+{
+  "safes": [
+    { "id": "1", "name": "Ana Kasa", "type": "cash", "currency": "TRY", "balance": -20.00, "isActive": true, "iban": "Belirtilmemiş" },
+    { "id": "2", "name": "Dolar Kasası", "type": "cash", "currency": "USD", "balance": 12500.00, "isActive": true, "iban": "Belirtilmemiş" },
+    { "id": "3", "name": "Euro Kasası", "type": "cash", "currency": "EUR", "balance": 8750.50, "isActive": true, "iban": "Belirtilmemiş" },
+    { "id": "4", "name": "N11 Kasa", "type": "bank", "currency": "TRY", "balance": 0.00, "isActive": true, "iban": "Belirtilmemiş" },
+    { "id": "5", "name": "Mng Kasa", "type": "bank", "currency": "TRY", "balance": 0.00, "isActive": true, "iban": "Belirtilmemiş" },
+    { "id": "6", "name": "HepsiBurada Kasa", "type": "bank", "currency": "TRY", "balance": 0.00, "isActive": true, "iban": "Belirtilmemiş" },
+    { "id": "7", "name": "Aras Kasa", "type": "bank", "currency": "TRY", "balance": 0.00, "isActive": true, "iban": "Belirtilmemiş" },
+    { "id": "8", "name": "Yurtiçi Kasa", "type": "bank", "currency": "TRY", "balance": 0.00, "isActive": true, "iban": "Belirtilmemiş" },
+    { "id": "9", "name": "Trendyol Kasa", "type": "bank", "currency": "TRY", "balance": 0.00, "isActive": true, "iban": "Belirtilmemiş" },
+    { "id": "10", "name": "Sürat Kasa", "type": "bank", "currency": "TRY", "balance": 0.00, "isActive": true, "iban": "Belirtilmemiş" },
+    { "id": "11", "name": "Pasif Banka Hesabı", "type": "bank", "currency": "GBP", "balance": 500.00, "isActive": false, "iban": "GB29 NWBK 6016 1331 9268 19" }
+  ]
+}

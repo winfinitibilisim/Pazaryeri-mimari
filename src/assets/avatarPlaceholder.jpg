@@ -1,0 +1,5 @@
+Bu dosya bir avatar placeholder görüntüsü olacaktır. 
+Kullanıcı profil fotoğrafı yüklendiğinde, bu dosya yerine gerçek kullanıcı fotoğrafı gösterilecektir.
+Sistemde tam bir resim dosyası oluşturulamadığından, bu metin dosyası sadece hatırlatma amaçlıdır.
+
+Gerçek uygulamada, buraya JPEG/PNG formatında bir avatar placeholder görüntüsü yerleştirilmelidir. 

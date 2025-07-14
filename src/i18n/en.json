@@ -1,0 +1,48 @@
+{
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "salesInvoices": "Sales Invoices",
+    "createSalesInvoice": "New Sales Invoice"
+  },
+  "topbar": {
+    "search": "Search"
+  },
+  "salesInvoicesPage": {
+    "title": "Sales Invoices",
+    "addInvoice": "Add Invoice",
+    "addReturnInvoice": "Add Return Invoice"
+  },
+  "invoice": {
+    "createNewSalesInvoice": "Create New Sales Invoice",
+    "createNewReturnInvoice": "Create Return Invoice"
+  },
+  "newReturnInvoiceModal": {
+    "title": "New Return Invoice",
+    "prompt": "Enter the number of the invoice to be returned.",
+    "invoiceNumberLabel": "Return Invoice No",
+    "invoiceNumberPlaceholder": "INV-2024-001",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "newInvoiceModal": {
+    "title": "Create New Invoice",
+    "description": "Enter invoice details.",
+    "invoiceNumber": "Invoice Number",
+    "customerName": "Customer Name",
+    "invoiceDate": "Invoice Date",
+    "invoiceEditTime": "Invoice Edit Time",
+    "dueDate": "Due Date",
+    "sameDay": "Same day",
+    "days7": "7 Days",
+    "days30": "30 Days",
+    "days60": "60 Days",
+    "days90": "90 Days",
+    "cancel": "Cancel",
+    "continue": "Continue"
+  },
+  "createInvoice": {
+    "cancel": "Cancel",
+    "saveAsDraft": "Save as Draft",
+    "saveInvoice": "Save Invoice"
+  }
+}

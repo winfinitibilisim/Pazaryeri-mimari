@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1235" height="650" viewBox="0 0 1235 650">
+<rect width="1235" height="650" fill="#bf0a30"/>
+<rect width="1235" height="50" fill="#ffffff" y="50"/>
+<rect width="1235" height="50" fill="#ffffff" y="150"/>
+<rect width="1235" height="50" fill="#ffffff" y="250"/>
+<rect width="1235" height="50" fill="#ffffff" y="350"/>
+<rect width="1235" height="50" fill="#ffffff" y="450"/>
+<rect width="1235" height="50" fill="#ffffff" y="550"/>
+<rect width="494" height="350" fill="#002868"/>
+<g fill="#ffffff">
+<g id="s18">
+<g id="s9">
+<g id="s5">
+<g id="s4">
+<path id="s" d="M247,90 l14.65,-45.21 l14.65,45.21 l-38.33,-27.84 h47.35 z"/>
+<use xlink:href="#s" transform="translate(0,70)"/>
+<use xlink:href="#s" transform="translate(0,140)"/>
+<use xlink:href="#s" transform="translate(0,210)"/>
+</g>
+<use xlink:href="#s" transform="translate(0,280)"/>
+</g>
+<use xlink:href="#s4" transform="translate(70,0)"/>
+</g>
+<use xlink:href="#s9" transform="translate(140,0)"/>
+</g>
+<use xlink:href="#s18" transform="translate(280,0)"/>
+</g>
+</svg>
