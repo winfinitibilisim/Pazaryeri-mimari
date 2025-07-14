@@ -213,24 +213,5 @@
     "total": "Toplam",
     "totalIn": "Toplam Giriş",
     "totalOut": "Toplam Çıkış"
-  },
-  "quickAddProduct": {
-    "title": "Hızlı Ürün Ekle",
-    "name": "Ad",
-    "category": "Kategori",
-    "brand": "Marka",
-    "stockCode": "Stok Kodu",
-    "barcode": "Barkod",
-    "sellingPrice": "Satış Fiyatı",
-    "purchasePrice": "Alış Fiyatı",
-    "status": {
-      "active": "Aktif",
-      "passive": "Pasif",
-      "hideProduct": "Ürünü Gizle",
-      "catalogOnly": "Sadece Katalog",
-      "archive": "Arşiv"
-    },
-    "cancel": "Vazgeç",
-    "add": "Ekle"
   }
 }

@@ -44,24 +44,5 @@
     "cancel": "Cancel",
     "saveAsDraft": "Save as Draft",
     "saveInvoice": "Save Invoice"
-  },
-  "quickAddProduct": {
-    "title": "Quick Add Product",
-    "name": "Name",
-    "category": "Category",
-    "brand": "Brand",
-    "stockCode": "Stock Code",
-    "barcode": "Barcode",
-    "sellingPrice": "Selling Price",
-    "purchasePrice": "Purchase Price",
-    "status": {
-      "active": "Active",
-      "passive": "Passive",
-      "hideProduct": "Hide Product",
-      "catalogOnly": "Catalog Only",
-      "archive": "Archive"
-    },
-    "cancel": "Cancel",
-    "add": "Add"
   }
 }
