@@ -93,15 +93,15 @@ const ltrCache = createLtrCache();
 
 function App() {
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <LanguageProvider>
-        <NotificationProvider>
-          <MessageProvider>
+    <LanguageProvider>
+      <NotificationProvider>
+        <MessageProvider>
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
             <AppWithLanguage />
-          </MessageProvider>
-        </NotificationProvider>
-      </LanguageProvider>
-    </LocalizationProvider>
+          </LocalizationProvider>
+        </MessageProvider>
+      </NotificationProvider>
+    </LanguageProvider>
   );
 }
 
@@ -243,7 +243,6 @@ const AppWithLanguage = () => {
     <CacheProvider value={isRTL ? rtlCache : ltrCache}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-
         <RouterProvider router={router} />
       </ThemeProvider>
     </CacheProvider>
