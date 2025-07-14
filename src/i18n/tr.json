@@ -12,6 +12,21 @@
     "addInvoice": "Fatura Ekle",
     "addReturnInvoice": "İade Faturası Ekle"
   },
+  "productsPage": {
+    "rowsPerPage": "Sayfa başına satır:",
+    "of": "/",
+    "addProduct": "Yeni Ürün Ekle",
+    "search": "Ara...",
+    "table": {
+      "product": "Ürünler",
+      "sku": "SKU",
+      "stock": "Stok",
+      "unitPrice": "Birim Fiyat",
+      "quantity": "Adet",
+      "status": "Durum",
+      "actions": "İşlemler"
+    }
+  },
   "invoice": {
     "createNewSalesInvoice": "Yeni Satış Faturası Oluştur",
     "createNewReturnInvoice": "İade Faturası Oluştur"

@@ -72,7 +72,7 @@ const ProductsPage: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [advancedFilters, setAdvancedFilters] = useState<Record<string, any>>({});
   
-  const { translations } = useLanguage();
+  const { t } = useLanguage();
   
 
   const hierarchicalCategories = [
@@ -474,7 +474,7 @@ const ProductsPage: React.FC = () => {
                 ml: { md: 1 }
               }}
             >
-              {translations.addProduct || "Yeni Ürün Ekle"}
+              {t('productsPage.addProduct')}
             </Button>
           </Box>
         </Box>
@@ -487,7 +487,7 @@ const ProductsPage: React.FC = () => {
           fields={productFilterConfig}
           onSearch={handleAdvancedFilterChange}
           initialValues={advancedFilters}
-          searchPlaceholder={translations.search || "Ara..."}
+          searchPlaceholder={t('productsPage.search')}
         />
       )}
 
@@ -497,13 +497,13 @@ const ProductsPage: React.FC = () => {
           <Table sx={{ width: '100%', tableLayout: 'fixed' }}>
             <TableHead>
               <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                <TableCell width="30%">{translations.products || "Ürünler"}</TableCell>
-                <TableCell width="12%">{translations.sku || "SKU"}</TableCell>
-                <TableCell width="10%">{translations.stock || "Stok"}</TableCell>
-                <TableCell width="12%" align="right">{translations.unitPrice || "Birim Fiyat"}</TableCell>
-                <TableCell width="10%" align="center">{translations.quantity || "Adet"}</TableCell>
-                <TableCell width="12%" align="center">{translations.status || "Durum"}</TableCell>
-                <TableCell width="14%" align="center">{translations.actionButtons || "İşlemler"}</TableCell>
+                <TableCell width="30%">{t('productsPage.table.product')}</TableCell>
+                <TableCell width="12%">{t('productsPage.table.sku')}</TableCell>
+                <TableCell width="10%">{t('productsPage.table.stock')}</TableCell>
+                <TableCell width="12%" align="right">{t('productsPage.table.unitPrice')}</TableCell>
+                <TableCell width="10%" align="center">{t('productsPage.table.quantity')}</TableCell>
+                <TableCell width="12%" align="center">{t('productsPage.table.status')}</TableCell>
+                <TableCell width="14%" align="center">{t('productsPage.table.actions')}</TableCell>
               </TableRow>
             </TableHead>
             <DragDropContext onDragEnd={handleDragEnd}>
@@ -666,8 +666,8 @@ const ProductsPage: React.FC = () => {
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          labelRowsPerPage="Sayfa başına satır:"
-          labelDisplayedRows={({ from, to, count }) => `${from}-${to} / ${count}`}
+          labelRowsPerPage={t('productsPage.rowsPerPage')}
+          labelDisplayedRows={({ from, to, count }) => `${from}-${to} ${t('productsPage.of')} ${count}`}
         />
       </Paper>
       
