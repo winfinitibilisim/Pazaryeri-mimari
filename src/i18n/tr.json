@@ -228,5 +228,22 @@
     "total": "Toplam",
     "totalIn": "Toplam Giriş",
     "totalOut": "Toplam Çıkış"
+  },
+  "quickAddProduct": {
+    "title": "Hızlı Ürün Ekle",
+    "name": "Ürün Adı",
+    "sku": "Stok Kodu (SKU)",
+    "barcode": "Barkod",
+    "brand": "Marka",
+    "category": "Kategori",
+    "unit": "Birim",
+    "stock": "Stok Miktarı",
+    "purchasePrice": "Alış Fiyatı",
+    "sellingPrice": "Satış Fiyatı",
+    "vatRate": "KDV Oranı",
+    "status": "Durum",
+    "description": "Açıklama",
+    "save": "Kaydet",
+    "cancel": "İptal"
   }
 }

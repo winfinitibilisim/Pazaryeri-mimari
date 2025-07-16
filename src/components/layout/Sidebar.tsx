@@ -49,6 +49,10 @@ import {
   Bookmark as BrandIcon,
   Tune as ProductFeaturesIcon,
   Class as ProductClassesIcon,
+  MoveToInbox as MoveToInboxIcon,
+  PendingActions as PendingActionsIcon,
+  LocalShipping as LocalShippingIcon,
+  AllInbox as AllInboxIcon,
 } from '@mui/icons-material';
 
 const DRAWER_WIDTH = 240;
@@ -83,18 +87,23 @@ const productMenuGroup: MenuGroup = {
   items: [
     { text: 'Ürünler', path: '/products', icon: <ShoppingCartIcon /> },
     { text: 'Kategori', path: '/products/categories', icon: <CategoryIcon /> },
+    { text: 'Markalar', path: '/products/brands', icon: <BrandIcon /> },
 
   ]
 };
 
+const shippingMenuGroup: MenuGroup = {
+  title: 'Kargo Yönetimi',
+  items: [
+    { text: 'Mal Kabul', path: '/shipping/goods-acceptance', icon: <MoveToInboxIcon /> },
+    { text: 'Bekleyen Paketler', path: '/shipping/pending-packages', icon: <PendingActionsIcon /> },
+    { text: 'Gönderilen Paketler', path: '/shipping/sent-packages', icon: <LocalShippingIcon /> },
+    { text: 'Tüm Paketler', path: '/shipping/all-packages', icon: <AllInboxIcon /> },
+  ]
+};
+
 const menuGroups: MenuGroup[] = [
-  {
-    title: 'Genel',
-    items: [
-      { text: 'Siparişler', icon: <ShoppingCartIcon />, path: '/orders', badge: 25 },
-      { text: 'Müşteriler', icon: <PeopleIcon />, path: '/customers' },
-    ],
-  },
+
   {
     title: 'Faturalar & Fişler',
     items: [
@@ -153,6 +162,21 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onToggle, activeMenu }) => {
     }
     return false;
   };
+
+    let displayedMenuGroups: MenuGroup[] = [];
+  switch (activeMenu) {
+    case 'products':
+      displayedMenuGroups = [productMenuGroup];
+      break;
+    case 'shipping':
+      displayedMenuGroups = [shippingMenuGroup];
+      break;
+    case 'sales':
+      displayedMenuGroups = menuGroups.filter(group => group.title === 'Faturalar & Fişler' || group.title === 'Finans');
+      break;
+    default:
+      displayedMenuGroups = menuGroups;
+  }
 
   const drawerContent = (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -217,7 +241,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onToggle, activeMenu }) => {
             </React.Fragment>
           )
           : (
-            menuGroups.map((group, groupIndex) => (
+            displayedMenuGroups.map((group, groupIndex) => (
               <React.Fragment key={group.title}>
                 {open && (
                   <Typography
@@ -291,7 +315,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onToggle, activeMenu }) => {
                     </ListItem>
                   );
                 })}
-                {groupIndex < menuGroups.length - 1 && open && <Divider sx={{ my: 1 }} />}
+                {groupIndex < displayedMenuGroups.length - 1 && open && <Divider sx={{ my: 1 }} />}
               </React.Fragment>
             ))
           )}

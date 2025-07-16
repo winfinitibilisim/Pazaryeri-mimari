@@ -666,36 +666,75 @@ const EditSalesInvoicePage: React.FC = () => {
                       />
                     </Grid>
                   )}
-                  <Grid item xs={3}>
-                    <TextField
-                      label="Miktar"
-                      type="number"
-                      value={item.quantity}
-                      onChange={(e) => handleItemChange(item.id, 'quantity', parseFloat(e.target.value) || 0)}
-                      fullWidth
-                    />
-                  </Grid>
-                  <Grid item xs={3}>
-                    <FormControl fullWidth>
-                      <InputLabel>Birim</InputLabel>
-                      <Select
-                        value={item.unit}
-                        onChange={(e) => handleItemChange(item.id, 'unit', e.target.value)}
-                        label="Birim"
-                        MenuProps={{
-                          sx: {
-                            '& .MuiMenuItem-root:hover': {
-                              backgroundColor: '#ff5722',
-                              color: 'white',
-                            },
-                          },
-                        }}
-                      >
-                        <MenuItem value="Adet">Adet</MenuItem>
-                        <MenuItem value="Kg">Kg</MenuItem>
-                        <MenuItem value="Metre">Metre</MenuItem>
-                      </Select>
-                    </FormControl>
+                  <Grid item xs={12}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={2.4}>
+                        <TextField
+                          label="Miktar"
+                          type="number"
+                          value={item.quantity}
+                          onChange={(e) => handleItemChange(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+                          fullWidth
+                          size="small"
+                        />
+                      </Grid>
+                      <Grid item xs={2.4}>
+                        <TextField
+                          label="KG"
+                          type="number"
+                          // value={item.kg} // kg alanı eklenmeli
+                          // onChange={(e) => handleItemChange(item.id, 'kg', e.target.value)}
+                          fullWidth
+                          size="small"
+                        />
+                      </Grid>
+                      <Grid item xs={2.4}>
+                        <TextField
+                          label="Hacim"
+                          type="number"
+                          // value={item.volume} // hacim alanı eklenmeli
+                          // onChange={(e) => handleItemChange(item.id, 'volume', e.target.value)}
+                          fullWidth
+                          size="small"
+                        />
+                      </Grid>
+                      <Grid item xs={2.4}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Birim</InputLabel>
+                          <Select
+                            value={item.unit}
+                            onChange={(e) => handleItemChange(item.id, 'unit', e.target.value)}
+                            label="Birim"
+                            MenuProps={{
+                              sx: {
+                                '& .MuiMenuItem-root:hover': {
+                                  backgroundColor: '#ff5722',
+                                  color: 'white',
+                                },
+                              },
+                            }}
+                          >
+                            <MenuItem value="Adet">Adet</MenuItem>
+                            <MenuItem value="Kg">Kg</MenuItem>
+                            <MenuItem value="Metre">Metre</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={2.4}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Birimler</InputLabel>
+                          <Select
+                            value={item.unit} // Bu alanın state'i yönetilmeli
+                            onChange={(e) => handleItemChange(item.id, 'unit', e.target.value)} // Bu alanın state'i yönetilmeli
+                            label="Birimler"
+                          >
+                            <MenuItem value="cift">Çift</MenuItem>
+                            <MenuItem value="cuval">Çuval</MenuItem>
+                            <MenuItem value="duzine">Düzine</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    </Grid>
                   </Grid>
                   <Grid item xs={3}>
                     <TextField

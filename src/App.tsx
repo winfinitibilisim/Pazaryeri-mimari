@@ -23,6 +23,7 @@ import CustomersPage from './pages/CustomersPage';
 import AddCustomerPage from './pages/AddCustomerPage';
 import ProductsPage from './pages/ProductsPage';
 import CategoriesPage from './pages/CategoriesPage';
+import BrandsPage from './pages/BrandsPage';
 import PaymentsPage from './pages/PaymentsPage';
 import ReportsPage from './pages/ReportsPage';
 import SettingsPage from './pages/SettingsPage';
@@ -76,6 +77,14 @@ import SafesPage from './pages/finance/SafesPage';
 import SafeDetailPage from './pages/finance/safes/SafeDetailPage';
 import EmployeesPage from './pages/EmployeesPage';
 import EmployeeDetailPage from './pages/EmployeeDetailPage';
+import ShippingListPage from './pages/ShippingListPage';
+import AccountingPage from './pages/AccountingPage';
+import ShipmentsPage from './pages/ShipmentsPage';
+import ShippingPricesPage from './pages/ShippingPricesPage';
+import GoodsAcceptancePage from './pages/shipping/GoodsAcceptancePage';
+import PendingPackagesPage from './pages/shipping/PendingPackagesPage';
+import SentPackagesPage from './pages/shipping/SentPackagesPage';
+import AllPackagesPage from './pages/shipping/AllPackagesPage';
 
 // Contexts
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
@@ -180,7 +189,8 @@ const AppWithLanguage = () => {
         { path: 'customers', element: <CustomersPage /> },
         { path: 'add-customer', element: <AddCustomerPage /> },
         { path: 'products', element: <ProductsPage /> },
-        { path: 'products/categories', element: <CategoriesPage /> },
+                { path: 'products/categories', element: <CategoriesPage /> },
+        { path: 'products/brands', element: <BrandsPage /> },
         { path: 'payments', element: <PaymentsPage /> },
         { path: 'reports', element: <ReportsPage /> },
         { path: 'settings', element: <SettingsPage /> },
@@ -234,6 +244,14 @@ const AppWithLanguage = () => {
         { path: 'safes/:id', element: <SafeDetailPage /> },
         { path: 'employees', element: <EmployeesPage /> },
         { path: 'employees/:id', element: <EmployeeDetailPage /> },
+        { path: 'shipping-list', element: <ShippingListPage /> },
+        { path: 'accounting', element: <AccountingPage /> },
+        { path: 'shipments', element: <ShipmentsPage /> },
+                { path: 'shipping-prices', element: <ShippingPricesPage /> },
+        { path: 'shipping/goods-acceptance', element: <GoodsAcceptancePage /> },
+        { path: 'shipping/pending-packages', element: <PendingPackagesPage /> },
+        { path: 'shipping/sent-packages', element: <SentPackagesPage /> },
+        { path: 'shipping/all-packages', element: <AllPackagesPage /> },
       ],
     },
     { path: '*', element: <Navigate to="/" /> }, // Redirect any unknown paths to dashboard

@@ -1,12 +1,12 @@
 import React from 'react';
 import { Box, Paper, Grid, Button, Typography, Container, useTheme } from '@mui/material';
 import {
-  Inventory as ProductsIcon,
-  ShoppingCart as SalesIcon,
-  LocalOffer as PromotionsIcon,
-  BarChart as ReportsIcon,
-  Code as XmlIcon,
-  Business as ErpIcon
+  LocalShipping as KargoListesiIcon,
+  AccountBalanceWallet as MuhasebeIcon,
+  Inventory as UrunlerIcon,
+  People as MusterilerIcon,
+  Assessment as SevkiyatlarIcon,
+  PriceCheck as KargoFiyatlariIcon
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -16,39 +16,39 @@ interface MainCategoriesBarProps {
 
 const mainCategories = [
   {
+    title: 'Kargo Listesi',
+    icon: <KargoListesiIcon sx={{ fontSize: 40, color: '#FFC107' }} />,
+    path: '/shipping/goods-acceptance',
+    menuKey: 'shipping'
+  },
+  {
+    title: 'Muhasebe',
+    icon: <MuhasebeIcon sx={{ fontSize: 40, color: '#3F51B5' }} />,
+    path: '/accounting',
+    menuKey: 'sales'
+  },
+  {
     title: 'Ürünler',
-    icon: <ProductsIcon sx={{ fontSize: 40, color: '#F57C00' }} />,
+    icon: <UrunlerIcon sx={{ fontSize: 40, color: '#F57C00' }} />,
     path: '/products',
     menuKey: 'products'
   },
   {
-    title: 'Satışlar',
-    icon: <SalesIcon sx={{ fontSize: 40, color: '#3F51B5' }} />,
-    path: '/sales-invoices',
-    menuKey: 'sales'
-  },
-  {
-    title: 'Promosyonlar',
-    icon: <PromotionsIcon sx={{ fontSize: 40, color: '#FFC107' }} />,
-    path: '/promotions',
+    title: 'Müşteriler',
+    icon: <MusterilerIcon sx={{ fontSize: 40, color: '#795548' }} />,
+    path: '/customers',
     menuKey: 'default'
   },
   {
-    title: 'Raporlar',
-    icon: <ReportsIcon sx={{ fontSize: 40, color: '#E91E63' }} />,
-    path: '/reports',
+    title: 'Sevkiyatlar',
+    icon: <SevkiyatlarIcon sx={{ fontSize: 40, color: '#E91E63' }} />,
+    path: '/shipments',
     menuKey: 'default'
   },
   {
-    title: 'Süper Xml',
-    icon: <XmlIcon sx={{ fontSize: 40, color: '#FF5722' }} />,
-    path: '/xml-import',
-    menuKey: 'default'
-  },
-  {
-    title: 'ERP / CRM',
-    icon: <ErpIcon sx={{ fontSize: 40, color: '#795548' }} />,
-    path: '/erp-crm',
+    title: 'Kargo Fiyatları',
+    icon: <KargoFiyatlariIcon sx={{ fontSize: 40, color: '#FF5722' }} />,
+    path: '/shipping-prices',
     menuKey: 'default'
   }
 ];
