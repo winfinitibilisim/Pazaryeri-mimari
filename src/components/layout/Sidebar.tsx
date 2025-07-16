@@ -103,10 +103,10 @@ const shippingMenuGroup: MenuGroup = {
 };
 
 const menuGroups: MenuGroup[] = [
-
   {
     title: 'Faturalar & Fişler',
     items: [
+      { text: 'Müşteriler', icon: <PeopleIcon />, path: '/customers' },
       { text: 'Satış Faturaları', icon: <ReceiptIcon />, path: '/sales-invoices' },
       { text: 'Taslak Faturalar', icon: <ArticleIcon />, path: '/draft-invoices' },
       { text: 'Alış Faturaları', icon: <ReceiptLongIcon />, path: '/purchase-invoices' },

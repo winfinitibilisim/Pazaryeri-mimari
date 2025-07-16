@@ -17,37 +17,32 @@ interface MainCategoriesBarProps {
 const mainCategories = [
   {
     title: 'Kargo Listesi',
-    icon: <KargoListesiIcon sx={{ fontSize: 40, color: '#FFC107' }} />,
+    icon: <KargoListesiIcon sx={{ fontSize: 56, color: '#FFC107' }} />,
     path: '/shipping/goods-acceptance',
     menuKey: 'shipping'
   },
   {
     title: 'Muhasebe',
-    icon: <MuhasebeIcon sx={{ fontSize: 40, color: '#3F51B5' }} />,
-    path: '/accounting',
+    icon: <MuhasebeIcon sx={{ fontSize: 56, color: '#3F51B5' }} />,
+    path: '/customers',
     menuKey: 'sales'
   },
   {
     title: 'Ürünler',
-    icon: <UrunlerIcon sx={{ fontSize: 40, color: '#F57C00' }} />,
+    icon: <UrunlerIcon sx={{ fontSize: 56, color: '#F57C00' }} />,
     path: '/products',
     menuKey: 'products'
   },
-  {
-    title: 'Müşteriler',
-    icon: <MusterilerIcon sx={{ fontSize: 40, color: '#795548' }} />,
-    path: '/customers',
-    menuKey: 'default'
-  },
+
   {
     title: 'Sevkiyatlar',
-    icon: <SevkiyatlarIcon sx={{ fontSize: 40, color: '#E91E63' }} />,
+    icon: <SevkiyatlarIcon sx={{ fontSize: 56, color: '#E91E63' }} />,
     path: '/shipments',
     menuKey: 'default'
   },
   {
     title: 'Kargo Fiyatları',
-    icon: <KargoFiyatlariIcon sx={{ fontSize: 40, color: '#FF5722' }} />,
+    icon: <KargoFiyatlariIcon sx={{ fontSize: 56, color: '#FF5722' }} />,
     path: '/shipping-prices',
     menuKey: 'default'
   }
@@ -72,7 +67,7 @@ const MainCategoriesBar: React.FC<MainCategoriesBarProps> = ({ setActiveMenu }) 
         <Paper elevation={0} sx={{ p: 2, borderRadius: 2, border: '1px solid #eee' }}>
           <Grid container spacing={3} justifyContent="center">
             {mainCategories.map((category, index) => (
-              <Grid item xs={6} sm={4} md={2} key={index}>
+              <Grid item xs={6} sm={4} md={2.4} key={index}>
                 <Button
                   variant={location.pathname === category.path ? 'contained' : 'outlined'}
                   onClick={() => {
@@ -86,7 +81,7 @@ const MainCategoriesBar: React.FC<MainCategoriesBarProps> = ({ setActiveMenu }) 
                     justifyContent: 'center',
                     width: '100%',
                     height: '100%',
-                    minHeight: 120,
+                    minHeight: 160,
                     p: 2,
                     borderRadius: 2,
                     borderColor: '#e0e0e0',
@@ -96,7 +91,7 @@ const MainCategoriesBar: React.FC<MainCategoriesBarProps> = ({ setActiveMenu }) 
                   }}
                 >
                   {category.icon}
-                  <Typography variant="subtitle1" sx={{ mt: 1, color: 'text.primary', fontWeight: 500 }}>
+                                    <Typography variant="subtitle1" sx={{ mt: 2, color: 'text.primary', fontWeight: 'medium', fontSize: '1.05rem' }}>
                     {category.title}
                   </Typography>
                 </Button>
