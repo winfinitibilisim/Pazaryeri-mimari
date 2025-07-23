@@ -94,17 +94,29 @@ const BrandsPage: FC = () => {
         setDialogOpen(false);
     };
 
-            const handleAddBrand = (newBrandData: { names: { lang: string; name: string }[], website: string, description: string, image: File | null }) => {
+    const handleAddBrand = (brand: {
+        names: { lang: string; name: string }[];
+        website: string;
+        description: string;
+        images: { id: string; file: File; preview: string; isLogo: boolean }[];
+        country: string;
+        foundedYear: string;
+        category: string;
+    }) => {
+        const logoImage = brand.images.find(img => img.isLogo);
         const newBrand: Brand = {
             id: (brands.length + 1).toString(),
-            logo: newBrandData.image ? URL.createObjectURL(newBrandData.image) : '',
-            name: newBrandData.names.find(n => n.lang === 'tr')?.name || newBrandData.names[0]?.name || 'N/A',
+            logo: logoImage ? logoImage.preview : (brand.images[0]?.preview || ''),
+            name: brand.names.find(n => n.lang === 'tr')?.name || brand.names[0]?.name || 'N/A',
             productCount: 0,
             isActive: true,
         };
 
         setBrands(prevBrands => [...prevBrands, newBrand]);
-        console.log('Adding brand:', newBrand);
+        console.log('Adding brand:', {
+            ...brand,
+            newBrand
+        });
     };
     return (
         <Paper sx={{ p: 2 }}>

@@ -49,7 +49,10 @@ interface Product {
   id: string;
   name: string;
   category: string;
-  price: number;
+  price: number; // Satış fiyatı (geriye uyumluluk için)
+  purchasePrice: number; // Alış fiyatı
+  salePrice: number; // Satış fiyatı
+  currency: 'TRY' | 'USD' | 'EUR' | 'GBP' | 'JPY' | 'CNY' | 'RUB' | 'SAR' | 'AED'; // Para birimi
   stock: number;
   status: 'Aktif' | 'Pasif';
   sku: string;
@@ -73,6 +76,22 @@ const ProductsPage: React.FC = () => {
   const [advancedFilters, setAdvancedFilters] = useState<Record<string, any>>({});
   
   const { t } = useLanguage();
+
+  // Para birimi sembollerini döndüren yardımcı fonksiyon
+  const getCurrencySymbol = (currency: string) => {
+    const symbols: Record<string, string> = {
+      'TRY': '₺',
+      'USD': '$',
+      'EUR': '€',
+      'GBP': '£',
+      'JPY': '¥',
+      'CNY': '¥',
+      'RUB': '₽',
+      'SAR': 'ر.س',
+      'AED': 'د.إ'
+    };
+    return symbols[currency] || currency;
+  };
   
 
   const hierarchicalCategories = [
@@ -133,7 +152,10 @@ const ProductsPage: React.FC = () => {
       id: '1',
       name: 'Kırmızı Tişört',
       category: 'Giyim',
-      price: 149.99,
+      price: 149.99, // Geriye uyumluluk için
+      purchasePrice: 89.99,
+      salePrice: 149.99,
+      currency: 'TRY',
       stock: 25,
       status: 'Aktif',
       sku: 'TS-RED-M',
@@ -147,6 +169,9 @@ const ProductsPage: React.FC = () => {
       name: 'Mavi Kot Pantolon',
       category: 'Giyim',
       price: 299.99,
+      purchasePrice: 179.99,
+      salePrice: 299.99,
+      currency: 'TRY',
       stock: 18,
       status: 'Aktif',
       sku: 'JP-BLU-32',
@@ -160,6 +185,9 @@ const ProductsPage: React.FC = () => {
       name: 'Siyah Ceket',
       category: 'Dış Giyim',
       price: 449.00,
+      purchasePrice: 269.00,
+      salePrice: 449.00,
+      currency: 'TRY',
       stock: 12,
       status: 'Aktif',
       sku: 'JK-BLK-L',
@@ -173,6 +201,9 @@ const ProductsPage: React.FC = () => {
       name: 'Beyaz Gömlek',
       category: 'Giyim',
       price: 189.00,
+      purchasePrice: 119.00,
+      salePrice: 189.00,
+      currency: 'TRY',
       stock: 0,
       status: 'Pasif',
       sku: 'SH-WHT-M',
@@ -186,6 +217,9 @@ const ProductsPage: React.FC = () => {
       name: 'Yeşil Kazak',
       category: 'Triko',
       price: 219.00,
+      purchasePrice: 139.00,
+      salePrice: 219.00,
+      currency: 'TRY',
       stock: 8,
       status: 'Aktif',
       sku: 'SW-GRN-XL',
@@ -193,6 +227,38 @@ const ProductsPage: React.FC = () => {
       imageUrl: 'https://images.unsplash.com/photo-1577789140096-85a8fb016270?w=300&h=300&fit=crop&auto=format&q=80',
       color: 'Yeşil',
       date: '2023-04-20'
+    },
+    {
+      id: '6',
+      name: 'Premium Laptop',
+      category: 'Elektronik',
+      price: 1299.99,
+      purchasePrice: 999.99,
+      salePrice: 1299.99,
+      currency: 'USD',
+      stock: 5,
+      status: 'Aktif',
+      sku: 'LP-PREM-15',
+      qty: 15,
+      imageUrl: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=300&h=300&fit=crop&auto=format&q=80',
+      color: 'Gri',
+      date: '2023-05-20'
+    },
+    {
+      id: '7',
+      name: 'Wireless Headphones',
+      category: 'Elektronik',
+      price: 199.99,
+      purchasePrice: 129.99,
+      salePrice: 199.99,
+      currency: 'EUR',
+      stock: 15,
+      status: 'Aktif',
+      sku: 'HP-WRL-BLK',
+      qty: 45,
+      imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop&auto=format&q=80',
+      color: 'Siyah',
+      date: '2023-05-18'
     }
   ]);
 
@@ -249,7 +315,7 @@ const ProductsPage: React.FC = () => {
   };
 
   const handleAddNew = () => {
-    console.log('Adding new product...');
+    setQuickAddModalOpen(true);
   };
 
   const handleAdvancedFilterChange = (newFilters: Record<string, any>) => {
@@ -497,13 +563,15 @@ const ProductsPage: React.FC = () => {
           <Table sx={{ width: '100%', tableLayout: 'fixed' }}>
             <TableHead>
               <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                <TableCell width="30%">{t('productsPage.table.product')}</TableCell>
-                <TableCell width="12%">{t('productsPage.table.sku')}</TableCell>
-                <TableCell width="10%">{t('productsPage.table.stock')}</TableCell>
-                <TableCell width="12%" align="right">{t('productsPage.table.unitPrice')}</TableCell>
-                <TableCell width="10%" align="center">{t('productsPage.table.quantity')}</TableCell>
-                <TableCell width="12%" align="center">{t('productsPage.table.status')}</TableCell>
-                <TableCell width="14%" align="center">{t('productsPage.table.actions')}</TableCell>
+                <TableCell width="25%">{t('productsPage.table.product')}</TableCell>
+                <TableCell width="10%">{t('productsPage.table.sku')}</TableCell>
+                <TableCell width="8%">{t('productsPage.table.stock')}</TableCell>
+                <TableCell width="10%" align="right">Alış Fiyatı</TableCell>
+                <TableCell width="10%" align="right">Satış Fiyatı</TableCell>
+                <TableCell width="8%" align="center">Para Birimi</TableCell>
+                <TableCell width="8%" align="center">{t('productsPage.table.quantity')}</TableCell>
+                <TableCell width="10%" align="center">{t('productsPage.table.status')}</TableCell>
+                <TableCell width="11%" align="center">{t('productsPage.table.actions')}</TableCell>
               </TableRow>
             </TableHead>
             <DragDropContext onDragEnd={handleDragEnd}>
@@ -612,7 +680,29 @@ const ProductsPage: React.FC = () => {
                   </TableCell>
                   <TableCell>{product.sku}</TableCell>
                   <TableCell>{product.stock}</TableCell>
-                  <TableCell align="right">{product.price.toFixed(2)} ₺</TableCell>
+                  <TableCell align="right">
+                    <Typography variant="body2" color="text.secondary">
+                      {product.purchasePrice.toFixed(2)} {getCurrencySymbol(product.currency)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="right">
+                    <Typography variant="body2" fontWeight={500}>
+                      {product.salePrice.toFixed(2)} {getCurrencySymbol(product.currency)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Chip 
+                      label={product.currency} 
+                      size="small" 
+                      variant="outlined"
+                      sx={{ 
+                        fontSize: '0.75rem',
+                        height: '24px',
+                        borderColor: '#e0e0e0',
+                        color: '#666'
+                      }} 
+                    />
+                  </TableCell>
                   <TableCell align="center">{product.qty}</TableCell>
                   <TableCell align="center">
                     <Chip 
