@@ -160,27 +160,80 @@ const GoodsAcceptancePage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
+    <Box sx={{ 
+      p: 3, 
+      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+      minHeight: '100vh'
+    }}>
+      <Typography 
+        variant="h4" 
+        gutterBottom 
+        sx={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          fontWeight: 700,
+          mb: 3,
+          textAlign: 'center'
+        }}
+      >
         Mal Kabul
       </Typography>
 
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Paper sx={{ 
+        p: 3, 
+        mb: 3,
+        borderRadius: 3,
+        boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+        border: '1px solid rgba(255,255,255,0.2)'
+      }}>
         <Grid container spacing={4}>
           {/* Alıcı Bölümü */}
           <Grid item xs={12} md={6}>
-            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+            <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ color: '#2c3e50', fontSize: '1.1rem' }}>
               Alıcı
             </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', border: '1px solid #ccc', borderRadius: 1, p: 1 }}>
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              border: '2px solid #e3f2fd', 
+              borderRadius: 2, 
+              p: 2,
+              background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+              '&:hover': {
+                borderColor: '#667eea',
+                transform: 'translateY(-1px)',
+                boxShadow: '0 4px 15px rgba(102, 126, 234, 0.1)'
+              },
+              transition: 'all 0.3s ease'
+            }}>
               <Box sx={{ flexGrow: 1 }}>
-                <Typography>Ahmet Yılmaz</Typography>
+                <Typography sx={{ fontWeight: 500, color: '#2c3e50' }}>Ahmet Yılmaz</Typography>
               </Box>
-              <Button size="small" endIcon={<AddIcon />}>
+              <Button 
+                size="small" 
+                endIcon={<AddIcon />}
+                sx={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  borderRadius: 2,
+                  px: 2,
+                  py: 1,
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 5px 15px rgba(102, 126, 234, 0.3)'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+              >
                 Ekle
               </Button>
             </Box>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, fontStyle: 'italic' }}>
               Orhan Mah. Test Cad. No:1 D:2, İstanbul
               <br />
               Vergi Dairesi: Maslak - Vergi No: 1234567890
@@ -189,18 +242,48 @@ const GoodsAcceptancePage: React.FC = () => {
 
           {/* Satıcı Bölümü */}
           <Grid item xs={12} md={6}>
-            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+            <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ color: '#2c3e50', fontSize: '1.1rem' }}>
               Satıcı
             </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', border: '1px solid #ccc', borderRadius: 1, p: 1 }}>
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              border: '2px solid #e3f2fd', 
+              borderRadius: 2, 
+              p: 2,
+              background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+              '&:hover': {
+                borderColor: '#667eea',
+                transform: 'translateY(-1px)',
+                boxShadow: '0 4px 15px rgba(102, 126, 234, 0.1)'
+              },
+              transition: 'all 0.3s ease'
+            }}>
               <Box sx={{ flexGrow: 1 }}>
-                <Typography>Ahmet Yılmaz</Typography>
+                <Typography sx={{ fontWeight: 500, color: '#2c3e50' }}>Ahmet Yılmaz</Typography>
               </Box>
-              <Button size="small" endIcon={<AddIcon />}>
+              <Button 
+                size="small" 
+                endIcon={<AddIcon />}
+                sx={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  borderRadius: 2,
+                  px: 2,
+                  py: 1,
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 5px 15px rgba(102, 126, 234, 0.3)'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+              >
                 Ekle
               </Button>
             </Box>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, fontStyle: 'italic' }}>
               Orhan Mah. Test Cad. No:1 D:2, İstanbul
               <br />
               Vergi Dairesi: Maslak - Vergi No: 1234567890
@@ -209,55 +292,199 @@ const GoodsAcceptancePage: React.FC = () => {
         </Grid>
       </Paper>
 
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        {/* Gönderim Tipi */}
-        <Grid item xs={12} md={4}>
-          <TextField select fullWidth label="Gönderim Tipi" defaultValue="TIR" SelectProps={{ native: true }}>
-            <option value="TIR">TIR</option>
-            <option value="Uçak">Uçak</option>
-            <option value="Gemi">Gemi</option>
-          </TextField>
-        </Grid>
+      <Paper sx={{ 
+        p: 3, 
+        mb: 3,
+        borderRadius: 3,
+        boxShadow: '0 8px 25px rgba(0,0,0,0.08)',
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+        border: '1px solid rgba(255,255,255,0.2)'
+      }}>
+        <Typography variant="h6" gutterBottom sx={{ color: '#2c3e50', mb: 3, fontWeight: 600 }}>
+          Gönderim Bilgileri
+        </Typography>
+        <Grid container spacing={3}>
+          {/* Gönderim Tipi */}
+          <Grid item xs={12} md={4}>
+            <TextField 
+              select 
+              fullWidth 
+              label="Gönderim Tipi" 
+              defaultValue="TIR" 
+              SelectProps={{ native: true }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&:hover fieldset': {
+                    borderColor: '#667eea'
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#667eea'
+                  }
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: '#667eea'
+                }
+              }}
+            >
+              <option value="TIR">TIR</option>
+              <option value="Uçak">Uçak</option>
+              <option value="Gemi">Gemi</option>
+            </TextField>
+          </Grid>
 
-        {/* Gönderim Nedeni */}
-        <Grid item xs={12} md={4}>
-          <TextField select fullWidth label="Gönderim Nedeni" defaultValue="Satış" SelectProps={{ native: true }}>
-            <option value="Satış">Satış</option>
-            <option value="İade">İade</option>
-            <option value="Numune">Numune</option>
-          </TextField>
-        </Grid>
+          {/* Gönderim Nedeni */}
+          <Grid item xs={12} md={4}>
+            <TextField 
+              select 
+              fullWidth 
+              label="Gönderim Nedeni" 
+              defaultValue="Satış" 
+              SelectProps={{ native: true }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&:hover fieldset': {
+                    borderColor: '#667eea'
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#667eea'
+                  }
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: '#667eea'
+                }
+              }}
+            >
+              <option value="Satış">Satış</option>
+              <option value="İade">İade</option>
+              <option value="Numune">Numune</option>
+            </TextField>
+          </Grid>
 
-        {/* Sıvı, Pil veya Kimyasal mı? */}
-        <Grid item xs={12} md={4}>
-          <TextField select fullWidth label="Sıvı, Pil veya Kimyasal mı?" defaultValue="Hayır" SelectProps={{ native: true }}>
-            <option value="Evet">Evet</option>
-            <option value="Hayır">Hayır</option>
-          </TextField>
+          {/* Sıvı, Pil veya Kimyasal mı? */}
+          <Grid item xs={12} md={4}>
+            <TextField 
+              select 
+              fullWidth 
+              label="Sıvı, Pil veya Kimyasal mı?" 
+              defaultValue="Hayır" 
+              SelectProps={{ native: true }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&:hover fieldset': {
+                    borderColor: '#667eea'
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#667eea'
+                  }
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: '#667eea'
+                }
+              }}
+            >
+              <option value="Evet">Evet</option>
+              <option value="Hayır">Hayır</option>
+            </TextField>
+          </Grid>
         </Grid>
+      </Paper>
 
-        {/* Kargo Fiyatı */}
-        <Grid item xs={12} md={4}>
-          <TextField select fullWidth label="Kargo Fiyatı" defaultValue="Rusya (5 usd)" SelectProps={{ native: true }}>
-            <option value="Rusya (5 usd)">Rusya (5 usd)</option>
-            <option value="ABD (10 usd)">ABD (10 usd)</option>
-          </TextField>
-        </Grid>
+      <Paper sx={{ 
+        p: 3, 
+        mb: 3,
+        borderRadius: 3,
+        boxShadow: '0 8px 25px rgba(0,0,0,0.08)',
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+        border: '1px solid rgba(255,255,255,0.2)'
+      }}>
+        <Typography variant="h6" gutterBottom sx={{ color: '#2c3e50', mb: 3, fontWeight: 600 }}>
+          Kargo ve Fiyat Bilgileri
+        </Typography>
+        <Grid container spacing={3}>
+          {/* Kargo Fiyatı */}
+          <Grid item xs={12} md={4}>
+            <TextField 
+              select 
+              fullWidth 
+              label="Kargo Fiyatı" 
+              defaultValue="Rusya (5 usd)" 
+              SelectProps={{ native: true }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&:hover fieldset': {
+                    borderColor: '#667eea'
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#667eea'
+                  }
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: '#667eea'
+                }
+              }}
+            >
+              <option value="Rusya (5 usd)">Rusya (5 usd)</option>
+              <option value="ABD (10 usd)">ABD (10 usd)</option>
+            </TextField>
+          </Grid>
 
-        {/* Açıklama */}
-        <Grid item xs={12} md={4}>
-          <TextField fullWidth label="Açıklama" variant="outlined" />
-        </Grid>
+          {/* Açıklama */}
+          <Grid item xs={12} md={4}>
+            <TextField 
+              fullWidth 
+              label="Açıklama" 
+              variant="outlined" 
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&:hover fieldset': {
+                    borderColor: '#667eea'
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#667eea'
+                  }
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: '#667eea'
+                }
+              }}
+            />
+          </Grid>
 
-        {/* Para Birimi */}
-        <Grid item xs={12} md={4}>
-          <TextField select fullWidth label="Para Birimi" defaultValue="USD" SelectProps={{ native: true }}>
+          {/* Para Birimi */}
+          <Grid item xs={12} md={4}>
+            <TextField 
+              select 
+              fullWidth 
+              label="Para Birimi" 
+              defaultValue="USD" 
+              SelectProps={{ native: true }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&:hover fieldset': {
+                    borderColor: '#667eea'
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#667eea'
+                  }
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: '#667eea'
+                }
+              }}
+            >
             <option value="USD">USD</option>
             <option value="EUR">EUR</option>
             <option value="TRY">TRY</option>
           </TextField>
         </Grid>
       </Grid>
+      </Paper>
 
       <Divider sx={{ my: 3 }} />
 
@@ -293,11 +520,50 @@ const GoodsAcceptancePage: React.FC = () => {
         </Paper>
       ))}
 
-      <Box sx={{ mt: 2 }}>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleAddItem} sx={{ mr: 1 }}>
+      <Box sx={{ mt: 3, display: 'flex', gap: 2, justifyContent: 'center' }}>
+        <Button 
+          variant="contained" 
+          startIcon={<AddIcon />} 
+          onClick={handleAddItem} 
+          sx={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            borderRadius: 2,
+            px: 3,
+            py: 1.5,
+            fontSize: '1rem',
+            fontWeight: 600,
+            '&:hover': {
+              background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+              transform: 'translateY(-2px)',
+              boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)'
+            },
+            transition: 'all 0.3s ease'
+          }}
+        >
           Kalem Ekle
         </Button>
-        <Button variant="outlined" startIcon={<AddCircleOutlineIcon />} onClick={() => setIsModalOpen(true)}>
+        <Button 
+          variant="outlined" 
+          startIcon={<AddCircleOutlineIcon />} 
+          onClick={() => setIsModalOpen(true)}
+          sx={{
+            borderColor: '#667eea',
+            color: '#667eea',
+            borderRadius: 2,
+            px: 3,
+            py: 1.5,
+            fontSize: '1rem',
+            fontWeight: 600,
+            '&:hover': {
+              borderColor: '#5a6fd8',
+              backgroundColor: 'rgba(102, 126, 234, 0.1)',
+              transform: 'translateY(-2px)',
+              boxShadow: '0 8px 20px rgba(102, 126, 234, 0.2)'
+            },
+            transition: 'all 0.3s ease'
+          }}
+        >
           Yeni Ürün Ekle
         </Button>
       </Box>
