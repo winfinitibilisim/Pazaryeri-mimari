@@ -26,14 +26,11 @@ interface QuickAddProductModalProps {
 }
 
 const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClose }) => {
-  const { language, setLanguage, t } = useLanguage();
+  const { t } = useLanguage();
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
 
-  const handleLanguageChange = () => {
-    const newLang = language === 'tr' ? 'en' : 'tr';
-    setLanguage(newLang);
-  };
+
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -59,15 +56,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
             fullWidth
             label={t('quickAddProduct.name')}
             margin="normal"
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={handleLanguageChange} size="small">
-                    <img src={`https://flagcdn.com/w20/${language === 'tr' ? 'tr' : 'gb'}.png`} alt="Flag" />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
+
           />
           <TextField
             required

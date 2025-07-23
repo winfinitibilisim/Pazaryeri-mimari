@@ -4,10 +4,7 @@ import { Box, CssBaseline, Toolbar } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { prefixer } from 'stylis';
-import rtlPlugin from 'stylis-plugin-rtl';
-import { CacheProvider } from '@emotion/react';
-import createCache from '@emotion/cache';
+
 import Header from './components/layout/Header';
 import Sidebar from './components/layout/Sidebar';
 import Footer from './components/layout/Footer';
@@ -59,6 +56,7 @@ import CreatePurchaseInvoicePage from './pages/CreatePurchaseInvoicePage';
 import SalesInvoicesListPage from './pages/sales-invoices/SalesInvoicesListPage';
 import SalesInvoiceDetailPage from './pages/sales-invoices/SalesInvoiceDetailPage';
 import EditSalesInvoicePage from './pages/sales-invoices/EditSalesInvoicePage';
+import CreateSalesInvoicePage from './pages/sales-invoices/CreateSalesInvoicePage';
 import CreateReturnInvoicePage from './pages/sales-invoices/CreateReturnInvoicePage';
 import PurchaseInvoiceDetailPage from './pages/purchase-invoices/PurchaseInvoiceDetailPage';
 
@@ -87,18 +85,14 @@ import SentPackagesPage from './pages/shipping/SentPackagesPage';
 import AllPackagesPage from './pages/shipping/AllPackagesPage';
 
 // Contexts
-import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { MessageProvider } from './contexts/MessageContext';
 
 // Theme
 import theme from './theme';
 
-const createRtlCache = () => createCache({ key: 'muirtl', stylisPlugins: [prefixer, rtlPlugin] });
-const createLtrCache = () => createCache({ key: 'muiltr', stylisPlugins: [prefixer] });
 
-const rtlCache = createRtlCache();
-const ltrCache = createLtrCache();
 
 function App() {
   return (
@@ -117,7 +111,7 @@ function App() {
 const AppWithLanguage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem('isAuthenticated') === 'true');
-  const { isRTL } = useLanguage();
+
 
   useEffect(() => {
     const handleNavigation = () => {
@@ -222,6 +216,7 @@ const AppWithLanguage = () => {
         { path: 'purchase-invoices/new', element: <CreatePurchaseInvoicePage /> },
 
         { path: 'sales-invoices', element: <SalesInvoicesListPage /> },
+        { path: 'sales-invoices/new', element: <CreateSalesInvoicePage /> },
         { path: 'sales-invoices/:id', element: <SalesInvoiceDetailPage /> },
         { path: 'sales-invoices/:id/edit', element: <EditSalesInvoicePage /> },
         { path: 'sales-invoices/create-return', element: <CreateReturnInvoicePage /> },
@@ -258,12 +253,10 @@ const AppWithLanguage = () => {
   ]);
 
   return (
-    <CacheProvider value={isRTL ? rtlCache : ltrCache}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <RouterProvider router={router} />
-      </ThemeProvider>
-    </CacheProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <RouterProvider router={router} />
+    </ThemeProvider>
   );
 };
 

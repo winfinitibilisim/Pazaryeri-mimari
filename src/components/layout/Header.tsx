@@ -21,7 +21,7 @@ import SystemLogsDialog from '../profile/SystemLogsDialog';
 import { useLanguage } from '../../contexts/LanguageContext';
 import ProfileMenu from './ProfileMenu';
 import AppsMenu from './AppsMenu';
-import LanguageDialog from './LanguageDialog';
+
 import DeletedItemsDialog from './DeletedItemsDialog';
 import HelpDialog from './HelpDialog';
 import SettingsMenu from './SettingsMenu';
@@ -31,11 +31,7 @@ interface HeaderProps {
   onToggle: () => void;
 }
 
-interface LanguageOption {
-  code: string;
-  name: string;
-  flag: string;
-}
+
 
 const Header: React.FC<HeaderProps> = ({ open, onToggle }) => {
   const navigate = useNavigate();
@@ -44,22 +40,12 @@ const Header: React.FC<HeaderProps> = ({ open, onToggle }) => {
   const [appsAnchor, setAppsAnchor] = useState<null | HTMLElement>(null);
   const [settingsAnchor, setSettingsAnchor] = useState<null | HTMLElement>(null);
   const [activeMenuItems, setActiveMenuItems] = useState<{[key: string]: boolean}>({});
-  const [languageDialogOpen, setLanguageDialogOpen] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [systemLogsDialogOpen, setSystemLogsDialogOpen] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState('tr');
-  const [searchLanguage, setSearchLanguage] = useState('');
   const [deletedItemsDialogOpen, setDeletedItemsDialogOpen] = useState(false);
   const [helpDialogOpen, setHelpDialogOpen] = useState(false);
   
-  const languages: LanguageOption[] = [
-    { code: 'tr', name: 'Türkçe / Turkish', flag: '🇹🇷' },
-    { code: 'en', name: 'İngilizce / English', flag: '🇬🇧' }
-  ];
 
-  const filteredLanguages = languages.filter(lang => 
-    lang.name.toLowerCase().includes(searchLanguage.toLowerCase())
-  );
   
   const handleNotificationsClick = (event: React.MouseEvent<HTMLElement>) => {
     setNotificationsAnchor(event.currentTarget);
@@ -86,11 +72,6 @@ const Header: React.FC<HeaderProps> = ({ open, onToggle }) => {
   };
 
   const handleMenuItemClick = (id: string) => {
-    if (id === 'language') {
-      setLanguageDialogOpen(true);
-      setProfileAnchor(null);
-      return;
-    }
     if (id === 'change-password') {
       setPasswordDialogOpen(true);
       setProfileAnchor(null);
@@ -130,32 +111,11 @@ const Header: React.FC<HeaderProps> = ({ open, onToggle }) => {
     }, 150);
   };
 
-  const handleLanguageDialogClose = () => {
-    setLanguageDialogOpen(false);
-    setSearchLanguage('');
-  };
 
-  // Use LanguageContext for language change
-  const { t, setLanguage, language } = useLanguage();
-  
-  const handleLanguageSelect = (code: string) => {
-    setSelectedLanguage(code);
-    // Notify central language management
-    setLanguage(code);
-  };
 
-  const handleLanguageConfirm = () => {
-    console.log('Language changed:', selectedLanguage);
-    handleLanguageDialogClose();
-  };
+  const { t } = useLanguage();
 
-  useEffect(() => {
-    const savedLanguage = localStorage.getItem('selectedLanguage');
-    if (savedLanguage) {
-      setSelectedLanguage(savedLanguage);
-      setLanguage(savedLanguage);
-    }
-  }, [setLanguage]);
+
 
   const getMenuItemStyle = (id: string) => {
     return {
@@ -301,18 +261,6 @@ const Header: React.FC<HeaderProps> = ({ open, onToggle }) => {
             <SystemLogsDialog 
               open={systemLogsDialogOpen} 
               onClose={() => setSystemLogsDialogOpen(false)} 
-            />
-
-            <LanguageDialog
-              open={languageDialogOpen}
-              onClose={handleLanguageDialogClose}
-              languages={languages}
-              selectedLanguage={selectedLanguage}
-              searchLanguage={searchLanguage}
-              setSearchLanguage={setSearchLanguage}
-              handleLanguageSelect={handleLanguageSelect}
-              handleLanguageConfirm={handleLanguageConfirm}
-              filteredLanguages={filteredLanguages}
             />
 
             <Tooltip title={t('general.modules')}>

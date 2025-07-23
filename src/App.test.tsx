@@ -15,7 +15,7 @@ jest.mock('react-router-dom', () => ({
 // Mock the language context
 jest.mock('./context/LanguageContext', () => ({
   LanguageProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  useLanguage: () => ({ isRTL: false, language: 'tr', setLanguage: jest.fn() }),
+  useLanguage: () => ({ t: jest.fn(), translations: {} }),
 }));
 
 // Mock the notification context

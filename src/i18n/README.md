@@ -1,27 +1,37 @@
-# Dil Dosyaları Hakkında
+# Dil Dosyası Hakkında
 
-Bu klasör, React Admin Panel uygulamasının çoklu dil desteği için gerekli olan dil dosyalarını içerir.
+Bu klasör, React Admin Panel uygulamasının Türkçe dil desteği için gerekli olan dil dosyasını içerir.
 
-## Desteklenen Diller
+## Desteklenen Dil
 
-Uygulama şu dilleri desteklemektedir:
+Uygulama sadece Türkçe dilini desteklemektedir:
 - Türkçe (tr.json)
-- İngilizce (en.json)
-- Arapça (ar.json)
-- Rusça (ru.json)
+
+## Dil Dosyasını Düzenleme Kılavuzu
+
+Dil dosyasını düzenlerken şu kurallara dikkat edilmelidir:
+
+1. Her anahtar yalnızca bir kez tanımlanmalıdır.
+2. Anahtarlar mantıksal kategorilere göre gruplandırılmalıdır.
+3. Çeviriler, ilgili modüllere göre düzenlenmelidir.
+4. Yeni özellikler eklenirken, ilgili çeviri anahtarları da eklenmelidir.
 
 ## Bilinen Sorunlar
 
 Dil dosyalarında bazı anahtarlar tekrarlanmaktadır. Bu, uygulamanın çalışmasını engellemez ancak çevirilerin doğru şekilde yönetilmesini zorlaştırabilir. Gelecekte bu sorunun çözülmesi için dil dosyalarının yeniden düzenlenmesi önerilir.
 
-## Dil Dosyalarını Düzenleme Kılavuzu
+## Dil Dosyalarını Yeniden Düzenleme Önerisi
 
-Dil dosyalarını düzenlerken şu kurallara dikkat edilmelidir:
+Dil dosyalarını yeniden düzenlemek için şu adımları izleyebilirsiniz:
 
-1. Her anahtar yalnızca bir kez tanımlanmalıdır.
-2. Anahtarlar mantıksal kategorilere göre gruplandırılmalıdır.
-3. Yeni bir çeviri eklendiğinde, tüm dil dosyalarına eklenmesi gerekir.
-4. Çeviriler, ilgili modüllere göre düzenlenmelidir.
+1. Tüm dil dosyalarını yedekleyin.
+2. Her dil dosyasını açın ve tekrarlanan anahtarları tespit edin.
+3. Tekrarlanan anahtarları kaldırın, yalnızca bir tanesi kalsın.
+4. Anahtarları mantıksal kategorilere göre düzenleyin.
+5. Tüm dil dosyalarının aynı anahtarları içerdiğinden emin olun.
+6. Değişiklikleri test edin ve uygulamayı yeniden başlatın.
+
+Bu işlem, dil dosyalarının daha kolay yönetilmesini sağlayacak ve tekrarlanan anahtarlardan kaynaklanan uyarıları ortadan kaldıracaktır.
 
 ## Satış Faturaları Modülü Çevirileri
 
