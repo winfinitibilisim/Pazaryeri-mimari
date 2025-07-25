@@ -24,6 +24,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  IconButton,
 } from '@mui/material';
 import {
   Search,
@@ -35,6 +36,7 @@ import {
   Numbers,
   FileDownload,
   Print,
+  QrCode,
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
@@ -45,6 +47,7 @@ interface PackageData {
   sevkDurumu: string;
   kapNo: number;
   barkod: string;
+  urunAdi: string;
   adet: number;
   kilo: number;
   hacim: number;
@@ -54,30 +57,30 @@ interface PackageData {
 
 const allPackagesData: PackageData[] = [
   // Fiş No 27 - Gönderildi
-  { id: 1, fisNo: 27, seferNo: 28, sevkDurumu: 'Gönderildi', kapNo: 155, barkod: '813348314730301', adet: 10, kilo: 20, hacim: 0, fiyat: '$0.00', tarih: '12/04/2025 6:36' },
+  { id: 1, fisNo: 27, seferNo: 28, sevkDurumu: 'Gönderildi', kapNo: 155, barkod: '813348314730301', urunAdi: 'Elektronik Ürün', adet: 10, kilo: 20, hacim: 0, fiyat: '$0.00', tarih: '12/04/2025 6:36' },
   // Fiş No 27 - Teslim Edildi
-  { id: 2, fisNo: 27, seferNo: 28, sevkDurumu: 'Teslim Edildi', kapNo: 164, barkod: '334HN33464H533', adet: 5, kilo: 15, hacim: 2, fiyat: '$25.00', tarih: '12/04/2025 7:15' },
+  { id: 2, fisNo: 27, seferNo: 28, sevkDurumu: 'Teslim Edildi', kapNo: 164, barkod: '334HN33464H533', urunAdi: 'Tekstil Ürünü', adet: 5, kilo: 15, hacim: 2, fiyat: '$25.00', tarih: '12/04/2025 7:15' },
   // Fiş No 27 - Bekleyen (8 adet)
-  { id: 3, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 153, barkod: '813348314730303', adet: 8, kilo: 16, hacim: 0, fiyat: '$15.00', tarih: '12/04/2025 9:33' },
-  { id: 4, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 154, barkod: '813348314730304', adet: 9, kilo: 18, hacim: 1, fiyat: '$20.00', tarih: '12/04/2025 10:34' },
-  { id: 5, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 155, barkod: '813348314731305', adet: 10, kilo: 20, hacim: 2, fiyat: '$25.00', tarih: '12/04/2025 11:35' },
-  { id: 6, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 156, barkod: '813348314731306', adet: 11, kilo: 22, hacim: 0, fiyat: '$30.00', tarih: '12/04/2025 12:36' },
-  { id: 7, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 157, barkod: '813348314731307', adet: 12, kilo: 24, hacim: 1, fiyat: '$35.00', tarih: '12/04/2025 13:37' },
-  { id: 8, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 158, barkod: '813348314731308', adet: 13, kilo: 26, hacim: 2, fiyat: '$40.00', tarih: '12/04/2025 14:38' },
-  { id: 9, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 159, barkod: '813348314731309', adet: 14, kilo: 28, hacim: 0, fiyat: '$45.00', tarih: '12/04/2025 15:39' },
-  { id: 10, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 160, barkod: '813348314731310', adet: 15, kilo: 30, hacim: 1, fiyat: '$50.00', tarih: '12/04/2025 16:40' },
+  { id: 3, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 153, barkod: '813348314730303', urunAdi: 'Gıda Ürünü', adet: 8, kilo: 16, hacim: 0, fiyat: '$15.00', tarih: '12/04/2025 9:33' },
+  { id: 4, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 154, barkod: '813348314730304', urunAdi: 'Kozmetik Ürün', adet: 9, kilo: 18, hacim: 1, fiyat: '$20.00', tarih: '12/04/2025 10:34' },
+  { id: 5, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 155, barkod: '813348314731305', urunAdi: 'Ev Eşyası', adet: 10, kilo: 20, hacim: 2, fiyat: '$25.00', tarih: '12/04/2025 11:35' },
+  { id: 6, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 156, barkod: '813348314731306', urunAdi: 'Kırtasiye', adet: 11, kilo: 22, hacim: 0, fiyat: '$30.00', tarih: '12/04/2025 12:36' },
+  { id: 7, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 157, barkod: '813348314731307', urunAdi: 'Oyuncak', adet: 12, kilo: 24, hacim: 1, fiyat: '$35.00', tarih: '12/04/2025 13:37' },
+  { id: 8, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 158, barkod: '813348314731308', urunAdi: 'Spor Malzemesi', adet: 13, kilo: 26, hacim: 2, fiyat: '$40.00', tarih: '12/04/2025 14:38' },
+  { id: 9, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 159, barkod: '813348314731309', urunAdi: 'Kitap', adet: 14, kilo: 28, hacim: 0, fiyat: '$45.00', tarih: '12/04/2025 15:39' },
+  { id: 10, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 160, barkod: '813348314731310', urunAdi: 'Müzik Aleti', adet: 15, kilo: 30, hacim: 1, fiyat: '$50.00', tarih: '12/04/2025 16:40' },
   
   // Fiş No 26 - Bekleyen (5 adet)
-  { id: 11, fisNo: 26, seferNo: 30, sevkDurumu: 'Bekleyen', kapNo: 153, barkod: '813348314730303', adet: 8, kilo: 16, hacim: 0, fiyat: '$15.00', tarih: '12/04/2025 9:33' },
-  { id: 12, fisNo: 26, seferNo: 30, sevkDurumu: 'Bekleyen', kapNo: 154, barkod: '813348314730304', adet: 9, kilo: 18, hacim: 1, fiyat: '$20.00', tarih: '12/04/2025 10:34' },
-  { id: 13, fisNo: 26, seferNo: 30, sevkDurumu: 'Bekleyen', kapNo: 155, barkod: '813348314731305', adet: 10, kilo: 20, hacim: 2, fiyat: '$25.00', tarih: '12/04/2025 11:35' },
-  { id: 14, fisNo: 26, seferNo: 30, sevkDurumu: 'Bekleyen', kapNo: 156, barkod: '813348314731306', adet: 11, kilo: 22, hacim: 0, fiyat: '$30.00', tarih: '12/04/2025 12:36' },
-  { id: 15, fisNo: 26, seferNo: 30, sevkDurumu: 'Bekleyen', kapNo: 157, barkod: '813348314731307', adet: 12, kilo: 24, hacim: 1, fiyat: '$35.00', tarih: '12/04/2025 13:37' },
+  { id: 11, fisNo: 26, seferNo: 30, sevkDurumu: 'Bekleyen', kapNo: 153, barkod: '813348314730303', urunAdi: 'Baharat', adet: 8, kilo: 16, hacim: 0, fiyat: '$15.00', tarih: '12/04/2025 9:33' },
+  { id: 12, fisNo: 26, seferNo: 30, sevkDurumu: 'Bekleyen', kapNo: 154, barkod: '813348314730304', urunAdi: 'Çay', adet: 9, kilo: 18, hacim: 1, fiyat: '$20.00', tarih: '12/04/2025 10:34' },
+  { id: 13, fisNo: 26, seferNo: 30, sevkDurumu: 'Bekleyen', kapNo: 155, barkod: '813348314731305', urunAdi: 'Kahve', adet: 10, kilo: 20, hacim: 2, fiyat: '$25.00', tarih: '12/04/2025 11:35' },
+  { id: 14, fisNo: 26, seferNo: 30, sevkDurumu: 'Bekleyen', kapNo: 156, barkod: '813348314731306', urunAdi: 'Şeker', adet: 11, kilo: 22, hacim: 0, fiyat: '$30.00', tarih: '12/04/2025 12:36' },
+  { id: 15, fisNo: 26, seferNo: 30, sevkDurumu: 'Bekleyen', kapNo: 157, barkod: '813348314731307', urunAdi: 'Un', adet: 12, kilo: 24, hacim: 1, fiyat: '$35.00', tarih: '12/04/2025 13:37' },
   
   // Fiş No 25 - Bekleyen (3 adet)
-  { id: 16, fisNo: 25, seferNo: 31, sevkDurumu: 'Bekleyen', kapNo: 158, barkod: '813348314731308', adet: 13, kilo: 26, hacim: 2, fiyat: '$40.00', tarih: '12/04/2025 14:38' },
-  { id: 17, fisNo: 25, seferNo: 31, sevkDurumu: 'Bekleyen', kapNo: 159, barkod: '813348314731309', adet: 14, kilo: 28, hacim: 0, fiyat: '$45.00', tarih: '12/04/2025 15:39' },
-  { id: 18, fisNo: 25, seferNo: 31, sevkDurumu: 'Bekleyen', kapNo: 160, barkod: '813348314731310', adet: 15, kilo: 30, hacim: 1, fiyat: '$50.00', tarih: '12/04/2025 16:40' },
+  { id: 16, fisNo: 25, seferNo: 31, sevkDurumu: 'Bekleyen', kapNo: 158, barkod: '813348314731308', urunAdi: 'Deterjan', adet: 13, kilo: 26, hacim: 2, fiyat: '$40.00', tarih: '12/04/2025 14:38' },
+  { id: 17, fisNo: 25, seferNo: 31, sevkDurumu: 'Bekleyen', kapNo: 159, barkod: '813348314731309', urunAdi: 'Şampuan', adet: 14, kilo: 28, hacim: 0, fiyat: '$45.00', tarih: '12/04/2025 15:39' },
+  { id: 18, fisNo: 25, seferNo: 31, sevkDurumu: 'Bekleyen', kapNo: 160, barkod: '813348314731310', urunAdi: 'Sabun', adet: 15, kilo: 30, hacim: 1, fiyat: '$50.00', tarih: '12/04/2025 16:40' },
 ];
 
 const AllPackagesPage: React.FC = () => {
@@ -137,18 +140,19 @@ const AllPackagesPage: React.FC = () => {
       [''],
       
       // Tablo Başlıkları
-      ['Fiş No', 'Sefer No', 'Sevk Durumu', 'Kap No', 'Barkod', 'Adet', 'Kilo', 'Hacim', 'Fiyat', 'Tarih'],
+      ['Fiş No', 'Sefer No', 'Sevk Durumu', 'Kap No', 'Barkod', 'Ürün Adı', 'Adet', 'Kilo', 'Hacim', 'Fiyat', 'Tarih'],
       
       // Paket verileri
       ...filteredPackages.map(pkg => [
-        pkg.fisNo,
-        pkg.seferNo,
+        pkg.fisNo.toString(),
+        pkg.seferNo.toString(),
         pkg.sevkDurumu,
-        pkg.kapNo,
+        pkg.kapNo.toString(),
         pkg.barkod,
-        pkg.adet,
-        pkg.kilo,
-        pkg.hacim,
+        pkg.urunAdi,
+        pkg.adet.toString(),
+        pkg.kilo.toString(),
+        pkg.hacim.toString(),
         pkg.fiyat,
         pkg.tarih
       ]),
@@ -385,6 +389,7 @@ const AllPackagesPage: React.FC = () => {
                 <TableCell sx={{ bgcolor: '#f5f5f5', fontWeight: 600, textAlign: 'center' }}>Sevk Durumu</TableCell>
                 <TableCell sx={{ bgcolor: '#f5f5f5', fontWeight: 600, textAlign: 'center' }}>Kap No</TableCell>
                 <TableCell sx={{ bgcolor: '#f5f5f5', fontWeight: 600, textAlign: 'center' }}>Barkod</TableCell>
+                <TableCell sx={{ bgcolor: '#f5f5f5', fontWeight: 600, textAlign: 'center' }}>Ürün Adı</TableCell>
                 <TableCell sx={{ bgcolor: '#f5f5f5', fontWeight: 600, textAlign: 'center' }}>Adet</TableCell>
                 <TableCell sx={{ bgcolor: '#f5f5f5', fontWeight: 600, textAlign: 'center' }}>Kilo</TableCell>
                 <TableCell sx={{ bgcolor: '#f5f5f5', fontWeight: 600, textAlign: 'center' }}>Hacim</TableCell>
@@ -418,6 +423,9 @@ const AllPackagesPage: React.FC = () => {
                   <TableCell sx={{ textAlign: 'center', fontFamily: 'monospace', fontSize: '0.9rem' }}>
                     {pkg.barkod}
                   </TableCell>
+                  <TableCell sx={{ textAlign: 'center', fontWeight: 600, color: '#2e7d32' }}>
+                    {pkg.urunAdi}
+                  </TableCell>
                   <TableCell sx={{ textAlign: 'center', fontWeight: 600 }}>
                     {pkg.adet}
                   </TableCell>
@@ -430,8 +438,28 @@ const AllPackagesPage: React.FC = () => {
                   <TableCell sx={{ textAlign: 'center', color: '#2e7d32', fontWeight: 600 }}>
                     {pkg.fiyat}
                   </TableCell>
-                  <TableCell sx={{ textAlign: 'center', fontSize: '0.9rem' }}>
-                    {pkg.tarih}
+                  <TableCell sx={{ textAlign: 'center' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'space-between' }}>
+                      <Typography variant="body2" sx={{ fontSize: '0.9rem' }}>
+                        {pkg.tarih}
+                      </Typography>
+                      <IconButton 
+                        size="small"
+                        sx={{
+                          backgroundColor: '#f8f9fa',
+                          color: '#495057',
+                          '&:hover': {
+                            backgroundColor: '#e9ecef',
+                            color: '#343a40'
+                          },
+                          border: '1px solid #dee2e6',
+                          width: 28,
+                          height: 28
+                        }}
+                      >
+                        <QrCode sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))}

@@ -97,7 +97,6 @@ const shippingMenuGroup: MenuGroup = {
   items: [
     { text: 'Mal Kabul', path: '/shipping/goods-acceptance', icon: <MoveToInboxIcon /> },
     { text: 'Bekleyen Paketler', path: '/shipping/pending-packages', icon: <PendingActionsIcon /> },
-    { text: 'Gönderilen Paketler', path: '/shipping/sent-packages', icon: <LocalShippingIcon /> },
     { text: 'Tüm Paketler', path: '/shipping/all-packages', icon: <AllInboxIcon /> },
   ]
 };

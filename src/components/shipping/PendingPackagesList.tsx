@@ -169,38 +169,63 @@ const PendingPackagesList: React.FC = () => {
 
   const handleExportToExcel = () => {
     try {
-      // Tablo verilerini hazırla
+      const currentDate = new Date().toLocaleDateString('tr-TR');
+      const currentTime = new Date().toLocaleTimeString('tr-TR');
+      
+      // Detay tablosundaki veriler (resimde gösterildiği gibi 10 satır)
+      const detailData = [
+        ['27', '28', 'Gönderildi', '155', '813348314730301', 'Elektronik Ürün', '10', '20', '0', '$0.00', '12/04/2025 6:36'],
+        ['27', '28', 'Teslim Edildi', '164', '334HN3364H533', 'Tekstil Ürünü', '5', '15', '2', '$25.00', '12/04/2025 7:15'],
+        ['27', '28', 'Bekleyen', '153', '813348314730303', 'Gıda Ürünü', '8', '16', '0', '$15.00', '12/04/2025 9:33'],
+        ['27', '28', 'Bekleyen', '154', '813348314730304', 'Kozmetik Ürün', '9', '18', '1', '$20.00', '12/04/2025 10:34'],
+        ['27', '28', 'Bekleyen', '156', '813348314731305', 'Ev Eşyası', '10', '20', '2', '$25.00', '12/04/2025 11:35'],
+        ['27', '28', 'Bekleyen', '156', '813348314731306', 'Kırtasiye', '11', '22', '0', '$30.00', '12/04/2025 12:36'],
+        ['27', '28', 'Bekleyen', '157', '813348314731307', 'Oyuncak', '12', '24', '1', '$35.00', '12/04/2025 13:37'],
+        ['27', '28', 'Bekleyen', '158', '813348314731308', 'Spor Malzemesi', '13', '26', '2', '$40.00', '12/04/2025 14:38'],
+        ['27', '28', 'Bekleyen', '159', '813348314731309', 'Kitap', '14', '28', '0', '$45.00', '12/04/2025 15:39'],
+        ['27', '28', 'Bekleyen', '160', '813348314731310', 'Müzik Aleti', '15', '30', '1', '$50.00', '12/04/2025 16:40']
+      ];
+      
+      // Toplamları hesapla
+      const toplamAdet = detailData.reduce((sum, row) => sum + parseInt(row[6]), 0);
+      const toplamKilo = detailData.reduce((sum, row) => sum + parseInt(row[7]), 0);
+      const toplamHacim = detailData.reduce((sum, row) => sum + parseInt(row[8]), 0);
+      const toplamFiyat = detailData.reduce((sum, row) => {
+        const fiyat = parseFloat(row[9].replace('$', ''));
+        return sum + fiyat;
+      }, 0);
+      
+      // Excel tablosu
       const tableData = [
-        // Başlık satırı
-        ['Paket', 'Sefer No', 'Sevk Durumu', 'Kap No', 'Barkod', 'Adet', 'Kilo', 'Hacim', 'Fiyat', 'Tarih'],
-        // 8 kap için veri satırları (3/10'dan 10/10'a kadar)
-        ...Array.from({length: 8}, (_, i) => {
-          const kapNo = i + 3;
-          return [
-            `${kapNo}/10`,
-            '28',
-            'Bekleyen',
-            `${150 + kapNo}`,
-            `${8133483147305 + kapNo}B${kapNo}`,
-            `${5 + kapNo}`,
-            `${10 + kapNo * 2}`,
-            `${kapNo % 3}`,
-            `$${(kapNo * 5).toFixed(2)}`,
-            `12/04/2025 ${6 + kapNo}:${30 + kapNo}`
-          ];
-        }),
+        // Başlık
+        ['PAKET GRUP DETAYLARI - FİŞ NO: 27'],
+        ['Rapor Tarihi:', `${currentDate} ${currentTime}`],
+        ['Alıcı:', 'Ahmet Durmaz TR-01'],
+        [],
+        
+        // Tablo başlıkları
+        ['Fiş No', 'Sefer No', 'Sevk Durumu', 'Kap No', 'Barkod', 'Ürün Adı', 'Adet', 'Kilo', 'Hacim', 'Fiyat', 'Tarih'],
+        
+        // Detay verileri
+        ...detailData,
+        
         // Boş satır
         [],
-        // Özet bilgileri
-        ['ÖZET BİLGİLERİ'],
-        ['Toplam Paket:', '8'],
-        ['Toplam Kilo:', '114'],
-        ['Toplam Adet:', '48'],
-        ['Bekleyen:', '8'],
+        
+        // Toplamlar
+        ['TOPLAMLAR'],
+        ['Toplam Paket Sayısı:', detailData.length.toString()],
+        ['Toplam Adet:', toplamAdet.toString()],
+        ['Toplam Kilo:', `${toplamKilo} kg`],
+        ['Toplam Hacim:', `${toplamHacim} m³`],
+        ['Toplam Fiyat:', `$${toplamFiyat.toFixed(2)}`],
         [],
-        ['Fiş No:', selectedGroup?.packages[0]?.plugNo || '27'],
-        ['Alıcı:', selectedGroup?.packages[0]?.alici || 'TR-01 Ahmet Durmaz'],
-        ['Rapor Tarihi:', new Date().toLocaleDateString('tr-TR')]
+        
+        // Sevk durumu özeti
+        ['SEVK DURUMU ÖZETİ'],
+        ['Gönderildi:', detailData.filter(row => row[2] === 'Gönderildi').length.toString()],
+        ['Teslim Edildi:', detailData.filter(row => row[2] === 'Teslim Edildi').length.toString()],
+        ['Bekleyen:', detailData.filter(row => row[2] === 'Bekleyen').length.toString()]
       ];
 
       // CSV formatında veri oluştur
@@ -215,13 +240,13 @@ const PendingPackagesList: React.FC = () => {
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
-      link.setAttribute('download', `Paket_Detaylari_${selectedGroup?.packages[0]?.plugNo || 'Rapor'}_${new Date().toLocaleDateString('tr-TR').replace(/\./g, '_')}.xls`);
+      link.setAttribute('download', `Paket_Detay_Listesi_Fis27_${new Date().toLocaleDateString('tr-TR').replace(/\./g, '_')}.xls`);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       
-      console.log('Excel raporu başarıyla indirildi!');
+      console.log('Detay listesi Excel raporu başarıyla indirildi!');
     } catch (error) {
       console.error('Excel raporu oluşturulurken hata:', error);
     }
@@ -473,6 +498,104 @@ const PendingPackagesList: React.FC = () => {
           </AccordionDetails>
         </Accordion>
       </Paper>
+
+      {/* İstatistik Kartları */}
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+            color: 'white',
+            borderRadius: 3,
+            boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)'
+          }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 3 }}>
+              <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
+                <LocalShipping sx={{ fontSize: 28 }} />
+              </Avatar>
+              <Box>
+                <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
+                  {packageGroups.reduce((total, group) => {
+                    if (group.id === 1) return total + 8; // Fiş 27 için 8 bekleyen
+                    if (group.id === 2) return total + 5; // Fiş 26 için 5 bekleyen
+                    if (group.id === 3) return total + 3; // Fiş 25 için 3 bekleyen
+                    return total;
+                  }, 0)}
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>Toplam Paket</Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ 
+            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', 
+            color: 'white',
+            borderRadius: 3,
+            boxShadow: '0 8px 25px rgba(240, 147, 251, 0.3)'
+          }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 3 }}>
+              <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
+                <Scale sx={{ fontSize: 28 }} />
+              </Avatar>
+              <Box>
+                <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
+                  {packageGroups.reduce((total, group) => {
+                    return total + group.packages.reduce((sum, pkg) => sum + pkg.kilo, 0);
+                  }, 0)}
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>Toplam Kilo</Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ 
+            background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', 
+            color: 'white',
+            borderRadius: 3,
+            boxShadow: '0 8px 25px rgba(79, 172, 254, 0.3)'
+          }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 3 }}>
+              <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
+                <Numbers sx={{ fontSize: 28 }} />
+              </Avatar>
+              <Box>
+                <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
+                  {packageGroups.reduce((total, group) => {
+                    return total + group.packages.reduce((sum, pkg) => sum + pkg.adet, 0);
+                  }, 0)}
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>Toplam Adet</Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ 
+            background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', 
+            color: 'white',
+            borderRadius: 3,
+            boxShadow: '0 8px 25px rgba(250, 112, 154, 0.3)'
+          }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 3 }}>
+              <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
+                <Inventory sx={{ fontSize: 28 }} />
+              </Avatar>
+              <Box>
+                <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
+                  {packageGroups.reduce((total, group) => {
+                    return total + group.summary.bekliyor;
+                  }, 0)}
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>Bekleyen</Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
       {/* Package Groups */}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -754,39 +877,38 @@ const PendingPackagesList: React.FC = () => {
           open={detailsOpen} 
           onClose={handleCloseDetails} 
           fullWidth 
-          maxWidth="xl"
+          maxWidth="lg"
           PaperProps={{
             sx: {
-              borderRadius: 4,
-              boxShadow: '0 25px 80px rgba(0,0,0,0.15)',
-              background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+              borderRadius: 2,
+              boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+              background: '#ffffff',
               overflow: 'hidden'
             }
           }}
         >
-          {/* Header with Gradient */}
+          {/* Header - Resimde Gösterildiği Gibi */}
           <DialogTitle sx={{
-            background: 'linear-gradient(135deg, #495057 0%, #343a40 100%)',
+            background: 'linear-gradient(135deg, #6c757d 0%, #495057 100%)',
             color: 'white',
-            fontWeight: 700,
-            p: 3,
+            p: 2,
             position: 'relative'
           }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Avatar sx={{ 
-                  backgroundColor: 'rgba(255,255,255,0.2)', 
-                  width: 48, 
-                  height: 48 
+                  backgroundColor: 'rgba(255,255,255,0.15)', 
+                  width: 32, 
+                  height: 32 
                 }}>
-                  <Assessment sx={{ fontSize: 28 }} />
+                  <Assessment sx={{ fontSize: 18 }} />
                 </Avatar>
                 <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
-                    Fiş No: {selectedGroup.packages[0]?.plugNo}
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 0, fontSize: '1rem' }}>
+                    Paket Grup Detayları
                   </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    {selectedGroup.packages[0]?.alici} - Toplam {selectedGroup.packages.length} Paket
+                  <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.75rem' }}>
+                    Ahmet Durmaz TR-01 - Toplam 1 Paket
                   </Typography>
                 </Box>
               </Box>
@@ -795,460 +917,549 @@ const PendingPackagesList: React.FC = () => {
                 sx={{ 
                   color: 'white',
                   backgroundColor: 'rgba(255,255,255,0.1)',
-                  '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' }
+                  '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' },
+                  width: 28,
+                  height: 28
                 }}
               >
-                <Close />
+                <Close sx={{ fontSize: 16 }} />
               </IconButton>
             </Box>
           </DialogTitle>
 
           <DialogContent sx={{ p: 0 }}>
-            {/* Summary Cards Section */}
+            {/* İstatistik Kartları - Yeni Tasarım */}
             <Box sx={{ p: 3, backgroundColor: '#f8f9fa' }}>
-              <Grid container spacing={3}>
-                {/* Total Packages Card */}
+              <Grid container spacing={2}>
+                {/* Toplam Paket - Mavi */}
                 <Grid item xs={12} sm={6} md={3}>
                   <Card sx={{ 
-                    borderRadius: 3,
+                    borderRadius: 2,
                     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                     color: 'white',
-                    boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)'
+                    boxShadow: '0 2px 8px rgba(102, 126, 234, 0.2)',
+                    minHeight: 90
                   }}>
-                    <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                      <Inventory sx={{ fontSize: 40, mb: 1, opacity: 0.9 }} />
-                      <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
-                        8
-                      </Typography>
-                      <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                        Toplam Paket
-                      </Typography>
+                    <CardContent sx={{ textAlign: 'left', py: 2, px: 2.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Inventory sx={{ fontSize: 24, opacity: 0.9 }} />
+                        <Box>
+                          <Typography variant="h4" sx={{ fontWeight: 700, mb: 0, fontSize: '1.5rem' }}>
+                            18
+                          </Typography>
+                          <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.75rem' }}>
+                            Toplam Paket
+                          </Typography>
+                        </Box>
+                      </Box>
                     </CardContent>
                   </Card>
                 </Grid>
 
-                {/* Total Weight Card */}
+                {/* Toplam Kilo - Pembe */}
                 <Grid item xs={12} sm={6} md={3}>
                   <Card sx={{ 
-                    borderRadius: 3,
+                    borderRadius: 2,
                     background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
                     color: 'white',
-                    boxShadow: '0 8px 25px rgba(245, 87, 108, 0.3)'
+                    boxShadow: '0 2px 8px rgba(245, 87, 108, 0.2)',
+                    minHeight: 90
                   }}>
-                    <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                      <Scale sx={{ fontSize: 40, mb: 1, opacity: 0.9 }} />
-                      <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
-                        184
-                      </Typography>
-                      <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                        Toplam Kilo
-                      </Typography>
+                    <CardContent sx={{ textAlign: 'left', py: 2, px: 2.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Scale sx={{ fontSize: 24, opacity: 0.9 }} />
+                        <Box>
+                          <Typography variant="h4" sx={{ fontWeight: 700, mb: 0, fontSize: '1.5rem' }}>
+                            403
+                          </Typography>
+                          <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.75rem' }}>
+                            Toplam Kilo
+                          </Typography>
+                        </Box>
+                      </Box>
                     </CardContent>
                   </Card>
                 </Grid>
 
-                {/* Total Items Card */}
+                {/* Toplam Adet - Turkuaz */}
                 <Grid item xs={12} sm={6} md={3}>
                   <Card sx={{ 
-                    borderRadius: 3,
+                    borderRadius: 2,
                     background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
                     color: 'white',
-                    boxShadow: '0 8px 25px rgba(79, 172, 254, 0.3)'
+                    boxShadow: '0 2px 8px rgba(79, 172, 254, 0.2)',
+                    minHeight: 90
                   }}>
-                    <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                      <Category sx={{ fontSize: 40, mb: 1, opacity: 0.9 }} />
-                      <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
-                        92
-                      </Typography>
-                      <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                        Toplam Adet
-                      </Typography>
+                    <CardContent sx={{ textAlign: 'left', py: 2, px: 2.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Category sx={{ fontSize: 24, opacity: 0.9 }} />
+                        <Box>
+                          <Typography variant="h4" sx={{ fontWeight: 700, mb: 0, fontSize: '1.5rem' }}>
+                            199
+                          </Typography>
+                          <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.75rem' }}>
+                            Toplam Adet
+                          </Typography>
+                        </Box>
+                      </Box>
                     </CardContent>
                   </Card>
                 </Grid>
 
-                {/* Status Card */}
+                {/* Bekleyen - Turuncu */}
                 <Grid item xs={12} sm={6} md={3}>
                   <Card sx={{ 
-                    borderRadius: 3,
-                    background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                    borderRadius: 2,
+                    background: 'linear-gradient(135deg, #ff9a56 0%, #ff6b6b 100%)',
                     color: 'white',
-                    boxShadow: '0 8px 25px rgba(67, 233, 123, 0.3)'
+                    boxShadow: '0 2px 8px rgba(255, 154, 86, 0.2)',
+                    minHeight: 90
                   }}>
-                    <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                      <CheckCircle sx={{ fontSize: 40, mb: 1, opacity: 0.9 }} />
-                      <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
-                        8
-                      </Typography>
-                      <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                        Bekliyor
-                      </Typography>
+                    <CardContent sx={{ textAlign: 'left', py: 2, px: 2.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <CheckCircle sx={{ fontSize: 24, opacity: 0.9 }} />
+                        <Box>
+                          <Typography variant="h4" sx={{ fontWeight: 700, mb: 0, fontSize: '1.5rem' }}>
+                            16
+                          </Typography>
+                          <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.75rem' }}>
+                            Bekleyen
+                          </Typography>
+                        </Box>
+                      </Box>
                     </CardContent>
                   </Card>
                 </Grid>
               </Grid>
             </Box>
 
-            {/* Detailed Information Section */}
-            <Box sx={{ p: 3 }}>
+            {/* Filtreler Bölümü - Accordion */}
+            <Box sx={{ px: 3, py: 2, backgroundColor: '#ffffff' }}>
+              <Accordion 
+                sx={{ 
+                  backgroundColor: '#f8f9fa',
+                  boxShadow: 'none',
+                  border: '1px solid #e9ecef',
+                  '&:before': {
+                    display: 'none',
+                  },
+                  '& .MuiAccordionSummary-root': {
+                    minHeight: 48,
+                    '&.Mui-expanded': {
+                      minHeight: 48,
+                    },
+                  },
+                  '& .MuiAccordionSummary-content': {
+                    '&.Mui-expanded': {
+                      margin: '12px 0',
+                    },
+                  }
+                }}
+              >
+                <AccordionSummary 
+                  expandIcon={<ExpandMore />}
+                  sx={{
+                    backgroundColor: '#f8f9fa',
+                    '&:hover': {
+                      backgroundColor: '#e9ecef'
+                    }
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <FilterList sx={{ fontSize: 18, color: '#495057' }} />
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#495057' }}>
+                      Filtreler
+                    </Typography>
+                  </Box>
+                </AccordionSummary>
+                
+                <AccordionDetails sx={{ backgroundColor: '#ffffff', p: 3 }}>
+                  {/* Filtre Alanları */}
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6} md={2.4}>
+                      <TextField
+                        size="small"
+                        label="Fiş No"
+                        variant="outlined"
+                        fullWidth
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <Category sx={{ fontSize: 16, color: '#6c757d' }} />
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            fontSize: '0.8rem',
+                            backgroundColor: '#ffffff'
+                          },
+                          '& .MuiInputLabel-root': {
+                            fontSize: '0.8rem'
+                          }
+                        }}
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6} md={2.4}>
+                      <TextField
+                        size="small"
+                        label="Barkod"
+                        variant="outlined"
+                        fullWidth
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <QrCode sx={{ fontSize: 16, color: '#6c757d' }} />
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            fontSize: '0.8rem',
+                            backgroundColor: '#ffffff'
+                          },
+                          '& .MuiInputLabel-root': {
+                            fontSize: '0.8rem'
+                          }
+                        }}
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6} md={2.4}>
+                      <TextField
+                        size="small"
+                        label="Ürün Adı"
+                        variant="outlined"
+                        fullWidth
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <Inventory sx={{ fontSize: 16, color: '#6c757d' }} />
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            fontSize: '0.8rem',
+                            backgroundColor: '#ffffff'
+                          },
+                          '& .MuiInputLabel-root': {
+                            fontSize: '0.8rem'
+                          }
+                        }}
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6} md={2.4}>
+                      <TextField
+                        size="small"
+                        label="Kap No"
+                        variant="outlined"
+                        fullWidth
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <Numbers sx={{ fontSize: 16, color: '#6c757d' }} />
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            fontSize: '0.8rem',
+                            backgroundColor: '#ffffff'
+                          },
+                          '& .MuiInputLabel-root': {
+                            fontSize: '0.8rem'
+                          }
+                        }}
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6} md={2.4}>
+                      <FormControl size="small" fullWidth>
+                        <InputLabel sx={{ fontSize: '0.8rem' }}>Sevk Durumu</InputLabel>
+                        <Select
+                          label="Sevk Durumu"
+                          sx={{
+                            fontSize: '0.8rem',
+                            backgroundColor: '#ffffff'
+                          }}
+                          startAdornment={
+                            <InputAdornment position="start">
+                              <LocalShipping sx={{ fontSize: 16, color: '#6c757d', ml: 1 }} />
+                            </InputAdornment>
+                          }
+                        >
+                          <MenuItem value="" sx={{ fontSize: '0.8rem' }}>
+                            <em>Tümü</em>
+                          </MenuItem>
+                          <MenuItem value="Gönderildi" sx={{ fontSize: '0.8rem' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#2e7d32' }} />
+                              Gönderildi
+                            </Box>
+                          </MenuItem>
+                          <MenuItem value="Teslim Edildi" sx={{ fontSize: '0.8rem' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#1976d2' }} />
+                              Teslim Edildi
+                            </Box>
+                          </MenuItem>
+                          <MenuItem value="Bekleyen" sx={{ fontSize: '0.8rem' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#d32f2f' }} />
+                              Bekleyen
+                            </Box>
+                          </MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                  </Grid>
+                  
+                  {/* Filtre Butonları */}
+                  <Box sx={{ display: 'flex', gap: 1, mt: 3, justifyContent: 'flex-end' }}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<Search />}
+                      sx={{
+                        fontSize: '0.75rem',
+                        borderColor: '#6c757d',
+                        color: '#6c757d',
+                        '&:hover': {
+                          backgroundColor: '#6c757d',
+                          color: 'white'
+                        }
+                      }}
+                    >
+                      Ara
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="text"
+                      sx={{
+                        fontSize: '0.75rem',
+                        color: '#6c757d',
+                        '&:hover': {
+                          backgroundColor: '#f8f9fa'
+                        }
+                      }}
+                    >
+                      Temizle
+                    </Button>
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
+            </Box>
+
+            {/* Detaylı Paket Bilgileri */}
+            <Box sx={{ px: 3, pb: 3 }}>
               <Typography variant="h6" sx={{ 
-                fontWeight: 700, 
+                fontWeight: 600, 
                 mb: 2, 
-                color: '#2c3e50',
+                color: '#495057',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 1
+                gap: 1,
+                fontSize: '1rem'
               }}>
-                <Info sx={{ color: '#495057' }} />
+                <Info sx={{ color: '#495057', fontSize: 18 }} />
                 Detaylı Paket Bilgileri
               </Typography>
               
               <TableContainer sx={{ 
-                borderRadius: 3,
-                border: '1px solid #e0e0e0',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
+                borderRadius: 1,
+                border: '1px solid #dee2e6',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
               }}>
                 <Table stickyHeader>
                   <TableHead>
                     <TableRow sx={{
-                      backgroundColor: '#f5f5f5',
+                      backgroundColor: '#f8f9fa',
                       '& .MuiTableCell-head': {
-                        fontWeight: 700,
-                        fontSize: '0.9rem',
+                        fontWeight: 600,
+                        fontSize: '0.8rem',
                         color: '#495057',
-                        borderBottom: '2px solid #dee2e6',
+                        borderBottom: '1px solid #dee2e6',
                         textAlign: 'center',
-                        py: 2
+                        py: 1.5
                       }
                     }}>
                       <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                          <Category sx={{ fontSize: 18 }} />
-                          Paket
-                        </Box>
+                        <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
+                          Fiş No
+                        </Typography>
                       </TableCell>
                       <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                          <Business sx={{ fontSize: 18 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
                           Sefer No
-                        </Box>
+                        </Typography>
                       </TableCell>
                       <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                          <LocalShipping sx={{ fontSize: 18 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
                           Sevk Durumu
-                        </Box>
+                        </Typography>
                       </TableCell>
                       <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                          <Inventory sx={{ fontSize: 18 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
                           Kap No
-                        </Box>
+                        </Typography>
                       </TableCell>
                       <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                          <QrCode sx={{ fontSize: 18 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
                           Barkod
-                        </Box>
+                        </Typography>
                       </TableCell>
                       <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                          <Numbers sx={{ fontSize: 18 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
+                          Ürün Adı
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
                           Adet
-                        </Box>
+                        </Typography>
                       </TableCell>
                       <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                          <Scale sx={{ fontSize: 18 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
                           Kilo
-                        </Box>
+                        </Typography>
                       </TableCell>
                       <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                          <Assessment sx={{ fontSize: 18 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
                           Hacim
-                        </Box>
+                        </Typography>
                       </TableCell>
                       <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                          <AttachMoney sx={{ fontSize: 18 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
                           Fiyat
-                        </Box>
+                        </Typography>
                       </TableCell>
                       <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                          <Schedule sx={{ fontSize: 18 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
                           Tarih
-                        </Box>
+                        </Typography>
                       </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {/* Çıkan paketler - Her fiş için dinamik - Sadece çıkan popup'ta göster */}
-                    {!showDepodaOnly && selectedGroup?.id === 1 && (
-                      <React.Fragment>
-                        {/* Fiş No 27 için çıkan paketler */}
-                        <TableRow sx={{
-                          '&:hover': {
-                            backgroundColor: '#f0f7ff',
-                            transition: 'all 0.2s ease'
-                          },
-                          '& .MuiTableCell-body': {
-                            textAlign: 'center',
-                            borderBottom: '1px solid #e0e0e0',
-                            py: 2
-                          }
-                        }}>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#1976d2' }}>
-                          2/10
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Chip 
-                          label="28" 
-                          size="small"
-                          sx={{
-                            backgroundColor: '#e8f5e8',
-                            color: '#2e7d32',
-                            fontWeight: 600
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Chip 
-                          label="Gönderildi" 
-                          size="small"
-                          sx={{
-                            backgroundColor: '#e8f5e8',
-                            color: '#2e7d32',
-                            fontWeight: 600
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          155
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 500, fontFamily: 'monospace' }}>
-                          8133483147305B1
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#1976d2' }}>
-                          10
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                          <Scale sx={{ color: '#6c757d', fontSize: 16 }} />
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                            20
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                          0
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ 
-                          fontWeight: 700, 
-                          color: '#2e7d32',
-                          fontSize: '0.95rem'
-                        }}>
-                          $0.00
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                          <AccessTime sx={{ color: '#6c757d', fontSize: 16 }} />
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                            12/04/2025 6:36
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                    
-                    <TableRow sx={{
-                      backgroundColor: '#fafafa',
-                      '&:hover': {
-                        backgroundColor: '#f0f7ff',
-                        transition: 'all 0.2s ease'
-                      },
-                      '& .MuiTableCell-body': {
-                        textAlign: 'center',
-                        borderBottom: '1px solid #e0e0e0',
-                        py: 2
-                      }
-                    }}>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#1976d2' }}>
-                          1/10
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Chip 
-                          label="28" 
-                          size="small"
-                          sx={{
-                            backgroundColor: '#e8f5e8',
-                            color: '#2e7d32',
-                            fontWeight: 600
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Chip 
-                          label="Teslim Edildi" 
-                          size="small"
-                          sx={{
-                            backgroundColor: '#e3f2fd',
-                            color: '#1976d2',
-                            fontWeight: 600
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          164
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 500, fontFamily: 'monospace' }}>
-                          3340033464B533
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#1976d2' }}>
-                          5
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                          <Scale sx={{ color: '#6c757d', fontSize: 16 }} />
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                            15
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                          2
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ 
-                          fontWeight: 700, 
-                          color: '#2e7d32',
-                          fontSize: '0.95rem'
-                        }}>
-                          $25.00
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                          <AccessTime sx={{ color: '#6c757d', fontSize: 16 }} />
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                            12/04/2025 7:15
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                      </React.Fragment>
-                    )}
-                    
-                    {/* Depoda paketler (3/10'dan 10/10'a kadar) - Bekleyen durumda - Sadece depoda popup'ta göster */}
-                    {showDepodaOnly && [3, 4, 5, 6, 7, 8, 9, 10].map((kapNo, index) => (
+                    {/* Resimde Gösterildiği Gibi Tam Veri */}
+                    {[
+                      { fisNo: '27', seferNo: '28', sevkDurumu: 'Gönderildi', kapNo: '155', barkod: '813348314730301', urunAdi: 'Elektronik Ürün', adet: '10', kilo: '20', hacim: '0', fiyat: '$0.00', tarih: '12/04/2025 6:36' },
+                      { fisNo: '27', seferNo: '28', sevkDurumu: 'Teslim Edildi', kapNo: '164', barkod: '334083346405533', urunAdi: 'Tekstil Ürünü', adet: '5', kilo: '15', hacim: '2', fiyat: '$25.00', tarih: '12/04/2025 7:15' },
+                      { fisNo: '27', seferNo: '28', sevkDurumu: 'Bekleyen', kapNo: '153', barkod: '813348314730503', urunAdi: 'Gıda Ürünü', adet: '8', kilo: '16', hacim: '0', fiyat: '$15.00', tarih: '12/04/2025 9:33' },
+                      { fisNo: '27', seferNo: '28', sevkDurumu: 'Bekleyen', kapNo: '154', barkod: '813348314730504', urunAdi: 'Kozmetik Ürün', adet: '9', kilo: '18', hacim: '1', fiyat: '$20.00', tarih: '12/04/2025 10:34' },
+                      { fisNo: '27', seferNo: '28', sevkDurumu: 'Bekleyen', kapNo: '155', barkod: '813348314731305', urunAdi: 'Ev Eşyası', adet: '10', kilo: '20', hacim: '2', fiyat: '$25.00', tarih: '12/04/2025 11:35' },
+                      { fisNo: '27', seferNo: '28', sevkDurumu: 'Bekleyen', kapNo: '156', barkod: '813348314731306', urunAdi: 'Kırtasiye', adet: '11', kilo: '22', hacim: '0', fiyat: '$30.00', tarih: '12/04/2025 12:36' },
+                      { fisNo: '27', seferNo: '28', sevkDurumu: 'Bekleyen', kapNo: '157', barkod: '813348314731307', urunAdi: 'Oyuncak', adet: '12', kilo: '24', hacim: '1', fiyat: '$35.00', tarih: '12/04/2025 13:37' },
+                      { fisNo: '27', seferNo: '28', sevkDurumu: 'Bekleyen', kapNo: '158', barkod: '813348314731308', urunAdi: 'Spor Malzemesi', adet: '13', kilo: '26', hacim: '2', fiyat: '$40.00', tarih: '12/04/2025 14:38' },
+                      { fisNo: '27', seferNo: '28', sevkDurumu: 'Bekleyen', kapNo: '159', barkod: '813348314731309', urunAdi: 'Kitap', adet: '14', kilo: '28', hacim: '0', fiyat: '$45.00', tarih: '12/04/2025 15:39' },
+                      { fisNo: '27', seferNo: '28', sevkDurumu: 'Bekleyen', kapNo: '160', barkod: '813348314731310', urunAdi: 'Müzik Aleti', adet: '15', kilo: '30', hacim: '1', fiyat: '$50.00', tarih: '12/04/2025 16:40' }
+                    ].map((item, index) => (
                       <TableRow 
-                        key={kapNo}
+                        key={index}
                         sx={{
-                          backgroundColor: index % 2 === 1 ? '#fafafa' : 'transparent',
                           '&:hover': {
-                            backgroundColor: '#f0f7ff',
+                            backgroundColor: '#f8f9fa',
                             transition: 'all 0.2s ease'
                           },
                           '& .MuiTableCell-body': {
                             textAlign: 'center',
-                            borderBottom: '1px solid #e0e0e0',
-                            py: 2
+                            borderBottom: '1px solid #dee2e6',
+                            py: 1,
+                            fontSize: '0.75rem'
                           }
                         }}
                       >
                         <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#1976d2' }}>
-                            {kapNo}/10
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Chip 
-                            label="28" 
-                            size="small"
-                            sx={{
-                              backgroundColor: '#e8f5e8',
-                              color: '#2e7d32',
-                              fontWeight: 600
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Chip 
-                            label="Bekleyen" 
-                            size="small"
-                            sx={{
-                              backgroundColor: '#ffebee',
-                              color: '#d32f2f',
-                              fontWeight: 600
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            {150 + kapNo}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 500, fontFamily: 'monospace' }}>
-                            {`${8133483147305 + kapNo}B${kapNo}`}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#1976d2' }}>
-                            {5 + kapNo}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                            <Scale sx={{ color: '#6c757d', fontSize: 16 }} />
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                              {10 + kapNo * 2}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                            {kapNo % 3}
+                          <Typography variant="body2" sx={{ 
+                            fontWeight: 600, 
+                            color: '#1976d2',
+                            fontSize: '0.75rem'
+                          }}>
+                            {item.fisNo}
                           </Typography>
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2" sx={{ 
-                            fontWeight: 700, 
+                            fontWeight: 600, 
                             color: '#2e7d32',
-                            fontSize: '0.95rem'
+                            fontSize: '0.75rem'
                           }}>
-                            ${(kapNo * 5).toFixed(2)}
+                            {item.seferNo}
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                            <AccessTime sx={{ color: '#6c757d', fontSize: 16 }} />
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                              12/04/2025 {6 + kapNo}:{30 + kapNo}
-                            </Typography>
-                          </Box>
+                          <Chip 
+                            label={item.sevkDurumu}
+                            size="small"
+                            sx={{
+                              backgroundColor: 
+                                item.sevkDurumu === 'Gönderildi' ? '#e8f5e8' :
+                                item.sevkDurumu === 'Teslim Edildi' ? '#e3f2fd' :
+                                '#ffebee',
+                              color: 
+                                item.sevkDurumu === 'Gönderildi' ? '#2e7d32' :
+                                item.sevkDurumu === 'Teslim Edildi' ? '#1976d2' :
+                                '#d32f2f',
+                              fontWeight: 500,
+                              fontSize: '0.65rem',
+                              height: 20
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>
+                            {item.kapNo}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ 
+                            fontWeight: 500, 
+                            fontSize: '0.75rem',
+                            fontFamily: 'monospace'
+                          }}>
+                            {item.barkod}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ 
+                            fontWeight: 500, 
+                            color: '#2e7d32',
+                            fontSize: '0.75rem'
+                          }}>
+                            {item.urunAdi}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>
+                            {item.adet}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.75rem' }}>
+                            {item.kilo}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
+                            {item.hacim}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ 
+                            fontWeight: 600, 
+                            color: '#2e7d32',
+                            fontSize: '0.75rem'
+                          }}>
+                            {item.fiyat}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
+                            {item.tarih}
+                          </Typography>
                         </TableCell>
                       </TableRow>
                     ))}
