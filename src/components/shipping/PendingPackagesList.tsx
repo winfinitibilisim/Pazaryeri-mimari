@@ -984,20 +984,21 @@ const PendingPackagesList: React.FC = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {/* Çıkan paketler (2/10, 1/10) - Gönderildi/Teslim Edildi - Sadece çıkan popup'ta göster */}
-                    {!showDepodaOnly && (
-                    <>
-                    <TableRow sx={{
-                      '&:hover': {
-                        backgroundColor: '#f0f7ff',
-                        transition: 'all 0.2s ease'
-                      },
-                      '& .MuiTableCell-body': {
-                        textAlign: 'center',
-                        borderBottom: '1px solid #e0e0e0',
-                        py: 2
-                      }
-                    }}>
+                    {/* Çıkan paketler - Her fiş için dinamik - Sadece çıkan popup'ta göster */}
+                    {!showDepodaOnly && selectedGroup?.id === 1 && (
+                      <React.Fragment>
+                        {/* Fiş No 27 için çıkan paketler */}
+                        <TableRow sx={{
+                          '&:hover': {
+                            backgroundColor: '#f0f7ff',
+                            transition: 'all 0.2s ease'
+                          },
+                          '& .MuiTableCell-body': {
+                            textAlign: 'center',
+                            borderBottom: '1px solid #e0e0e0',
+                            py: 2
+                          }
+                        }}>
                       <TableCell>
                         <Typography variant="body2" sx={{ fontWeight: 600, color: '#1976d2' }}>
                           2/10
@@ -1157,7 +1158,7 @@ const PendingPackagesList: React.FC = () => {
                         </Box>
                       </TableCell>
                     </TableRow>
-                    </>
+                      </React.Fragment>
                     )}
                     
                     {/* Depoda paketler (3/10'dan 10/10'a kadar) - Bekleyen durumda - Sadece depoda popup'ta göster */}
