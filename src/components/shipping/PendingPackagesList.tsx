@@ -1160,8 +1160,8 @@ const PendingPackagesList: React.FC = () => {
                     </>
                     )}
                     
-                    {/* Depoda paketler (3/10'dan 10/10'a kadar) - Bekleyen durumda */}
-                    {[3, 4, 5, 6, 7, 8, 9, 10].map((kapNo, index) => (
+                    {/* Depoda paketler (3/10'dan 10/10'a kadar) - Bekleyen durumda - Sadece depoda popup'ta göster */}
+                    {showDepodaOnly && [3, 4, 5, 6, 7, 8, 9, 10].map((kapNo, index) => (
                       <TableRow 
                         key={kapNo}
                         sx={{
