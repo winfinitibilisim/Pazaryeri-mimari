@@ -56,8 +56,9 @@ import {
   Phone as PhoneIcon,
   Sms as SmsIcon,
   LocalShipping as ShippingIcon,
-  CloudUpload as UploadIcon,
+  CloudUpload as CloudUploadIcon,
   Delete as DeleteIcon,
+  AccountBalance as AccountBalanceIcon,
   Menu as MenuIcon,
   FileDownload as ExportIcon,
   Print as PrintIcon,
@@ -65,7 +66,7 @@ import {
   ShoppingCart as SalesIcon,
   Description as KargolarIcon,
   Person as PersonIcon,
-  ShoppingBag as ShoppingBagIcon,
+  Person,
   Public as PublicIcon,
   Sell as SellIcon,
   FormatBold as FormatBoldIcon,
@@ -155,6 +156,1530 @@ type FinancialStatus = 'all' | 'balance' | 'debtor' | 'creditor';
 
 // Parti tipi
 type PartyType = 'all' | 'buyer' | 'seller';
+
+// CustomerFormContent bileşeni
+interface CustomerFormContentProps {
+  editingCustomer: any;
+  onSubmit: (data: any) => void;
+  onClose: () => void;
+}
+
+const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustomer, onSubmit, onClose }) => {
+  const [selectedCategory, setSelectedCategory] = useState('info');
+  const [selectedCountryCode, setSelectedCountryCode] = useState('tr');
+  const [countryMenuAnchor, setCountryMenuAnchor] = useState<null | HTMLElement>(null);
+  
+  // Form state
+  const [customerType, setCustomerType] = useState('individual');
+  const [formCountry, setFormCountry] = useState('turkey');
+  const [selectedCity, setSelectedCity] = useState('istanbul');
+  const [selectedDistrict, setSelectedDistrict] = useState('kadikoy');
+  const [customerStatus, setCustomerStatus] = useState('active');
+  const [currency, setCurrency] = useState('try');
+  const [customerGroup, setCustomerGroup] = useState('turkey');
+  const [selectedBank, setSelectedBank] = useState('');
+  const [selectedBankCountry, setSelectedBankCountry] = useState('TR');
+  const [selectedBranchCode, setSelectedBranchCode] = useState('');
+  
+  const countries = [
+    { code: 'tr', name: 'Türkiye', flag: '🇹🇷', dialCode: '+90' },
+    { code: 'us', name: 'Amerika', flag: '🇺🇸', dialCode: '+1' },
+    { code: 'de', name: 'Almanya', flag: '🇩🇪', dialCode: '+49' },
+    { code: 'fr', name: 'Fransa', flag: '🇫🇷', dialCode: '+33' },
+    { code: 'gb', name: 'İngiltere', flag: '🇬🇧', dialCode: '+44' },
+    { code: 'it', name: 'İtalya', flag: '🇮🇹', dialCode: '+39' },
+    { code: 'es', name: 'İspanya', flag: '🇪🇸', dialCode: '+34' },
+    { code: 'nl', name: 'Hollanda', flag: '🇳🇱', dialCode: '+31' },
+    { code: 'be', name: 'Belçika', flag: '🇧🇪', dialCode: '+32' },
+    { code: 'ch', name: 'İsviçre', flag: '🇨🇭', dialCode: '+41' },
+    { code: 'at', name: 'Avusturya', flag: '🇦🇹', dialCode: '+43' },
+    { code: 'se', name: 'İsveç', flag: '🇸🇪', dialCode: '+46' },
+    { code: 'no', name: 'Norveç', flag: '🇳🇴', dialCode: '+47' },
+    { code: 'dk', name: 'Danimarka', flag: '🇩🇰', dialCode: '+45' },
+    { code: 'fi', name: 'Finlandiya', flag: '🇫🇮', dialCode: '+358' },
+    { code: 'ru', name: 'Rusya', flag: '🇷🇺', dialCode: '+7' },
+    { code: 'cn', name: 'Çin', flag: '🇨🇳', dialCode: '+86' },
+    { code: 'jp', name: 'Japonya', flag: '🇯🇵', dialCode: '+81' },
+    { code: 'kr', name: 'Güney Kore', flag: '🇰🇷', dialCode: '+82' },
+    { code: 'ae', name: 'BAE', flag: '🇦🇪', dialCode: '+971' },
+    { code: 'sa', name: 'Suudi Arabistan', flag: '🇸🇦', dialCode: '+966' }
+  ];
+  
+  const selectedCountry = countries.find(c => c.code === selectedCountryCode) || countries[0];
+  
+  const handleCountrySelect = (countryCode: string) => {
+    setSelectedCountryCode(countryCode);
+    setCountryMenuAnchor(null);
+  };
+  
+  const categories = [
+    { id: 'info', label: 'Müşteri Bilgileri', icon: '👤', active: true },
+    { id: 'address', label: 'Adresler', icon: '📍', active: false },
+    { id: 'risk', label: 'Risk Tanımları', icon: '⚠️', active: false },
+    { id: 'discount', label: '% İndirim Tanımları', icon: '💰', active: false },
+    { id: 'warehouse', label: 'Depolar/Şubeler', icon: '🏪', active: false },
+    { id: 'notes', label: 'Notlar', icon: '📝', active: false },
+    { id: 'documents', label: 'Belgeler', icon: '📄', active: false },
+    { id: 'banks', label: 'Bankalar', icon: '🏦', active: false },
+    { id: 'mail', label: 'Mail', icon: '📧', active: false },
+    { id: 'sms', label: 'SMS', icon: '📱', active: false }
+  ];
+
+  const renderCategoryContent = () => {
+    switch (selectedCategory) {
+      case 'info':
+        return (
+          <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+            <CardContent sx={{ p: 3 }}>
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={3}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <Avatar sx={{ width: 100, height: 100, mb: 2, bgcolor: '#e9ecef', color: '#6c757d', fontSize: '2rem' }}>👤</Avatar>
+                    <Button variant="outlined" component="label" startIcon={<CloudUploadIcon />} size="small">
+                      Yükle
+                      <input type="file" hidden accept="image/*" />
+                    </Button>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={9}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Müşteri Tipi *</InputLabel>
+                        <Select 
+                          value={customerType} 
+                          onChange={(e) => setCustomerType(e.target.value)}
+                        >
+                          <MenuItem value="individual">Gerçek Kişi</MenuItem>
+                          <MenuItem value="corporate">Tüzel Kişi</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField fullWidth label="Ad *" size="small" required />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField fullWidth label="Soyad *" size="small" required />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField 
+                        fullWidth 
+                        label="Müşteri Kodu" 
+                        size="small" 
+                        defaultValue="M554967"
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton size="small" sx={{ bgcolor: '#1976d2', color: 'white', width: 24, height: 24 }}>
+                                <span style={{ fontSize: '12px', fontWeight: 'bold' }}>G</span>
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField 
+                        fullWidth 
+                        label="E-mail *" 
+                        type="email" 
+                        size="small" 
+                        required 
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton size="small" sx={{ bgcolor: '#1976d2', color: 'white', width: 24, height: 24 }}>
+                                <span style={{ fontSize: '12px', fontWeight: 'bold' }}>C</span>
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField 
+                        fullWidth 
+                        label="Telefon" 
+                        size="small"
+                        placeholder="5xx xxx xx xx"
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mr: 1 }}>
+                                <Box 
+                                  onClick={(e) => setCountryMenuAnchor(e.currentTarget)}
+                                  sx={{ 
+                                    width: 20, 
+                                    height: 14, 
+                                    background: '#e30a17',
+                                    borderRadius: 0.5,
+                                    border: '1px solid #ccc',
+                                    position: 'relative',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    '&:hover': {
+                                      opacity: 0.8
+                                    }
+                                  }}
+                                >
+                                  <Box sx={{ fontSize: '10px' }}>{selectedCountry.flag}</Box>
+                                </Box>
+                                <Typography variant="caption" sx={{ fontWeight: 500 }}>{selectedCountry.dialCode}</Typography>
+                              </Box>
+                            </InputAdornment>
+                          )
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField 
+                        fullWidth 
+                        label="Cep Telefonu" 
+                        size="small"
+                        placeholder="5xx xxx xx xx"
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mr: 1 }}>
+                                <Box 
+                                  onClick={(e) => setCountryMenuAnchor(e.currentTarget)}
+                                  sx={{ 
+                                    width: 20, 
+                                    height: 14, 
+                                    background: '#e30a17',
+                                    borderRadius: 0.5,
+                                    border: '1px solid #ccc',
+                                    position: 'relative',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    '&:hover': {
+                                      opacity: 0.8
+                                    }
+                                  }}
+                                >
+                                  <Box sx={{ fontSize: '10px' }}>{selectedCountry.flag}</Box>
+                                </Box>
+                                <Typography variant="caption" sx={{ fontWeight: 500 }}>{selectedCountry.dialCode}</Typography>
+                              </Box>
+                            </InputAdornment>
+                          )
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Ülke</InputLabel>
+                        <Select 
+                          value={formCountry} 
+                          onChange={(e) => setFormCountry(e.target.value)}
+                        >
+                          <MenuItem value="turkey">Türkiye</MenuItem>
+                          <MenuItem value="germany">Almanya</MenuItem>
+                          <MenuItem value="usa">ABD</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Şehir</InputLabel>
+                        <Select 
+                          value={selectedCity} 
+                          onChange={(e) => setSelectedCity(e.target.value)}
+                        >
+                          <MenuItem value="istanbul">İstanbul</MenuItem>
+                          <MenuItem value="ankara">Ankara</MenuItem>
+                          <MenuItem value="izmir">İzmir</MenuItem>
+                          <MenuItem value="bursa">Bursa</MenuItem>
+                          <MenuItem value="antalya">Antalya</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>İlçe</InputLabel>
+                        <Select 
+                          value={selectedDistrict} 
+                          onChange={(e) => setSelectedDistrict(e.target.value)}
+                        >
+                          <MenuItem value="kadikoy">Kadıköy</MenuItem>
+                          <MenuItem value="besiktas">Beşiktaş</MenuItem>
+                          <MenuItem value="sisli">Şişli</MenuItem>
+                          <MenuItem value="uskudar">Üsküdar</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Durum</InputLabel>
+                        <Select 
+                          value={customerStatus} 
+                          onChange={(e) => setCustomerStatus(e.target.value)}
+                        >
+                          <MenuItem value="active">Aktif</MenuItem>
+                          <MenuItem value="passive">Pasif</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Para Birimi *</InputLabel>
+                        <Select 
+                          value={currency} 
+                          onChange={(e) => setCurrency(e.target.value)}
+                        >
+                          <MenuItem value="try">TRY</MenuItem>
+                          <MenuItem value="usd">USD</MenuItem>
+                          <MenuItem value="eur">EUR</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Müşteri Grubu *</InputLabel>
+                        <Select 
+                          value={customerGroup} 
+                          onChange={(e) => setCustomerGroup(e.target.value)}
+                        >
+                          <MenuItem value="turkey">TÜRKİYE</MenuItem>
+                          <MenuItem value="export">İHRACAT</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField 
+                        fullWidth 
+                        label="Açıklama" 
+                        multiline 
+                        rows={3} 
+                        size="small" 
+                        placeholder="Müşteri hakkında açıklama..."
+                      />
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        );
+      case 'address':
+        return (
+          <Box>
+            {/* Yeni Adres Ekle Formu */}
+            <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', mb: 3 }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Yeni Adres Ekle</Typography>
+                
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Tipi</InputLabel>
+                      <Select defaultValue="teslimat">
+                        <MenuItem value="teslimat">Teslimat Adresi</MenuItem>
+                        <MenuItem value="fatura">Fatura Adresi</MenuItem>
+                        <MenuItem value="iade">İade Adresi</MenuItem>
+                        <MenuItem value="depo">Depo Adresi</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField fullWidth label="Adı" size="small" placeholder="Adres adı giriniz" />
+                  </Grid>
+                  
+                  <Grid item xs={12}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                      <Box sx={{ 
+                        width: 20, 
+                        height: 20, 
+                        bgcolor: '#f0f0f0', 
+                        borderRadius: 1, 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center' 
+                      }}>
+                        📁
+                      </Box>
+                      <Typography variant="body2" sx={{ color: '#666' }}>Varsayılan Adres</Typography>
+                    </Box>
+                  </Grid>
+                  
+                  <Grid item xs={12}>
+                    <TextField 
+                      fullWidth 
+                      label="Adres" 
+                      multiline 
+                      rows={3} 
+                      size="small" 
+                      placeholder="Detaylı adres bilgisi giriniz"
+                    />
+                  </Grid>
+                  
+                  <Grid item xs={12}>
+                    <FormControlLabel
+                      control={<Switch size="small" />}
+                      label="Adres Yurtdışında"
+                      sx={{ mb: 2 }}
+                    />
+                  </Grid>
+                  
+                  <Grid item xs={12} md={4}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Ülke</InputLabel>
+                      <Select defaultValue="turkey">
+                        <MenuItem value="turkey">Türkiye</MenuItem>
+                        <MenuItem value="usa">Amerika</MenuItem>
+                        <MenuItem value="germany">Almanya</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>İl</InputLabel>
+                      <Select defaultValue="">
+                        <MenuItem value="">İl seçiniz</MenuItem>
+                        <MenuItem value="istanbul">İstanbul</MenuItem>
+                        <MenuItem value="ankara">Ankara</MenuItem>
+                        <MenuItem value="izmir">İzmir</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>İlçe</InputLabel>
+                      <Select defaultValue="">
+                        <MenuItem value="">İlçe seçiniz</MenuItem>
+                        <MenuItem value="kadikoy">Kadıköy</MenuItem>
+                        <MenuItem value="besiktas">Beşiktaş</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  
+                  <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+                    <Button variant="outlined" color="error" size="small">
+                      Vazgeç
+                    </Button>
+                    <Button variant="contained" color="success" size="small">
+                      Kaydet
+                    </Button>
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+            
+            {/* Kayıtlı Adresler Listesi */}
+            <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Kayıtlı Adresler</Typography>
+                
+                {/* Adres Listesi Başlıkları */}
+                <Box sx={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '1fr 1fr 2fr 1fr 80px', 
+                  gap: 2, 
+                  p: 2, 
+                  bgcolor: '#f8f9fa', 
+                  borderRadius: 1, 
+                  mb: 2,
+                  fontWeight: 600,
+                  fontSize: '14px'
+                }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Tipi</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Adı</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Adres</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>İl/İlçe</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>İşlem</Typography>
+                </Box>
+                
+                {/* Örnek Adres */}
+                <Box sx={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '1fr 1fr 2fr 1fr 80px', 
+                  gap: 2, 
+                  p: 2, 
+                  borderBottom: '1px solid #eee',
+                  alignItems: 'center'
+                }}>
+                  <Typography variant="body2">Teslimat</Typography>
+                  <Typography variant="body2">Ahmet Durmaz</Typography>
+                  <Typography variant="body2" sx={{ color: '#666' }}>
+                    Dünya ticaret merkezi business part florya
+                  </Typography>
+                  <Typography variant="body2">İstanbul/İstanbul</Typography>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <IconButton size="small" sx={{ color: '#1976d2' }}>
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" sx={{ color: '#d32f2f' }}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </Box>
+                
+                {/* Toplam Kayıt */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  mt: 2, 
+                  pt: 2, 
+                  borderTop: '1px solid #eee' 
+                }}>
+                  <Typography variant="body2" sx={{ color: '#666' }}>
+                    Toplam Kayıt: 1
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button variant="outlined" size="small">
+                      İptal
+                    </Button>
+                    <Button variant="contained" size="small">
+                      Kaydet
+                    </Button>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
+        );
+      case 'risk':
+        return (
+          <Box>
+            {/* Yeni İndirim Ekle Formu */}
+            <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', mb: 3 }}>
+              <CardContent sx={{ p: 3 }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={3}>
+                    <TextField 
+                      fullWidth 
+                      label="İndirim Adı" 
+                      size="small" 
+                      placeholder="İndirim adı giriniz"
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={2}>
+                    <TextField 
+                      fullWidth 
+                      label="İndirim Değeri" 
+                      size="small" 
+                      type="number"
+                      InputProps={{
+                        endAdornment: <InputAdornment position="end">%</InputAdornment>
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={2}>
+                    <TextField 
+                      fullWidth 
+                      label="Alt Limit" 
+                      size="small" 
+                      type="number"
+                      placeholder="0.00"
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={2}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Kategoriler</InputLabel>
+                      <Select defaultValue="all">
+                        <MenuItem value="all">Tüm Kategoriler</MenuItem>
+                        <MenuItem value="electronics">Elektronik</MenuItem>
+                        <MenuItem value="clothing">Giyim</MenuItem>
+                        <MenuItem value="books">Kitap</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} md={1.5}>
+                    <TextField 
+                      fullWidth 
+                      label="Başlangıç Tarihi" 
+                      size="small" 
+                      type="date"
+                      defaultValue="2025-01-01"
+                      InputLabelProps={{ shrink: true }}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton size="small">
+                              📅
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={1.5}>
+                    <TextField 
+                      fullWidth 
+                      label="Bitiş Tarihi" 
+                      size="small" 
+                      type="date"
+                      defaultValue="2025-12-31"
+                      InputLabelProps={{ shrink: true }}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton size="small">
+                              📅
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                    />
+                  </Grid>
+                  
+                  <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 1 }}>
+                    <Button variant="outlined" color="error" size="small">
+                      Temizle
+                    </Button>
+                    <Button variant="contained" color="success" size="small">
+                      Kaydet
+                    </Button>
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+            
+            {/* Eklenmiş İndirimler Listesi */}
+            <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Eklenmiş İndirimler</Typography>
+                
+                {/* Liste Başlıkları */}
+                <Box sx={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr 80px', 
+                  gap: 2, 
+                  p: 2, 
+                  bgcolor: '#f8f9fa', 
+                  borderRadius: 1, 
+                  mb: 2,
+                  fontWeight: 600,
+                  fontSize: '14px'
+                }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>İndirim Adı</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>İndirim Değeri</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Alt Limit</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Başlangıç Tarihi</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Bitiş Tarihi</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>İşlem</Typography>
+                </Box>
+                
+                {/* Örnek İndirim */}
+                <Box sx={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr 80px', 
+                  gap: 2, 
+                  p: 2, 
+                  borderBottom: '1px solid #eee',
+                  alignItems: 'center'
+                }}>
+                  <Typography variant="body2">albice</Typography>
+                  <Typography variant="body2">10%</Typography>
+                  <Typography variant="body2">₺1.000,00</Typography>
+                  <Typography variant="body2">23.06.2025</Typography>
+                  <Typography variant="body2">24.06.2025</Typography>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <IconButton size="small" sx={{ color: '#d32f2f' }}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </Box>
+                
+                {/* Alt Butonlar */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'flex-end', 
+                  gap: 2, 
+                  mt: 3, 
+                  pt: 2, 
+                  borderTop: '1px solid #eee' 
+                }}>
+                  <Button variant="outlined" size="small">
+                    İptal
+                  </Button>
+                  <Button variant="contained" size="small">
+                    Kaydet
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
+        );
+      case 'discount':
+        return (
+          <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="h6" sx={{ mb: 2 }}>💰 İndirim Tanımları</Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <TextField fullWidth label="Genel İndirim %" size="small" type="number" />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField fullWidth label="Özel İndirim %" size="small" type="number" />
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        );
+      case 'notes':
+        return (
+          <Box>
+            {/* Yeni Not Ekle Formu */}
+            <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', mb: 3 }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Notlar</Typography>
+                
+                <TextField 
+                  fullWidth 
+                  label="Notlar *" 
+                  multiline 
+                  rows={6} 
+                  size="small" 
+                  placeholder="Müşteri hakkında önemli notlarınızı buraya yazabilirsiniz..."
+                  sx={{ mb: 3 }}
+                />
+                
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                  <Button variant="outlined" color="error" size="small">
+                    Vazgeç
+                  </Button>
+                  <Button variant="contained" color="primary" size="small">
+                    Kaydet
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+            
+            {/* Mevcut Notlar Listesi */}
+            <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              <CardContent sx={{ p: 3 }}>
+                {/* Örnek Not */}
+                <Box sx={{ 
+                  border: '1px solid #e9ecef', 
+                  borderRadius: 2, 
+                  p: 2, 
+                  mb: 2,
+                  bgcolor: '#fafafa'
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                    <Avatar sx={{ width: 32, height: 32, bgcolor: '#e0e0e0', color: '#666' }}>
+                      <PersonIcon fontSize="small" />
+                    </Avatar>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#333' }}>
+                        Ahmet Durmaz
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#666' }}>
+                        23/06/2025 16:12
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <IconButton size="small" sx={{ color: '#1976d2' }}>
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton size="small" sx={{ color: '#d32f2f' }}>
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  </Box>
+                  
+                  <Typography variant="body2" sx={{ color: '#555', lineHeight: 1.6 }}>
+                    riskli birisi
+                  </Typography>
+                </Box>
+                
+                {/* Boş Durum Mesajı (Eğer başka not yoksa) */}
+                <Box sx={{ 
+                  textAlign: 'center', 
+                  py: 4, 
+                  color: '#999',
+                  display: 'none' // Örnek not olduğu için gizli
+                }}>
+                  <Typography variant="body2">
+                    Henüz not eklenmemiş.
+                  </Typography>
+                </Box>
+                
+                {/* Alt Butonlar */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'flex-end', 
+                  gap: 2, 
+                  mt: 3, 
+                  pt: 2, 
+                  borderTop: '1px solid #eee' 
+                }}>
+                  <Button variant="outlined" size="small">
+                    İptal
+                  </Button>
+                  <Button variant="contained" size="small">
+                    Kaydet
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
+        );
+      case 'documents':
+        return (
+          <Box>
+            <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Yüklenmeesi Gereken Belgeler</Typography>
+            
+            <Grid container spacing={3}>
+              {/* Onaylı Fiyat Teklifi */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ 
+                  border: '1px solid #e9ecef', 
+                  borderRadius: 3, 
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  height: '200px',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}>
+                  <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+                      Onaylı Fiyat Teklifi
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#666', mb: 3, flex: 1 }}>
+                      Firmanıza ait Onaylı Fiyat Teklifi yükleyiniz
+                    </Typography>
+                    <Button 
+                      variant="contained" 
+                      component="label"
+                      startIcon={<CloudUploadIcon />}
+                      sx={{ 
+                        bgcolor: '#6c757d',
+                        '&:hover': { bgcolor: '#5a6268' },
+                        borderRadius: 2
+                      }}
+                      fullWidth
+                    >
+                      Dosya Seçiniz
+                      <input type="file" hidden accept=".pdf,.doc,.docx,.jpg,.png" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+              
+              {/* Onaylı Sözleşme */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ 
+                  border: '1px solid #e9ecef', 
+                  borderRadius: 3, 
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  height: '200px',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}>
+                  <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+                      Onaylı Sözleşme
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#666', mb: 3, flex: 1 }}>
+                      Firmanıza ait Onaylı Sözleşme yükleyiniz
+                    </Typography>
+                    <Button 
+                      variant="contained" 
+                      component="label"
+                      startIcon={<CloudUploadIcon />}
+                      sx={{ 
+                        bgcolor: '#6c757d',
+                        '&:hover': { bgcolor: '#5a6268' },
+                        borderRadius: 2
+                      }}
+                      fullWidth
+                    >
+                      Dosya Seçiniz
+                      <input type="file" hidden accept=".pdf,.doc,.docx,.jpg,.png" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+              
+              {/* Vergi Levhası */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ 
+                  border: '1px solid #e9ecef', 
+                  borderRadius: 3, 
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  height: '200px',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}>
+                  <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+                      Vergi Levhası
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#666', mb: 3, flex: 1 }}>
+                      Firmanıza ait Vergi Levhası yükleyiniz
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Button 
+                        variant="outlined" 
+                        size="small"
+                        startIcon={<VisibilityIcon />}
+                        sx={{ 
+                          color: '#1976d2',
+                          borderColor: '#1976d2',
+                          flex: 1
+                        }}
+                      >
+                        Görüntüle
+                      </Button>
+                      <Button 
+                        variant="contained" 
+                        size="small"
+                        sx={{ 
+                          bgcolor: '#dc3545',
+                          '&:hover': { bgcolor: '#c82333' },
+                          flex: 1
+                        }}
+                      >
+                        Sil
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+              
+              {/* Kimlik */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ 
+                  border: '1px solid #e9ecef', 
+                  borderRadius: 3, 
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  height: '200px',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}>
+                  <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+                      Kimlik
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#666', mb: 3, flex: 1 }}>
+                      Firmanıza ait Kimlik yükleyiniz
+                    </Typography>
+                    <Button 
+                      variant="contained" 
+                      component="label"
+                      startIcon={<CloudUploadIcon />}
+                      sx={{ 
+                        bgcolor: '#6c757d',
+                        '&:hover': { bgcolor: '#5a6268' },
+                        borderRadius: 2
+                      }}
+                      fullWidth
+                    >
+                      Dosya Seçiniz
+                      <input type="file" hidden accept=".pdf,.doc,.docx,.jpg,.png" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+              
+              {/* Fiyat Teklifi */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ 
+                  border: '1px solid #e9ecef', 
+                  borderRadius: 3, 
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  height: '200px',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}>
+                  <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+                      Fiyat Teklifi
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#666', mb: 3, flex: 1 }}>
+                      Firmanıza ait Fiyat Teklifi yükleyiniz
+                    </Typography>
+                    <Button 
+                      variant="contained" 
+                      component="label"
+                      startIcon={<CloudUploadIcon />}
+                      sx={{ 
+                        bgcolor: '#6c757d',
+                        '&:hover': { bgcolor: '#5a6268' },
+                        borderRadius: 2
+                      }}
+                      fullWidth
+                    >
+                      Dosya Seçiniz
+                      <input type="file" hidden accept=".pdf,.doc,.docx,.jpg,.png" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+            
+            {/* Alt Butonlar */}
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'flex-end', 
+              gap: 2, 
+              mt: 4 
+            }}>
+              <Button variant="outlined" size="small">
+                İptal
+              </Button>
+              <Button variant="contained" size="small">
+                Kaydet
+              </Button>
+            </Box>
+          </Box>
+        );
+      case 'banks':
+        return (
+          <Box>
+            {/* Yeni Banka Ekle Formu */}
+            <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', mb: 3 }}>
+              <CardContent sx={{ p: 3 }}>
+                <Grid container spacing={3}>
+                  {/* İlk Satır */}
+                  <Grid item xs={12} md={6}>
+                    <TextField 
+                      fullWidth 
+                      label="Hesap Sahibi" 
+                      size="small" 
+                      placeholder="Hesap sahibinin adını giriniz"
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField 
+                      fullWidth 
+                      label="Hesap Numarası" 
+                      size="small" 
+                      placeholder="Hesap numarasını giriniz"
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <Typography variant="body2" sx={{ color: '#666' }}>#</Typography>
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  </Grid>
+                  
+                  {/* İkinci Satır */}
+                  <Grid item xs={12} md={4}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Banka Adı</InputLabel>
+                      <Select
+                        value={selectedBank}
+                        onChange={(e) => setSelectedBank(e.target.value)}
+                        label="Banka Adı"
+                      >
+                        <MenuItem value="ziraat">Ziraat Bankası</MenuItem>
+                        <MenuItem value="garanti">Garanti BBVA</MenuItem>
+                        <MenuItem value="isbank">İş Bankası</MenuItem>
+                        <MenuItem value="akbank">Akbank</MenuItem>
+                        <MenuItem value="vakifbank">VakıfBank</MenuItem>
+                        <MenuItem value="halkbank">Halkbank</MenuItem>
+                        <MenuItem value="yapikredi">Yapı Kredi</MenuItem>
+                        <MenuItem value="denizbank">DenizBank</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Ülke Kodu</InputLabel>
+                      <Select
+                        value={selectedBankCountry}
+                        onChange={(e) => setSelectedBankCountry(e.target.value)}
+                        label="Ülke Kodu"
+                      >
+                        <MenuItem value="TR">TR, Türkiye</MenuItem>
+                        <MenuItem value="US">US, United States</MenuItem>
+                        <MenuItem value="DE">DE, Germany</MenuItem>
+                        <MenuItem value="FR">FR, France</MenuItem>
+                        <MenuItem value="GB">GB, United Kingdom</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <TextField 
+                      fullWidth 
+                      label="IBAN Numarası" 
+                      size="small" 
+                      placeholder="IBAN numarasını giriniz"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <AccountBalanceIcon sx={{ color: '#666', fontSize: 20 }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  </Grid>
+                  
+                  {/* Üçüncü Satır */}
+                  <Grid item xs={12} md={6}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Şube Kodu</InputLabel>
+                      <Select
+                        value={selectedBranchCode}
+                        onChange={(e) => setSelectedBranchCode(e.target.value)}
+                        label="Şube Kodu"
+                      >
+                        <MenuItem value="001">001 - Merkez Şubesi</MenuItem>
+                        <MenuItem value="002">002 - Kadıköy Şubesi</MenuItem>
+                        <MenuItem value="003">003 - Beşiktaş Şubesi</MenuItem>
+                        <MenuItem value="004">004 - Şişli Şubesi</MenuItem>
+                        <MenuItem value="005">005 - Bakırköy Şubesi</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  
+                  {/* Butonlar */}
+                  <Grid item xs={12}>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+                      <Button variant="outlined" color="error" size="small">
+                        Temizle
+                      </Button>
+                      <Button variant="contained" color="primary" size="small">
+                        Kaydet
+                      </Button>
+                    </Box>
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+            
+            {/* Eklenmiş Bankalar Listesi */}
+            <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Eklenmiş Bankalar</Typography>
+                
+                {/* Tablo Başlıkları */}
+                <Box sx={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '2fr 2fr 2fr 2fr 1fr', 
+                  gap: 2, 
+                  p: 2, 
+                  bgcolor: '#f8f9fa', 
+                  borderRadius: 2, 
+                  mb: 2,
+                  fontWeight: 600
+                }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Banka Adı</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Şubesi</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Hesap Numarası</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>IBAN</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, textAlign: 'center' }}>İşlem</Typography>
+                </Box>
+                
+                {/* Boş Durum Mesajı */}
+                <Box sx={{ 
+                  textAlign: 'center', 
+                  py: 6, 
+                  color: '#999',
+                  border: '1px dashed #ddd',
+                  borderRadius: 2
+                }}>
+                  <AccountBalanceIcon sx={{ fontSize: 48, color: '#ccc', mb: 2 }} />
+                  <Typography variant="body2">
+                    Kayıt Bulunamadı.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#bbb' }}>
+                    Henüz banka hesabı eklenmemiş.
+                  </Typography>
+                </Box>
+                
+                {/* Alt Butonlar */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'flex-end', 
+                  gap: 2, 
+                  mt: 3, 
+                  pt: 2, 
+                  borderTop: '1px solid #eee' 
+                }}>
+                  <Button variant="outlined" size="small">
+                    İptal
+                  </Button>
+                  <Button variant="contained" size="small">
+                    Kaydet
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
+        );
+      case 'mail':
+        return (
+          <Box>
+            <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              <CardContent sx={{ p: 3 }}>
+                {/* Mail Geçmişi Tablosu */}
+                <Box sx={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '80px 150px 200px 150px 120px 120px 100px', 
+                  gap: 2, 
+                  p: 2, 
+                  bgcolor: '#f8f9fa', 
+                  borderRadius: 2, 
+                  mb: 2,
+                  fontWeight: 600,
+                  fontSize: '0.875rem'
+                }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>ID</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Tarih</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Konu</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Alıcı</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Gönderen</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Durum</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, textAlign: 'center' }}>İşlemler</Typography>
+                </Box>
+                
+                {/* Örnek Mail Kayıtları */}
+                <Box sx={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '80px 150px 200px 150px 120px 120px 100px', 
+                  gap: 2, 
+                  p: 2, 
+                  borderBottom: '1px solid #eee',
+                  alignItems: 'center',
+                  fontSize: '0.875rem'
+                }}>
+                  <Typography variant="body2">1</Typography>
+                  <Typography variant="body2">23/06/2025 14:30</Typography>
+                  <Typography variant="body2" sx={{ 
+                    overflow: 'hidden', 
+                    textOverflow: 'ellipsis', 
+                    whiteSpace: 'nowrap' 
+                  }}>
+                    Hoş Geldiniz - Üyelik Onayı
+                  </Typography>
+                  <Typography variant="body2">ahmet@example.com</Typography>
+                  <Typography variant="body2">sistem@firma.com</Typography>
+                  <Chip 
+                    label="Gönderildi" 
+                    size="small" 
+                    sx={{ 
+                      bgcolor: '#d1ecf1', 
+                      color: '#0c5460',
+                      fontSize: '0.75rem',
+                      height: '24px'
+                    }} 
+                  />
+                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+                    <IconButton size="small" sx={{ color: '#1976d2' }}>
+                      <VisibilityIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" sx={{ color: '#d32f2f' }}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </Box>
+                
+                {/* İkinci Örnek Kayıt */}
+                <Box sx={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '80px 150px 200px 150px 120px 120px 100px', 
+                  gap: 2, 
+                  p: 2, 
+                  borderBottom: '1px solid #eee',
+                  alignItems: 'center',
+                  fontSize: '0.875rem'
+                }}>
+                  <Typography variant="body2">2</Typography>
+                  <Typography variant="body2">22/06/2025 09:15</Typography>
+                  <Typography variant="body2" sx={{ 
+                    overflow: 'hidden', 
+                    textOverflow: 'ellipsis', 
+                    whiteSpace: 'nowrap' 
+                  }}>
+                    Sipariş Onay Bildirimi
+                  </Typography>
+                  <Typography variant="body2">mehmet@test.com</Typography>
+                  <Typography variant="body2">siparis@firma.com</Typography>
+                  <Chip 
+                    label="Başarısız" 
+                    size="small" 
+                    sx={{ 
+                      bgcolor: '#f8d7da', 
+                      color: '#721c24',
+                      fontSize: '0.75rem',
+                      height: '24px'
+                    }} 
+                  />
+                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+                    <IconButton size="small" sx={{ color: '#1976d2' }}>
+                      <VisibilityIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" sx={{ color: '#d32f2f' }}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </Box>
+                
+                {/* Boş Durum (Eğer başka kayıt yoksa) */}
+                <Box sx={{ 
+                  textAlign: 'center', 
+                  py: 6, 
+                  color: '#999',
+                  display: 'none' // Örnek kayıtlar olduğu için gizli
+                }}>
+                  <EmailIcon sx={{ fontSize: 48, color: '#ccc', mb: 2 }} />
+                  <Typography variant="body2">
+                    Henüz mail gönderilmemiş.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#bbb' }}>
+                    Müşteriye mail gönderdikten sonra burada görüntülenecek.
+                  </Typography>
+                </Box>
+                
+                {/* Alt Butonlar */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'flex-end', 
+                  gap: 2, 
+                  mt: 3, 
+                  pt: 2, 
+                  borderTop: '1px solid #eee' 
+                }}>
+                  <Button variant="outlined" size="small">
+                    İptal
+                  </Button>
+                  <Button variant="contained" size="small">
+                    Kaydet
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
+        );
+      case 'sms':
+        return (
+          <Box>
+            <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              <CardContent sx={{ p: 3 }}>
+                {/* SMS Geçmişi Tablosu */}
+                <Box sx={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '80px 150px 120px 120px 120px 120px 120px 100px', 
+                  gap: 2, 
+                  p: 2, 
+                  bgcolor: '#f8f9fa', 
+                  borderRadius: 2, 
+                  mb: 2,
+                  fontWeight: 600,
+                  fontSize: '0.875rem'
+                }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>ID</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Oluşturulma Tarihi</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>SMS</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>senderName</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Başlık</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Başarılı</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>İçerik</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, textAlign: 'center' }}>İşlemler</Typography>
+                </Box>
+                
+                {/* Örnek SMS Kayıtları */}
+                <Box sx={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '80px 150px 120px 120px 120px 120px 120px 100px', 
+                  gap: 2, 
+                  p: 2, 
+                  borderBottom: '1px solid #eee',
+                  alignItems: 'center',
+                  fontSize: '0.875rem'
+                }}>
+                  <Typography variant="body2">1</Typography>
+                  <Typography variant="body2">23/06/2025 16:53</Typography>
+                  <Typography variant="body2">Happ-Sms</Typography>
+                  <Typography variant="body2">Yigit Kemal</Typography>
+                  <Typography variant="body2">Test Header</Typography>
+                  <Chip 
+                    label="Success" 
+                    size="small" 
+                    sx={{ 
+                      bgcolor: '#d4edda', 
+                      color: '#155724',
+                      fontSize: '0.75rem',
+                      height: '24px'
+                    }} 
+                  />
+                  <Typography variant="body2">This is a test sms</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <IconButton size="small" sx={{ color: '#1976d2' }}>
+                      <VisibilityIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </Box>
+                
+                {/* Boş Durum (Eğer başka kayıt yoksa) */}
+                <Box sx={{ 
+                  textAlign: 'center', 
+                  py: 6, 
+                  color: '#999',
+                  display: 'none' // Örnek kayıt olduğu için gizli
+                }}>
+                  <SmsIcon sx={{ fontSize: 48, color: '#ccc', mb: 2 }} />
+                  <Typography variant="body2">
+                    Henüz SMS gönderilmemiş.
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#bbb' }}>
+                    Müşteriye SMS gönderdikten sonra burada görüntülenecek.
+                  </Typography>
+                </Box>
+                
+                {/* Alt Butonlar */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'flex-end', 
+                  gap: 2, 
+                  mt: 3, 
+                  pt: 2, 
+                  borderTop: '1px solid #eee' 
+                }}>
+                  <Button variant="outlined" size="small">
+                    İptal
+                  </Button>
+                  <Button variant="contained" size="small">
+                    Kaydet
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
+        );
+      default:
+        return (
+          <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+            <CardContent sx={{ p: 3, textAlign: 'center' }}>
+              <Typography variant="h6" sx={{ mb: 2 }}>🚧 Geliştiriliyor</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Bu kategori henüz geliştirilme aşamasındadır.
+              </Typography>
+            </CardContent>
+          </Card>
+        );
+    }
+  };
+
+  return (
+    <Box sx={{ display: 'flex', height: 'calc(100% - 64px)' }}>
+      {/* Sol Sidebar */}
+      <Box sx={{ width: { xs: '100%', md: '280px' }, bgcolor: '#f8f9fa', borderRight: '1px solid #e9ecef', display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ p: 2, borderBottom: '1px solid #e9ecef' }}>
+          <TextField
+            fullWidth
+            size="small"
+            placeholder="Kategori ara..."
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: '#6c757d' }} />
+                </InputAdornment>
+              )
+            }}
+          />
+        </Box>
+        
+        <Box sx={{ flex: 1, overflow: 'auto', p: 1 }}>
+          {categories.map((category) => (
+            <Box
+              key={category.id}
+              onClick={() => setSelectedCategory(category.id)}
+              sx={{
+                p: 1.5,
+                mb: 0.5,
+                borderRadius: 2,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2,
+                bgcolor: selectedCategory === category.id ? '#667eea' : 'transparent',
+                color: selectedCategory === category.id ? 'white' : '#495057',
+                fontWeight: selectedCategory === category.id ? 600 : 400,
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  bgcolor: selectedCategory === category.id ? '#667eea' : '#e9ecef',
+                  transform: 'translateX(4px)'
+                }
+              }}
+            >
+              <Box sx={{ fontSize: '18px' }}>{category.icon}</Box>
+              <Typography variant="body2" sx={{ fontWeight: 'inherit' }}>
+                {category.label}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </Box>
+      
+      {/* Sağ İçerik Alanı */}
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ p: 3, borderBottom: '1px solid #e9ecef', bgcolor: 'white' }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, color: '#495057', mb: 1 }}>
+            {categories.find(c => c.id === selectedCategory)?.icon} {categories.find(c => c.id === selectedCategory)?.label}
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#6c757d' }}>
+            Bu kategoride müşteriye ait bilgileri yönetebilirsiniz.
+          </Typography>
+        </Box>
+        
+        <Box sx={{ flex: 1, overflow: 'auto', p: 3 }}>
+          {renderCategoryContent()}
+        </Box>
+        
+        {/* Alt Butonlar */}
+        <Box sx={{ p: 3, borderTop: '1px solid #e9ecef', bgcolor: '#f8f9fa', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+          <Button variant="outlined" onClick={onClose}>
+            İptal
+          </Button>
+          <Button 
+            variant="contained" 
+            onClick={() => onSubmit({})}
+            sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+          >
+            {editingCustomer ? 'Güncelle' : 'Müşteri Ekle'}
+          </Button>
+        </Box>
+      </Box>
+      
+      {/* Ülke Seçici Menü */}
+      <Menu
+        anchorEl={countryMenuAnchor}
+        open={Boolean(countryMenuAnchor)}
+        onClose={() => setCountryMenuAnchor(null)}
+        PaperProps={{
+          sx: {
+            maxHeight: 300,
+            width: 250,
+            mt: 1
+          }
+        }}
+      >
+        {countries.map((country) => (
+          <MenuItem
+            key={country.code}
+            onClick={() => handleCountrySelect(country.code)}
+            selected={country.code === selectedCountryCode}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              py: 1
+            }}
+          >
+            <Box sx={{ fontSize: '16px' }}>{country.flag}</Box>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="body2">{country.name}</Typography>
+            </Box>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              {country.dialCode}
+            </Typography>
+          </MenuItem>
+        ))}
+      </Menu>
+    </Box>
+  );
+};
 
 const CustomersPage: React.FC = () => {
   // Şu an seçili ülkenin şehirlerini döndüren yardımcı fonksiyon
@@ -607,6 +2132,11 @@ const CustomersPage: React.FC = () => {
     handleMenuClose();
   };
   
+  const handleCustomerFormOpen = () => {
+    setEditingCustomer(null);
+    setCustomerFormOpen(true);
+  };
+  
   const handleCustomerFormClose = () => {
     setCustomerFormOpen(false);
   };
@@ -979,87 +2509,179 @@ const CustomersPage: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      {/* Mavi Başlık */}
-      <Box sx={{ 
-        bgcolor: '#1e5172',
-        color: 'white',
-        p: 2,
-        borderTopLeftRadius: 8,
-        borderTopRightRadius: 8,
-        mb: 0
-      }}>
-        <Typography variant="h6" sx={{ fontWeight: 500 }}>
-          Müşteriler
-        </Typography>
-      </Box>
-      
-      {/* Sekme Menüsü */}
-      <Box sx={{ 
-        display: 'flex',
-        borderBottom: '1px solid #e0e0e0',
-        bgcolor: '#fff'
-      }}>
+      {/* Ana Header - Resimde gösterilen tasarım */}
+      <Paper 
+        elevation={0}
+        sx={{ 
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          borderRadius: 4,
+          overflow: 'hidden',
+          mb: 4,
+          boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)'
+        }}
+      >
         <Box sx={{ 
-          py: 1.5,
-          px: 2,
-          borderBottom: '2px solid #1e5172',
-          color: '#1e5172',
-          fontWeight: 'bold'
+          p: { xs: 3, md: 5 },
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          minHeight: 140
         }}>
-          <Typography variant="subtitle2">Müşteri Listesi</Typography>
-        </Box>
-        
-        <Link to="/add-customer" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <Box sx={{ 
-            py: 1.5,
-            px: 2,
-            color: '#555',
-            '&:hover': { bgcolor: '#f5f5f5' },
-            cursor: 'pointer'
-          }}>
-            <Typography variant="subtitle2">Yeni Müşteri Ekle</Typography>
+          <Box>
+            <Typography 
+              variant="h3" 
+              sx={{ 
+                fontWeight: 700,
+                fontSize: { xs: '2rem', md: '2.5rem' },
+                textShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                mb: 1
+              }}
+            >
+              Müşteri Yönetimi
+            </Typography>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                opacity: 0.9,
+                fontSize: { xs: '1rem', md: '1.1rem' },
+                fontWeight: 400
+              }}
+            >
+              Müşterilerinizi yönetin, yeni müşteriler ekleyin ve raporlarınızı görüntüleyin
+            </Typography>
           </Box>
-        </Link>
-        
-        <Box sx={{ 
-          py: 1.5,
-          px: 2,
-          display: 'flex',
-          alignItems: 'center',
-          color: '#555',
-          '&:hover': { bgcolor: '#f5f5f5' },
-          cursor: 'pointer'
-        }} onClick={handleQuickAddOpen}>
-          <Box component="span" sx={{ mr: 0.5 }}>⚡</Box>
-          <Typography variant="subtitle2">Hızlı Müşteri Ekle</Typography>
+          
+          <Avatar 
+            sx={{ 
+              bgcolor: 'rgba(255,255,255,0.2)',
+              width: { xs: 60, md: 80 },
+              height: { xs: 60, md: 80 },
+              backdropFilter: 'blur(10px)',
+              border: '2px solid rgba(255,255,255,0.3)'
+            }}
+          >
+            <PersonIcon sx={{ fontSize: { xs: 30, md: 40 }, color: 'white' }} />
+          </Avatar>
         </Box>
+      </Paper>
+      
+      {/* Renkli Kart Menüleri */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card 
+            onClick={handleCustomerFormOpen}
+            sx={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              borderRadius: 3,
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'translateY(-8px)',
+                boxShadow: '0 12px 40px rgba(102, 126, 234, 0.4)'
+              }
+            }}
+          >
+            <CardContent sx={{ p: 3, textAlign: 'center' }}>
+              <PersonAddIcon sx={{ fontSize: 40, mb: 2 }} />
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                Yeni
+              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                Müşteri
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                Müşteri ekle
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
         
-        <Box sx={{ 
-          py: 1.5,
-          px: 2,
-          display: 'flex',
-          alignItems: 'center',
-          color: '#555',
-          '&:hover': { bgcolor: '#f5f5f5' },
-          cursor: 'pointer'
-        }} onClick={handleImportOpen}>
-          <Box component="span" sx={{ mr: 0.5 }}>📥</Box>
-          <Typography variant="subtitle2">İçe Aktar</Typography>
-        </Box>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card 
+            onClick={handleQuickAddOpen}
+            sx={{
+              background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+              color: 'white',
+              borderRadius: 3,
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'translateY(-8px)',
+                boxShadow: '0 12px 40px rgba(240, 147, 251, 0.4)'
+              }
+            }}
+          >
+            <CardContent sx={{ p: 3, textAlign: 'center' }}>
+              <QuickAddIcon sx={{ fontSize: 40, mb: 2 }} />
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                Hızlı Ekle
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                Hızlı müşteri
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
         
-        <Box sx={{ 
-          py: 1.5,
-          px: 2,
-          display: 'flex',
-          alignItems: 'center',
-          color: '#555',
-          '&:hover': { bgcolor: '#f5f5f5' },
-          cursor: 'pointer'
-        }} onClick={() => setMailDialogOpen(true)}>
-          <Box component="span" sx={{ mr: 0.5 }}>📧</Box>
-          <Typography variant="subtitle2">Mail</Typography>
-        </Box>
-      </Box>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card 
+            onClick={handleImportOpen}
+            sx={{
+              background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+              color: 'white',
+              borderRadius: 3,
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'translateY(-8px)',
+                boxShadow: '0 12px 40px rgba(79, 172, 254, 0.4)'
+              }
+            }}
+          >
+            <CardContent sx={{ p: 3, textAlign: 'center' }}>
+              <CloudUploadIcon sx={{ fontSize: 40, mb: 2 }} />
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                İçe Aktar
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                Excel'den aktar
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={3}>
+          <Card 
+            onClick={() => setMailDialogOpen(true)}
+            sx={{
+              background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+              color: 'white',
+              borderRadius: 3,
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'translateY(-8px)',
+                boxShadow: '0 12px 40px rgba(250, 112, 154, 0.4)'
+              }
+            }}
+          >
+            <CardContent sx={{ p: 3, textAlign: 'center' }}>
+              <EmailIcon sx={{ fontSize: 40, mb: 2 }} />
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                Mail
+              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                Gönder
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                Toplu mail
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
       
       {/* Arama ve Export Butonları */}
       <Box sx={{ 
@@ -1797,7 +3419,7 @@ const CustomersPage: React.FC = () => {
           Kargolar
         </MenuItem>
         <MenuItem onClick={handleMenuClose}>
-          <UploadIcon fontSize="small" sx={{ mr: 2, color: '#25638f' }} />
+          <CloudUploadIcon fontSize="small" sx={{ mr: 2, color: '#25638f' }} />
           Yükle
         </MenuItem>
         <Divider />
@@ -1865,27 +3487,47 @@ const CustomersPage: React.FC = () => {
         onImport={handleImportCustomers}
       />
       
-      {/* Müşteri Ekleme/Düzenleme Dialog'u */}
+      {/* Yeni Müşteri Ekle Popup'u */}
       <Dialog
         open={customerFormOpen}
         onClose={handleCustomerFormClose}
-        maxWidth="md"
+        maxWidth="lg"
         fullWidth
+        sx={{
+          '& .MuiDialog-paper': {
+            height: '80vh',
+            maxHeight: '800px'
+          }
+        }}
       >
-        <DialogTitle sx={{ bgcolor: '#25638f', color: 'white', fontWeight: 500 }}>
-          {editingCustomer ? 'Müşteri Düzenle' : 'Yeni Müşteri Ekle'}
+        <DialogTitle 
+          sx={{ 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white', 
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            py: 2
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Person sx={{ fontSize: 28 }} />
+            {editingCustomer ? 'Müşteri Düzenle' : 'Yeni Müşteri Ekle'}
+          </Box>
+          <IconButton 
+            onClick={handleCustomerFormClose}
+            sx={{ color: 'white' }}
+          >
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
-        <Box sx={{ p: 0 }}>
-          <HookForm
-            open={true}
-            onClose={handleCustomerFormClose}
-            onSubmit={handleCustomerFormSubmit}
-            title=""
-            submitButtonText={editingCustomer ? 'Güncelle' : 'Ekle'}
-            fields={customerFormFields}
-            defaultValues={editingCustomer || {}}
-          />
-        </Box>
+        
+        <CustomerFormContent 
+          editingCustomer={editingCustomer}
+          onSubmit={handleCustomerFormSubmit}
+          onClose={handleCustomerFormClose}
+        />
       </Dialog>
     </Box>
   );
