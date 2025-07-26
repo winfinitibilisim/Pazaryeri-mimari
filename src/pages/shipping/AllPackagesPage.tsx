@@ -25,6 +25,15 @@ import {
   Select,
   MenuItem,
   IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Stepper,
+  Step,
+  StepLabel,
+  StepContent,
+  Divider,
 } from '@mui/material';
 import {
   Search,
@@ -37,13 +46,22 @@ import {
   FileDownload,
   Print,
   QrCode,
+  Close,
+  CheckCircle,
+  Schedule,
+  Person,
+  Business,
+  LocationOn,
+  Phone,
+  Email,
+  Visibility,
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 interface PackageData {
   id: number;
   fisNo: number;
-  seferNo: number;
+  seferNo: number | string;
   sevkDurumu: string;
   kapNo: number;
   barkod: string;
@@ -53,34 +71,36 @@ interface PackageData {
   hacim: number;
   fiyat: string;
   tarih: string;
+  gonderenAdi: string;
+  teslimAlanSube: string;
 }
 
 const allPackagesData: PackageData[] = [
   // Fiş No 27 - Gönderildi
-  { id: 1, fisNo: 27, seferNo: 28, sevkDurumu: 'Gönderildi', kapNo: 155, barkod: '813348314730301', urunAdi: 'Elektronik Ürün', adet: 10, kilo: 20, hacim: 0, fiyat: '$0.00', tarih: '12/04/2025 6:36' },
+  { id: 1, fisNo: 27, seferNo: 28, sevkDurumu: 'Gönderildi', kapNo: 163, barkod: '334HN33464H533', urunAdi: 'Elektronik Ürün', adet: 3, kilo: 12, hacim: 1, fiyat: '$12.50', tarih: '12/04/2025 8:45', gonderenAdi: 'ABC Elektronik Ltd.', teslimAlanSube: 'Ankara Merkez Şube' },
   // Fiş No 27 - Teslim Edildi
-  { id: 2, fisNo: 27, seferNo: 28, sevkDurumu: 'Teslim Edildi', kapNo: 164, barkod: '334HN33464H533', urunAdi: 'Tekstil Ürünü', adet: 5, kilo: 15, hacim: 2, fiyat: '$25.00', tarih: '12/04/2025 7:15' },
+  { id: 2, fisNo: 27, seferNo: 28, sevkDurumu: 'Teslim Edildi', kapNo: 164, barkod: '334HN33464H533', urunAdi: 'Tekstil Ürünü', adet: 5, kilo: 15, hacim: 2, fiyat: '$25.00', tarih: '12/04/2025 7:15', gonderenAdi: 'XYZ Tekstil A.Ş.', teslimAlanSube: 'İstanbul Anadolu Şube' },
   // Fiş No 27 - Bekleyen (8 adet)
-  { id: 3, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 153, barkod: '813348314730303', urunAdi: 'Gıda Ürünü', adet: 8, kilo: 16, hacim: 0, fiyat: '$15.00', tarih: '12/04/2025 9:33' },
-  { id: 4, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 154, barkod: '813348314730304', urunAdi: 'Kozmetik Ürün', adet: 9, kilo: 18, hacim: 1, fiyat: '$20.00', tarih: '12/04/2025 10:34' },
-  { id: 5, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 155, barkod: '813348314731305', urunAdi: 'Ev Eşyası', adet: 10, kilo: 20, hacim: 2, fiyat: '$25.00', tarih: '12/04/2025 11:35' },
-  { id: 6, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 156, barkod: '813348314731306', urunAdi: 'Kırtasiye', adet: 11, kilo: 22, hacim: 0, fiyat: '$30.00', tarih: '12/04/2025 12:36' },
-  { id: 7, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 157, barkod: '813348314731307', urunAdi: 'Oyuncak', adet: 12, kilo: 24, hacim: 1, fiyat: '$35.00', tarih: '12/04/2025 13:37' },
-  { id: 8, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 158, barkod: '813348314731308', urunAdi: 'Spor Malzemesi', adet: 13, kilo: 26, hacim: 2, fiyat: '$40.00', tarih: '12/04/2025 14:38' },
-  { id: 9, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 159, barkod: '813348314731309', urunAdi: 'Kitap', adet: 14, kilo: 28, hacim: 0, fiyat: '$45.00', tarih: '12/04/2025 15:39' },
-  { id: 10, fisNo: 27, seferNo: 28, sevkDurumu: 'Bekleyen', kapNo: 160, barkod: '813348314731310', urunAdi: 'Müzik Aleti', adet: 15, kilo: 30, hacim: 1, fiyat: '$50.00', tarih: '12/04/2025 16:40' },
+  { id: 3, fisNo: 27, seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: 153, barkod: '813348314730303', urunAdi: 'Gıda Ürünü', adet: 8, kilo: 16, hacim: 0, fiyat: '$15.00', tarih: '12/04/2025 9:33', gonderenAdi: 'Gıda Market A.Ş.', teslimAlanSube: 'Bursa Merkez Şube' },
+  { id: 4, fisNo: 27, seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: 154, barkod: '813348314730304', urunAdi: 'Kozmetik Ürün', adet: 9, kilo: 18, hacim: 1, fiyat: '$20.00', tarih: '12/04/2025 10:34', gonderenAdi: 'Güzellik Dünyası Ltd.', teslimAlanSube: 'Antalya Şube' },
+  { id: 5, fisNo: 27, seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: 155, barkod: '813348314731305', urunAdi: 'Ev Eşyası', adet: 10, kilo: 20, hacim: 2, fiyat: '$25.00', tarih: '12/04/2025 11:35', gonderenAdi: 'Ev Dekorasyon A.Ş.', teslimAlanSube: 'İzmir Konak Şube' },
+  { id: 6, fisNo: 27, seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: 156, barkod: '813348314731306', urunAdi: 'Kırtasiye', adet: 11, kilo: 22, hacim: 0, fiyat: '$30.00', tarih: '12/04/2025 12:36', gonderenAdi: 'Ofis Malzemeleri Ltd.', teslimAlanSube: 'Adana Şube' },
+  { id: 7, fisNo: 27, seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: 157, barkod: '813348314731307', urunAdi: 'Oyuncak', adet: 12, kilo: 24, hacim: 1, fiyat: '$35.00', tarih: '12/04/2025 13:37', gonderenAdi: 'Çocuk Dünyası A.Ş.', teslimAlanSube: 'Gaziantep Şube' },
+  { id: 8, fisNo: 27, seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: 158, barkod: '813348314731308', urunAdi: 'Spor Malzemesi', adet: 13, kilo: 26, hacim: 2, fiyat: '$40.00', tarih: '12/04/2025 14:38', gonderenAdi: 'Spor Ekipmanları Ltd.', teslimAlanSube: 'Konya Şube' },
+  { id: 9, fisNo: 27, seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: 159, barkod: '813348314731309', urunAdi: 'Kitap', adet: 14, kilo: 28, hacim: 0, fiyat: '$45.00', tarih: '12/04/2025 15:39', gonderenAdi: 'Kitap Evi Yayınları', teslimAlanSube: 'Kayseri Şube' },
+  { id: 10, fisNo: 27, seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: 160, barkod: '813348314731310', urunAdi: 'Müzik Aleti', adet: 15, kilo: 30, hacim: 1, fiyat: '$50.00', tarih: '12/04/2025 16:40', gonderenAdi: 'Müzik Dünyası A.Ş.', teslimAlanSube: 'Samsun Şube' },
   
   // Fiş No 26 - Bekleyen (5 adet)
-  { id: 11, fisNo: 26, seferNo: 30, sevkDurumu: 'Bekleyen', kapNo: 153, barkod: '813348314730303', urunAdi: 'Baharat', adet: 8, kilo: 16, hacim: 0, fiyat: '$15.00', tarih: '12/04/2025 9:33' },
-  { id: 12, fisNo: 26, seferNo: 30, sevkDurumu: 'Bekleyen', kapNo: 154, barkod: '813348314730304', urunAdi: 'Çay', adet: 9, kilo: 18, hacim: 1, fiyat: '$20.00', tarih: '12/04/2025 10:34' },
-  { id: 13, fisNo: 26, seferNo: 30, sevkDurumu: 'Bekleyen', kapNo: 155, barkod: '813348314731305', urunAdi: 'Kahve', adet: 10, kilo: 20, hacim: 2, fiyat: '$25.00', tarih: '12/04/2025 11:35' },
-  { id: 14, fisNo: 26, seferNo: 30, sevkDurumu: 'Bekleyen', kapNo: 156, barkod: '813348314731306', urunAdi: 'Şeker', adet: 11, kilo: 22, hacim: 0, fiyat: '$30.00', tarih: '12/04/2025 12:36' },
-  { id: 15, fisNo: 26, seferNo: 30, sevkDurumu: 'Bekleyen', kapNo: 157, barkod: '813348314731307', urunAdi: 'Un', adet: 12, kilo: 24, hacim: 1, fiyat: '$35.00', tarih: '12/04/2025 13:37' },
+  { id: 11, fisNo: 26, seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: 153, barkod: '813348314730303', urunAdi: 'Baharat', adet: 8, kilo: 16, hacim: 0, fiyat: '$15.00', tarih: '12/04/2025 9:33', gonderenAdi: 'Baharat Ticaret Ltd.', teslimAlanSube: 'Trabzon Şube' },
+  { id: 12, fisNo: 26, seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: 154, barkod: '813348314730304', urunAdi: 'Çay', adet: 9, kilo: 18, hacim: 1, fiyat: '$20.00', tarih: '12/04/2025 10:34', gonderenAdi: 'Rize Çay A.Ş.', teslimAlanSube: 'Erzurum Şube' },
+  { id: 13, fisNo: 26, seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: 155, barkod: '813348314731305', urunAdi: 'Kahve', adet: 10, kilo: 20, hacim: 2, fiyat: '$25.00', tarih: '12/04/2025 11:35', gonderenAdi: 'Kahve Dünyası Ltd.', teslimAlanSube: 'Malatya Şube' },
+  { id: 14, fisNo: 26, seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: 156, barkod: '813348314731306', urunAdi: 'Şeker', adet: 11, kilo: 22, hacim: 0, fiyat: '$30.00', tarih: '12/04/2025 12:36', gonderenAdi: 'Pancar Şeker A.Ş.', teslimAlanSube: 'Elazığ Şube' },
+  { id: 15, fisNo: 26, seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: 157, barkod: '813348314731307', urunAdi: 'Un', adet: 12, kilo: 24, hacim: 1, fiyat: '$35.00', tarih: '12/04/2025 13:37', gonderenAdi: 'Buğday Un A.Ş.', teslimAlanSube: 'Diyarbakır Şube' },
   
   // Fiş No 25 - Bekleyen (3 adet)
-  { id: 16, fisNo: 25, seferNo: 31, sevkDurumu: 'Bekleyen', kapNo: 158, barkod: '813348314731308', urunAdi: 'Deterjan', adet: 13, kilo: 26, hacim: 2, fiyat: '$40.00', tarih: '12/04/2025 14:38' },
-  { id: 17, fisNo: 25, seferNo: 31, sevkDurumu: 'Bekleyen', kapNo: 159, barkod: '813348314731309', urunAdi: 'Şampuan', adet: 14, kilo: 28, hacim: 0, fiyat: '$45.00', tarih: '12/04/2025 15:39' },
-  { id: 18, fisNo: 25, seferNo: 31, sevkDurumu: 'Bekleyen', kapNo: 160, barkod: '813348314731310', urunAdi: 'Sabun', adet: 15, kilo: 30, hacim: 1, fiyat: '$50.00', tarih: '12/04/2025 16:40' },
+  { id: 16, fisNo: 25, seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: 158, barkod: '813348314731308', urunAdi: 'Deterjan', adet: 13, kilo: 26, hacim: 2, fiyat: '$40.00', tarih: '12/04/2025 14:38', gonderenAdi: 'Temizlik Ürünleri A.Ş.', teslimAlanSube: 'Van Şube' },
+  { id: 17, fisNo: 25, seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: 159, barkod: '813348314731309', urunAdi: 'Sabun', adet: 14, kilo: 28, hacim: 0, fiyat: '$45.00', tarih: '12/04/2025 15:39', gonderenAdi: 'Hijyen Kozmetik Ltd.', teslimAlanSube: 'Bitlis Şube' },
+  { id: 18, fisNo: 25, seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: 160, barkod: '813348314731310', urunAdi: 'Şampüan', adet: 15, kilo: 30, hacim: 1, fiyat: '$50.00', tarih: '12/04/2025 16:40', gonderenAdi: 'Saç Bakım Ürünleri A.Ş.', teslimAlanSube: 'Muş Şube' },
 ];
 
 const AllPackagesPage: React.FC = () => {
@@ -89,6 +109,8 @@ const AllPackagesPage: React.FC = () => {
   const [fisNoFilter, setFisNoFilter] = useState('Tümü');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [dateFilter, setDateFilter] = useState<Date | null>(null);
+  const [trackingDialogOpen, setTrackingDialogOpen] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState<PackageData | null>(null);
 
   // Filtreleme fonksiyonu
   const filteredPackages = allPackagesData.filter(pkg => {
@@ -140,7 +162,7 @@ const AllPackagesPage: React.FC = () => {
       [''],
       
       // Tablo Başlıkları
-      ['Fiş No', 'Sefer No', 'Sevk Durumu', 'Kap No', 'Barkod', 'Ürün Adı', 'Adet', 'Kilo', 'Hacim', 'Fiyat', 'Tarih'],
+      ['Fiş No', 'Sefer No', 'Sevk Durumu', 'Kap No', 'Barkod', 'Ürün Adı', 'Adet', 'Kilo', 'Hacim', 'Fiyat', 'Tarih', 'Gönderen', 'Teslim Alan Şube'],
       
       // Paket verileri
       ...filteredPackages.map(pkg => [
@@ -154,7 +176,9 @@ const AllPackagesPage: React.FC = () => {
         pkg.kilo.toString(),
         pkg.hacim.toString(),
         pkg.fiyat,
-        pkg.tarih
+        pkg.tarih,
+        pkg.gonderenAdi,
+        pkg.teslimAlanSube
       ]),
       
       // Boş satır
@@ -241,6 +265,17 @@ const AllPackagesPage: React.FC = () => {
       console.error('Excel raporu oluşturulurken hata:', error);
       alert('Excel raporu oluşturulurken bir hata oluştu.');
     }
+  };
+
+  // Dialog handler fonksiyonları
+  const handleTrackingOpen = (pkg: PackageData) => {
+    setSelectedPackage(pkg);
+    setTrackingDialogOpen(true);
+  };
+
+  const handleTrackingClose = () => {
+    setTrackingDialogOpen(false);
+    setSelectedPackage(null);
   };
 
   return (
@@ -414,7 +449,15 @@ const AllPackagesPage: React.FC = () => {
                     <Chip 
                       label={pkg.sevkDurumu} 
                       size="small"
-                      sx={getStatusColor(pkg.sevkDurumu)}
+                      onClick={() => handleTrackingOpen(pkg)}
+                      sx={{
+                        ...getStatusColor(pkg.sevkDurumu),
+                        cursor: 'pointer',
+                        '&:hover': {
+                          opacity: 0.8,
+                          transform: 'scale(1.05)'
+                        }
+                      }}
                     />
                   </TableCell>
                   <TableCell sx={{ textAlign: 'center', fontWeight: 600 }}>
@@ -474,6 +517,319 @@ const AllPackagesPage: React.FC = () => {
           Toplam {filteredPackages.length} paket gösteriliyor
         </Typography>
       </Box>
+
+      {/* Paket Takip Dialog'u */}
+      <Dialog
+        open={trackingDialogOpen}
+        onClose={handleTrackingClose}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            background: 'linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%)'
+          }
+        }}
+      >
+        <DialogTitle
+          sx={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            p: 2
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <LocalShipping sx={{ fontSize: 24 }} />
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              Paket Takip Sistemi
+            </Typography>
+          </Box>
+          <Typography variant="body2" sx={{ opacity: 0.9 }}>
+            Fiş No: {selectedPackage?.fisNo} | Kap No: {selectedPackage?.kapNo}
+          </Typography>
+          <IconButton
+            onClick={handleTrackingClose}
+            sx={{ color: 'white', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
+          >
+            <Close />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent sx={{ p: 3 }}>
+          {selectedPackage && (
+            <Grid container spacing={3}>
+              {/* Paket Bilgileri */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ height: '100%', boxShadow: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 600 }}>
+                      PAKET BİLGİLERİ
+                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Fiş No:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.fisNo}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Sefer No:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.seferNo}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Kap No:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.kapNo}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Barkod:</Typography>
+                      <IconButton
+                        size="small"
+                        sx={{
+                          backgroundColor: '#f8f9fa',
+                          color: '#495057',
+                          border: '1px solid #dee2e6',
+                          width: 28,
+                          height: 28
+                        }}
+                      >
+                        <QrCode sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Ürün:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.urunAdi}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Adet:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.adet}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Kilo:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.kilo} kg</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Hacim:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.hacim}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Fiyat:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#28a745' }}>{selectedPackage.fiyat}</Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              {/* Durum Bilgileri */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ height: '100%', boxShadow: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 600 }}>
+                      DURUM BİLGİSİ
+                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Durum:</Typography>
+                      <Chip
+                        label={selectedPackage.sevkDurumu}
+                        size="small"
+                        sx={getStatusColor(selectedPackage.sevkDurumu)}
+                      />
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Tarih:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.tarih}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Fiyat:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#28a745' }}>{selectedPackage.fiyat}</Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              {/* Paket Yolculuğu */}
+              <Grid item xs={12}>
+                <Card sx={{ boxShadow: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6" sx={{ mb: 3, color: '#495057', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <LocalShipping sx={{ color: '#667eea' }} />
+                      Paket Yolculuğu
+                    </Typography>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                      {/* Çıkış Noktası */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
+                        <Box sx={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: '50%',
+                          backgroundColor: '#28a745',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <CheckCircle sx={{ color: 'white', fontSize: 20 }} />
+                        </Box>
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#495057' }}>
+                            Çıkış Noktası
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#6c757d' }}>
+                            Yiğit Kemal - Satıcı Şube
+                          </Typography>
+                          <Typography variant="caption" sx={{ display: 'block', color: '#28a745' }}>
+                            {selectedPackage.tarih}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      {/* Bağlantı Çizgisi */}
+                      <Box sx={{
+                        height: 2,
+                        backgroundColor: selectedPackage.sevkDurumu !== 'Bekleyen' ? '#28a745' : '#dee2e6',
+                        flex: 1,
+                        mx: 2
+                      }} />
+
+                      {/* Kargo Merkezi */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
+                        <Box sx={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: '50%',
+                          backgroundColor: selectedPackage.sevkDurumu === 'Teslim Edildi' ? '#28a745' : 
+                                         selectedPackage.sevkDurumu === 'Gönderildi' ? '#1976d2' : '#dee2e6',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          {selectedPackage.sevkDurumu === 'Teslim Edildi' ? (
+                            <CheckCircle sx={{ color: 'white', fontSize: 20 }} />
+                          ) : selectedPackage.sevkDurumu === 'Gönderildi' ? (
+                            <LocalShipping sx={{ color: 'white', fontSize: 20 }} />
+                          ) : (
+                            <Schedule sx={{ color: '#6c757d', fontSize: 20 }} />
+                          )}
+                        </Box>
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#495057' }}>
+                            Kargo Merkezi
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#6c757d' }}>
+                            {selectedPackage.teslimAlanSube}
+                          </Typography>
+                          <Typography variant="caption" sx={{ 
+                            display: 'block', 
+                            color: selectedPackage.sevkDurumu !== 'Bekleyen' ? '#28a745' : '#6c757d'
+                          }}>
+                            {selectedPackage.sevkDurumu !== 'Bekleyen' ? selectedPackage.tarih : 'Bekleniyor'}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              {/* Gönderen Bilgileri */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ boxShadow: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Person sx={{ color: '#667eea' }} />
+                      Gönderen Bilgileri
+                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Ad Soyad:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>Yiğit Kemal</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Şube:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.gonderenAdi}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Telefon:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Phone sx={{ fontSize: 14 }} />
+                        +90 532 123 45 67
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>E-posta:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Email sx={{ fontSize: 14 }} />
+                        yigit@satici.com
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Adres:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <LocationOn sx={{ fontSize: 14 }} />
+                        Satıcı Şube Adresi
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              {/* Teslim Alan Bilgileri */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ boxShadow: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Business sx={{ color: '#667eea' }} />
+                      Teslim Alan Bilgileri
+                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Ad Soyad:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>Ahmet Durmaz</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Şube:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.teslimAlanSube}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Telefon:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Phone sx={{ fontSize: 14 }} />
+                        +90 555 987 65 43
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>E-posta:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Email sx={{ fontSize: 14 }} />
+                        ahmet@teslimat.com
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Adres:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <LocationOn sx={{ fontSize: 14 }} />
+                        {selectedPackage.teslimAlanSube} Adresi
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          )}
+        </DialogContent>
+
+        <DialogActions sx={{ p: 2, bgcolor: '#f8f9fa' }}>
+          <Button
+            onClick={handleTrackingClose}
+            variant="contained"
+            sx={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)'
+              }
+            }}
+          >
+            Kapat
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

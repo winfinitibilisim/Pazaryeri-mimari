@@ -184,16 +184,16 @@ const PendingPackagesList: React.FC = () => {
       
       // Detay tablosundaki veriler (resimde gösterildiği gibi 10 satır)
       const detailData = [
-        ['27', '28', 'Gönderildi', '155', '813348314730301', 'Elektronik Ürün', '10', '20', '0', '$0.00', '12/04/2025 6:36'],
-        ['27', '28', 'Teslim Edildi', '164', '334HN3364H533', 'Tekstil Ürünü', '5', '15', '2', '$25.00', '12/04/2025 7:15'],
-        ['27', '28', 'Bekleyen', '153', '813348314730303', 'Gıda Ürünü', '8', '16', '0', '$15.00', '12/04/2025 9:33'],
-        ['27', '28', 'Bekleyen', '154', '813348314730304', 'Kozmetik Ürün', '9', '18', '1', '$20.00', '12/04/2025 10:34'],
-        ['27', '28', 'Bekleyen', '156', '813348314731305', 'Ev Eşyası', '10', '20', '2', '$25.00', '12/04/2025 11:35'],
-        ['27', '28', 'Bekleyen', '156', '813348314731306', 'Kırtasiye', '11', '22', '0', '$30.00', '12/04/2025 12:36'],
-        ['27', '28', 'Bekleyen', '157', '813348314731307', 'Oyuncak', '12', '24', '1', '$35.00', '12/04/2025 13:37'],
-        ['27', '28', 'Bekleyen', '158', '813348314731308', 'Spor Malzemesi', '13', '26', '2', '$40.00', '12/04/2025 14:38'],
-        ['27', '28', 'Bekleyen', '159', '813348314731309', 'Kitap', '14', '28', '0', '$45.00', '12/04/2025 15:39'],
-        ['27', '28', 'Bekleyen', '160', '813348314731310', 'Müzik Aleti', '15', '30', '1', '$50.00', '12/04/2025 16:40']
+        ['27', '28', 'Gönderildi', '155', '813348314730301', 'Elektronik Ürün', '10', '20', '0', '$0.00', 'QR'],
+        ['27', '28', 'Teslim Edildi', '164', '334HN3364H533', 'Tekstil Ürünü', '5', '15', '2', '$25.00', 'QR'],
+        ['27', '-', 'Bekleyen', '153', '813348314730303', 'Gıda Ürünü', '8', '16', '0', '$15.00', 'QR'],
+        ['27', '-', 'Bekleyen', '154', '813348314730304', 'Kozmetik Ürün', '9', '18', '1', '$20.00', 'QR'],
+        ['27', '-', 'Bekleyen', '156', '813348314731305', 'Ev Eşyası', '10', '20', '2', '$25.00', 'QR'],
+        ['27', '-', 'Bekleyen', '156', '813348314731306', 'Kırtasiye', '11', '22', '0', '$30.00', 'QR'],
+        ['27', '-', 'Bekleyen', '157', '813348314731307', 'Oyuncak', '12', '24', '1', '$35.00', 'QR'],
+        ['27', '-', 'Bekleyen', '158', '813348314731308', 'Spor Malzemesi', '13', '26', '2', '$40.00', 'QR'],
+        ['27', '-', 'Bekleyen', '159', '813348314731309', 'Kitap', '14', '28', '0', '$45.00', 'QR'],
+        ['27', '-', 'Bekleyen', '160', '813348314731310', 'Müzik Aleti', '15', '30', '1', '$50.00', 'QR']
       ];
       
       // Toplamları hesapla
@@ -214,7 +214,7 @@ const PendingPackagesList: React.FC = () => {
         [],
         
         // Tablo başlıkları
-        ['Fiş No', 'Sefer No', 'Sevk Durumu', 'Kap No', 'Barkod', 'Ürün Adı', 'Adet', 'Kilo', 'Hacim', 'Fiyat', 'Tarih'],
+        ['Fiş No', 'Sefer No', 'Sevk Durumu', 'Kap No', 'Barkod', 'Ürün Adı', 'Adet', 'Kilo', 'Hacim', 'Fiyat', 'QR'],
         
         // Detay verileri
         ...detailData,
@@ -1397,7 +1397,7 @@ const PendingPackagesList: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
-                          Tarih
+                          QR
                         </Typography>
                       </TableCell>
                     </TableRow>
@@ -1407,14 +1407,14 @@ const PendingPackagesList: React.FC = () => {
                     {[
                       { fisNo: '27', seferNo: '28', sevkDurumu: 'Gönderildi', kapNo: '155', barkod: '813348314730301', urunAdi: 'Elektronik Ürün', adet: '10', kilo: '20', hacim: '0', fiyat: '$0.00', tarih: '12/04/2025 6:36' },
                       { fisNo: '27', seferNo: '28', sevkDurumu: 'Teslim Edildi', kapNo: '164', barkod: '334083346405533', urunAdi: 'Tekstil Ürünü', adet: '5', kilo: '15', hacim: '2', fiyat: '$25.00', tarih: '12/04/2025 7:15' },
-                      { fisNo: '27', seferNo: '28', sevkDurumu: 'Bekleyen', kapNo: '153', barkod: '813348314730503', urunAdi: 'Gıda Ürünü', adet: '8', kilo: '16', hacim: '0', fiyat: '$15.00', tarih: '12/04/2025 9:33' },
-                      { fisNo: '27', seferNo: '28', sevkDurumu: 'Bekleyen', kapNo: '154', barkod: '813348314730504', urunAdi: 'Kozmetik Ürün', adet: '9', kilo: '18', hacim: '1', fiyat: '$20.00', tarih: '12/04/2025 10:34' },
-                      { fisNo: '27', seferNo: '28', sevkDurumu: 'Bekleyen', kapNo: '155', barkod: '813348314731305', urunAdi: 'Ev Eşyası', adet: '10', kilo: '20', hacim: '2', fiyat: '$25.00', tarih: '12/04/2025 11:35' },
-                      { fisNo: '27', seferNo: '28', sevkDurumu: 'Bekleyen', kapNo: '156', barkod: '813348314731306', urunAdi: 'Kırtasiye', adet: '11', kilo: '22', hacim: '0', fiyat: '$30.00', tarih: '12/04/2025 12:36' },
-                      { fisNo: '27', seferNo: '28', sevkDurumu: 'Bekleyen', kapNo: '157', barkod: '813348314731307', urunAdi: 'Oyuncak', adet: '12', kilo: '24', hacim: '1', fiyat: '$35.00', tarih: '12/04/2025 13:37' },
-                      { fisNo: '27', seferNo: '28', sevkDurumu: 'Bekleyen', kapNo: '158', barkod: '813348314731308', urunAdi: 'Spor Malzemesi', adet: '13', kilo: '26', hacim: '2', fiyat: '$40.00', tarih: '12/04/2025 14:38' },
-                      { fisNo: '27', seferNo: '28', sevkDurumu: 'Bekleyen', kapNo: '159', barkod: '813348314731309', urunAdi: 'Kitap', adet: '14', kilo: '28', hacim: '0', fiyat: '$45.00', tarih: '12/04/2025 15:39' },
-                      { fisNo: '27', seferNo: '28', sevkDurumu: 'Bekleyen', kapNo: '160', barkod: '813348314731310', urunAdi: 'Müzik Aleti', adet: '15', kilo: '30', hacim: '1', fiyat: '$50.00', tarih: '12/04/2025 16:40' }
+                      { fisNo: '27', seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: '153', barkod: '813348314730503', urunAdi: 'Gıda Ürünü', adet: '8', kilo: '16', hacim: '0', fiyat: '$15.00', tarih: '12/04/2025 9:33' },
+                      { fisNo: '27', seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: '154', barkod: '813348314730504', urunAdi: 'Kozmetik Ürün', adet: '9', kilo: '18', hacim: '1', fiyat: '$20.00', tarih: '12/04/2025 10:34' },
+                      { fisNo: '27', seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: '155', barkod: '813348314731305', urunAdi: 'Ev Eşyası', adet: '10', kilo: '20', hacim: '2', fiyat: '$25.00', tarih: '12/04/2025 11:35' },
+                      { fisNo: '27', seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: '156', barkod: '813348314731306', urunAdi: 'Kırtasiye', adet: '11', kilo: '22', hacim: '0', fiyat: '$30.00', tarih: '12/04/2025 12:36' },
+                      { fisNo: '27', seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: '157', barkod: '813348314731307', urunAdi: 'Oyuncak', adet: '12', kilo: '24', hacim: '1', fiyat: '$35.00', tarih: '12/04/2025 13:37' },
+                      { fisNo: '27', seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: '158', barkod: '813348314731308', urunAdi: 'Spor Malzemesi', adet: '13', kilo: '26', hacim: '2', fiyat: '$40.00', tarih: '12/04/2025 14:38' },
+                      { fisNo: '27', seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: '159', barkod: '813348314731309', urunAdi: 'Kitap', adet: '14', kilo: '28', hacim: '0', fiyat: '$45.00', tarih: '12/04/2025 15:39' },
+                      { fisNo: '27', seferNo: '-', sevkDurumu: 'Bekleyen', kapNo: '160', barkod: '813348314731310', urunAdi: 'Müzik Aleti', adet: '15', kilo: '30', hacim: '1', fiyat: '$50.00', tarih: '12/04/2025 16:40' }
                     ].map((item, index) => (
                       <TableRow 
                         key={index}
@@ -1522,9 +1522,22 @@ const PendingPackagesList: React.FC = () => {
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
-                            {item.tarih}
-                          </Typography>
+                          <IconButton
+                            size="small"
+                            sx={{
+                              backgroundColor: '#f8f9fa',
+                              color: '#495057',
+                              '&:hover': {
+                                backgroundColor: '#e9ecef',
+                                color: '#343a40'
+                              },
+                              border: '1px solid #dee2e6',
+                              width: 28,
+                              height: 28
+                            }}
+                          >
+                            <QrCode sx={{ fontSize: 16 }} />
+                          </IconButton>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -1589,260 +1602,301 @@ const PendingPackagesList: React.FC = () => {
         </Dialog>
       )}
       
-      {/* Package Tracking Dialog */}
+      {/* Paket Takip Dialog'u */}
       {selectedPackage && (
-        <Dialog 
-          open={trackingOpen} 
-          onClose={handleCloseTracking} 
-          fullWidth 
+        <Dialog
+          open={trackingOpen}
+          onClose={handleCloseTracking}
           maxWidth="md"
+          fullWidth
           PaperProps={{
             sx: {
-              borderRadius: 3,
-              boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
-              background: '#ffffff',
-              overflow: 'hidden'
+              borderRadius: 2,
+              background: 'linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%)'
             }
           }}
         >
-          {/* Header */}
-          <DialogTitle sx={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white',
-            p: 3,
-            position: 'relative'
-          }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar sx={{ 
-                  backgroundColor: 'rgba(255,255,255,0.15)', 
-                  width: 40, 
-                  height: 40 
-                }}>
-                  <MyLocation sx={{ fontSize: 22 }} />
-                </Avatar>
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5, fontSize: '1.1rem' }}>
-                    Paket Takip Sistemi
-                  </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.8rem' }}>
-                    Fiş No: {selectedPackage.fisNo} | Kap No: {selectedPackage.kapNo}
-                  </Typography>
-                </Box>
-              </Box>
-              <IconButton 
-                onClick={handleCloseTracking}
-                sx={{ 
-                  color: 'white',
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' },
-                  width: 32,
-                  height: 32
-                }}
-              >
-                <Close sx={{ fontSize: 18 }} />
-              </IconButton>
+          <DialogTitle
+            sx={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              p: 2
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <LocalShipping sx={{ fontSize: 24 }} />
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Paket Takip Sistemi
+              </Typography>
             </Box>
+            <Typography variant="body2" sx={{ opacity: 0.9 }}>
+              Fiş No: {selectedPackage?.fisNo} | Kap No: {selectedPackage?.kapNo}
+            </Typography>
+            <IconButton
+              onClick={handleCloseTracking}
+              sx={{ color: 'white', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
+            >
+              <Close />
+            </IconButton>
           </DialogTitle>
 
-          <DialogContent sx={{ p: 0 }}>
-            {/* Package Info Card */}
-            <Box sx={{ p: 3, backgroundColor: '#f8f9fa', borderBottom: '1px solid #dee2e6' }}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
-                  <Card sx={{ borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-                    <CardContent sx={{ p: 2 }}>
-                      <Typography variant="subtitle2" sx={{ color: '#6c757d', mb: 1, fontSize: '0.75rem' }}>
-                        PAKET BİLGİLERİ
-                      </Typography>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="body2" sx={{ color: '#6c757d' }}>Ürün:</Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.urunAdi}</Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="body2" sx={{ color: '#6c757d' }}>Adet:</Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.adet}</Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="body2" sx={{ color: '#6c757d' }}>Ağırlık:</Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.kilo} kg</Typography>
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <Card sx={{ borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-                    <CardContent sx={{ p: 2 }}>
-                      <Typography variant="subtitle2" sx={{ color: '#6c757d', mb: 1, fontSize: '0.75rem' }}>
-                        DURUM BİLGİSİ
-                      </Typography>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="body2" sx={{ color: '#6c757d' }}>Durum:</Typography>
-                          <Chip 
-                            label={selectedPackage.sevkDurumu}
-                            size="small"
-                            sx={{
-                              backgroundColor: 
-                                selectedPackage.sevkDurumu === 'Gönderildi' ? '#e8f5e8' :
-                                selectedPackage.sevkDurumu === 'Teslim Edildi' ? '#e3f2fd' :
-                                '#ffebee',
-                              color: 
-                                selectedPackage.sevkDurumu === 'Gönderildi' ? '#2e7d32' :
-                                selectedPackage.sevkDurumu === 'Teslim Edildi' ? '#1976d2' :
-                                '#d32f2f',
-                              fontWeight: 600
-                            }}
-                          />
-                        </Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="body2" sx={{ color: '#6c757d' }}>Tarih:</Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.tarih}</Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="body2" sx={{ color: '#6c757d' }}>Fiyat:</Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#2e7d32' }}>{selectedPackage.fiyat}</Typography>
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
+          <DialogContent sx={{ p: 3 }}>
+            <Grid container spacing={3}>
+              {/* Paket Bilgileri */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ height: '100%', boxShadow: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 600 }}>
+                      PAKET BİLGİLERİ
+                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Fiş No:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.fisNo}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Sefer No:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.seferNo}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Kap No:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.kapNo}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Barkod:</Typography>
+                      <IconButton
+                        size="small"
+                        sx={{
+                          width: 28,
+                          height: 28,
+                          backgroundColor: '#f8f9fa',
+                          border: '1px solid #dee2e6',
+                          '&:hover': {
+                            backgroundColor: '#e9ecef'
+                          }
+                        }}
+                      >
+                        <QrCode sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Ürün:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.urun}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Adet:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.adet}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Kilo:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.kilo}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Hacim:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.hacim}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Fiyat:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#28a745' }}>{selectedPackage.fiyat}</Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
               </Grid>
-            </Box>
 
-            {/* Tracking Timeline */}
-            <Box sx={{ p: 3 }}>
-              <Typography variant="h6" sx={{ 
-                fontWeight: 600, 
-                mb: 3, 
-                color: '#495057',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1
-              }}>
-                <Timeline sx={{ color: '#495057' }} />
-                Paket Yolculuğu
-              </Typography>
-              
-              {/* Timeline Steps */}
-              <Box sx={{ position: 'relative', pl: 3 }}>
-                {/* Vertical Line */}
-                <Box sx={{
-                  position: 'absolute',
-                  left: '20px',
-                  top: '20px',
-                  bottom: '20px',
-                  width: '2px',
-                  backgroundColor: '#dee2e6'
-                }} />
-                
-                {/* Timeline Items */}
-                {[
-                  {
-                    title: 'Çıkış Noktası',
-                    location: 'Yiğit Kemal - Satıcı Şube',
-                    time: '12/04/2025 6:00',
-                    status: 'completed',
-                    icon: <Flag sx={{ fontSize: 18 }} />
-                  },
-                  {
-                    title: 'Kargo Merkezi',
-                    location: 'İstanbul Kargo Merkezi',
-                    time: '12/04/2025 8:30',
-                    status: selectedPackage.sevkDurumu === 'Bekleyen' ? 'current' : 'completed',
-                    icon: <Business sx={{ fontSize: 18 }} />
-                  },
-                  {
-                    title: 'Transit Merkezi',
-                    location: 'Ankara Transit Merkezi',
-                    time: selectedPackage.sevkDurumu === 'Bekleyen' ? 'Bekleniyor' : '12/04/2025 14:15',
-                    status: selectedPackage.sevkDurumu === 'Teslim Edildi' ? 'completed' : 
-                           selectedPackage.sevkDurumu === 'Gönderildi' ? 'current' : 'pending',
-                    icon: <LocalShipping sx={{ fontSize: 18 }} />
-                  },
-                  {
-                    title: 'Varış Noktası',
-                    location: 'İstanbul Şubesi - Teslim Noktası',
-                    time: selectedPackage.sevkDurumu === 'Teslim Edildi' ? '12/04/2025 18:45' : 'Bekleniyor',
-                    status: selectedPackage.sevkDurumu === 'Teslim Edildi' ? 'completed' : 'pending',
-                    icon: <CheckCircle sx={{ fontSize: 18 }} />
-                  }
-                ].map((step, index) => (
-                  <Box key={index} sx={{ 
-                    display: 'flex', 
-                    alignItems: 'flex-start', 
-                    mb: 3,
-                    position: 'relative'
-                  }}>
-                    {/* Timeline Dot */}
-                    <Box sx={{
-                      position: 'absolute',
-                      left: '-32px',
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '50%',
-                      backgroundColor: 
-                        step.status === 'completed' ? '#2e7d32' :
-                        step.status === 'current' ? '#1976d2' : '#dee2e6',
+              {/* Durum Bilgileri */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ height: '100%', boxShadow: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 600 }}>
+                      DURUM BİLGİSİ
+                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Durum:</Typography>
+                      <Chip
+                        label={selectedPackage.sevkDurumu}
+                        size="small"
+                        sx={{
+                          backgroundColor: 
+                            selectedPackage.sevkDurumu === 'Gönderildi' ? '#e8f5e8' :
+                            selectedPackage.sevkDurumu === 'Teslim Edildi' ? '#e3f2fd' :
+                            '#ffebee',
+                          color: 
+                            selectedPackage.sevkDurumu === 'Gönderildi' ? '#2e7d32' :
+                            selectedPackage.sevkDurumu === 'Teslim Edildi' ? '#1976d2' :
+                            '#d32f2f',
+                          fontWeight: 500,
+                          fontSize: '0.65rem',
+                          height: 20
+                        }}
+                      />
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Tarih:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.tarih}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Fiyat:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#28a745' }}>{selectedPackage.fiyat}</Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              {/* Paket Yolculuğu */}
+              <Grid item xs={12}>
+                <Card sx={{ boxShadow: 2 }}>
+                  <CardContent sx={{ p: 3 }}>
+                    <Typography variant="h6" sx={{ 
+                      fontWeight: 600, 
+                      mb: 3, 
+                      color: '#495057',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      color: step.status === 'pending' ? '#6c757d' : 'white',
-                      boxShadow: step.status !== 'pending' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
-                      border: step.status === 'current' ? '3px solid #bbdefb' : 'none'
+                      gap: 1
                     }}>
-                      {step.icon}
-                    </Box>
+                      <Timeline sx={{ color: '#495057' }} />
+                      Paket Yolculuğu
+                    </Typography>
                     
-                    {/* Content */}
-                    <Box sx={{ ml: 2, flex: 1 }}>
-                      <Typography variant="subtitle1" sx={{ 
-                        fontWeight: 600, 
-                        color: step.status === 'pending' ? '#6c757d' : '#2c3e50',
-                        mb: 0.5
+                    {/* Timeline Steps */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      {/* Çıkış Noktası */}
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+                        <Box sx={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: '50%',
+                          backgroundColor: '#2e7d32',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          mb: 1
+                        }}>
+                          <CheckCircle sx={{ color: 'white', fontSize: 20 }} />
+                        </Box>
+                        <Typography variant="body2" sx={{ fontWeight: 600, textAlign: 'center', mb: 0.5 }}>
+                          Çıkış Noktası
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#6c757d', textAlign: 'center', mb: 0.5 }}>
+                          Yiğit Kemal - Satıcı Şube
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#28a745', fontWeight: 500 }}>
+                          12/04/2025 8:45
+                        </Typography>
+                      </Box>
+
+                      {/* Bağlantı Çizgisi */}
+                      <Box sx={{
+                        height: '2px',
+                        flex: 2,
+                        backgroundColor: selectedPackage.sevkDurumu === 'Bekleyen' ? '#dee2e6' : '#2e7d32',
+                        position: 'relative'
                       }}>
-                        {step.title}
-                      </Typography>
-                      <Typography variant="body2" sx={{ 
-                        color: '#6c757d', 
-                        mb: 0.5,
-                        fontSize: '0.85rem'
-                      }}>
-                        {step.location}
-                      </Typography>
-                      <Typography variant="body2" sx={{ 
-                        color: step.status === 'pending' ? '#6c757d' : '#495057',
-                        fontSize: '0.8rem',
-                        fontWeight: 500
-                      }}>
-                        {step.time}
-                      </Typography>
+                        <LocalShipping sx={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          color: selectedPackage.sevkDurumu === 'Bekleyen' ? '#6c757d' : '#2e7d32',
+                          backgroundColor: 'white',
+                          padding: '4px',
+                          borderRadius: '50%',
+                          fontSize: 16
+                        }} />
+                      </Box>
+
+                      {/* Kargo Merkezi */}
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+                        <Box sx={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: '50%',
+                          backgroundColor: 
+                            selectedPackage.sevkDurumu === 'Bekleyen' ? '#dee2e6' :
+                            selectedPackage.sevkDurumu === 'Gönderildi' ? '#1976d2' : '#2e7d32',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          mb: 1
+                        }}>
+                          {selectedPackage.sevkDurumu === 'Bekleyen' ? (
+                            <Schedule sx={{ color: '#6c757d', fontSize: 20 }} />
+                          ) : selectedPackage.sevkDurumu === 'Gönderildi' ? (
+                            <LocalShipping sx={{ color: 'white', fontSize: 20 }} />
+                          ) : (
+                            <CheckCircle sx={{ color: 'white', fontSize: 20 }} />
+                          )}
+                        </Box>
+                        <Typography variant="body2" sx={{ fontWeight: 600, textAlign: 'center', mb: 0.5 }}>
+                          Kargo Merkezi
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#6c757d', textAlign: 'center', mb: 0.5 }}>
+                          Ankara Merkez Şube
+                        </Typography>
+                        <Typography variant="caption" sx={{ 
+                          color: selectedPackage.sevkDurumu === 'Bekleyen' ? '#6c757d' : '#28a745', 
+                          fontWeight: 500 
+                        }}>
+                          {selectedPackage.sevkDurumu === 'Bekleyen' ? 'Bekleniyor' : '12/04/2025 8:45'}
+                        </Typography>
+                      </Box>
                     </Box>
-                  </Box>
-                ))}
-              </Box>
-            </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              {/* Gönderen Bilgileri */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ height: '100%', boxShadow: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 600 }}>
+                      GÖNDEREN BİLGİLERİ
+                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Ad Soyad:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>Yiğit Kemal</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Şube:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>Satıcı Şube</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Telefon:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>+90 532 123 45 67</Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+              
+              {/* Teslim Alan Bilgileri */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ height: '100%', boxShadow: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 600 }}>
+                      TESLİM ALAN BİLGİLERİ
+                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Ad Soyad:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>Ahmet Durmaz</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Şube:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>İstanbul Şubesi</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" sx={{ color: '#6c757d' }}>Telefon:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>+90 555 987 65 43</Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
           </DialogContent>
 
-          {/* Action Buttons */}
-          <DialogActions sx={{ 
-            p: 3, 
-            backgroundColor: '#f8f9fa',
-            borderTop: '1px solid #dee2e6'
-          }}>
-            <Button 
-              onClick={handleCloseTracking}
-              variant="contained"
-              startIcon={<Close />}
-              sx={{
-                backgroundColor: '#495057',
-                '&:hover': {
-                  backgroundColor: '#343a40'
-                }
-              }}
-            >
+          <DialogActions>
+            <Button onClick={handleCloseTracking} variant="contained">
               Kapat
             </Button>
           </DialogActions>
