@@ -62,7 +62,7 @@ import {
   Menu as MenuIcon,
   FileDownload as ExportIcon,
   Print as PrintIcon,
-  FlashOn as QuickAddIcon,
+
   ShoppingCart as SalesIcon,
   Description as KargolarIcon,
   Person as PersonIcon,
@@ -2133,7 +2133,7 @@ const CustomersPage: React.FC = () => {
   
   // Yeni müşteri ve hızlı ekleme dialog'ları için state'ler
   const [newCustomerDialogOpen, setNewCustomerDialogOpen] = useState(false);
-  const [quickAddDialogOpen, setQuickAddDialogOpen] = useState(false);
+
   
   // Yeni müşteri dialog'unu açma fonksiyonu
   const handleNewCustomerOpen = () => {
@@ -2144,16 +2144,7 @@ const CustomersPage: React.FC = () => {
   const handleNewCustomerClose = () => {
     setNewCustomerDialogOpen(false);
   };
-  
-  // Hızlı ekleme dialog'unu açma fonksiyonu
-  const handleQuickAddOpen = () => {
-    setQuickAddDialogOpen(true);
-  };
-  
-  // Hızlı ekleme dialog'unu kapatma fonksiyonu
-  const handleQuickAddClose = () => {
-    setQuickAddDialogOpen(false);
-  };
+
   
   // Müşteri ekleme/düzenleme Dialog fonksiyonları
   const handleAddCustomer = () => {
@@ -2603,7 +2594,7 @@ const CustomersPage: React.FC = () => {
       
       {/* Renkli Kart Menüleri */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4}>
           <Card 
             onClick={handleCustomerFormOpen}
             sx={{
@@ -2631,37 +2622,9 @@ const CustomersPage: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
+
         
-        <Grid item xs={12} sm={6} md={3}>
-          <Card 
-            onClick={handleQuickAddOpen}
-            sx={{
-              background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-              color: 'white',
-              borderRadius: 3,
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                transform: 'translateY(-8px)',
-                boxShadow: '0 12px 40px rgba(240, 147, 251, 0.4)'
-              }
-            }}
-          >
-            <CardContent sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-              <QuickAddIcon sx={{ fontSize: 32, color: 'white' }} />
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5, color: 'white' }}>
-                  Hızlı Ekle
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.9, color: 'white' }}>
-                  Hızlı müşteri
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-        
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4}>
           <Card 
             onClick={handleImportOpen}
             sx={{
@@ -2690,7 +2653,7 @@ const CustomersPage: React.FC = () => {
           </Card>
         </Grid>
         
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4}>
           <Card 
             onClick={() => setMailDialogOpen(true)}
             sx={{
