@@ -736,21 +736,6 @@ const PendingPackagesList: React.FC = () => {
                         <span>Kodu</span>
                       </Tooltip>
                     </TableCell>
-                    <TableCell sx={{ minWidth: 120 }}>
-                      <Tooltip title="Satıcı Bilgisi" arrow>
-                        <span>Satıcı</span>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell sx={{ minWidth: 100 }}>
-                      <Tooltip title="Şube Adı" arrow>
-                        <span>Şube</span>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell sx={{ minWidth: 120 }}>
-                      <Tooltip title="Varış Yeri" arrow>
-                        <span>Varış</span>
-                      </Tooltip>
-                    </TableCell>
 
                     <TableCell sx={{ minWidth: 60 }}>
                       <Tooltip title="Araç Tipi" arrow>
@@ -833,34 +818,6 @@ const PendingPackagesList: React.FC = () => {
                             border: '1px solid #ffcc02'
                           }}
                         />
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Person sx={{ color: '#6c757d', fontSize: 18 }} />
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                            {pkg.satici}
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Chip 
-                          label={pkg.subeAdi} 
-                          size="small"
-                          sx={{
-                            backgroundColor: '#e8f5e8',
-                            color: '#2e7d32',
-                            fontWeight: 500,
-                            border: '1px solid #4caf50'
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <LocationOn sx={{ color: '#6c757d', fontSize: 18 }} />
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                            {pkg.varisYeri}
-                          </Typography>
-                        </Box>
                       </TableCell>
 
                       <TableCell>
@@ -952,6 +909,46 @@ const PendingPackagesList: React.FC = () => {
                   </Typography>
                   <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.75rem' }}>
                     Ahmet Durmaz TR-01 - Toplam 1 Paket
+                  </Typography>
+                </Box>
+              </Box>
+              
+              {/* Gönderen ve Teslim Alan Şube Bilgileri */}
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'flex-end',
+                gap: 0.5,
+                mr: 5
+              }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="body2" sx={{ 
+                    opacity: 0.8, 
+                    fontSize: '0.75rem',
+                    fontWeight: 500
+                  }}>
+                    Gönderen:
+                  </Typography>
+                  <Typography variant="body2" sx={{ 
+                    fontSize: '0.75rem',
+                    fontWeight: 600
+                  }}>
+                    Yiğit Kemal
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="body2" sx={{ 
+                    opacity: 0.8, 
+                    fontSize: '0.75rem',
+                    fontWeight: 500
+                  }}>
+                    Teslim Alan Şube:
+                  </Typography>
+                  <Typography variant="body2" sx={{ 
+                    fontSize: '0.75rem',
+                    fontWeight: 600
+                  }}>
+                    İstanbul Şubesi
                   </Typography>
                 </Box>
               </Box>
