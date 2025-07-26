@@ -908,7 +908,7 @@ const PendingPackagesList: React.FC = () => {
                     Paket Grup Detayları
                   </Typography>
                   <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.75rem' }}>
-                    Ahmet Durmaz TR-01 - Toplam 1 Paket
+                    Ahmet Durmaz TR-01
                   </Typography>
                 </Box>
               </Box>
