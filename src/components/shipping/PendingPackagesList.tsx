@@ -56,7 +56,13 @@ import {
   CheckCircle,
   Schedule,
   QrCode,
-  Numbers
+  Numbers,
+  Timeline,
+  RadioButtonChecked,
+  RadioButtonUnchecked,
+  ArrowForward,
+  MyLocation,
+  Flag
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { useNavigate } from 'react-router-dom';
@@ -166,6 +172,10 @@ const PendingPackagesList: React.FC = () => {
   const [selectedGroup, setSelectedGroup] = useState<IPackageGroup | null>(null);
   const [plugNoFilter, setPlugNoFilter] = useState('');
   const [showDepodaOnly, setShowDepodaOnly] = useState(false);
+  
+  // Tracking popup states
+  const [trackingOpen, setTrackingOpen] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState<any>(null);
 
   const handleExportToExcel = () => {
     try {
@@ -271,7 +281,16 @@ const PendingPackagesList: React.FC = () => {
   const handleCloseDetails = () => {
     setDetailsOpen(false);
     setSelectedGroup(null);
-    setShowDepodaOnly(false);
+  };
+  
+  const handleOpenTracking = (packageItem: any) => {
+    setSelectedPackage(packageItem);
+    setTrackingOpen(true);
+  };
+  
+  const handleCloseTracking = () => {
+    setTrackingOpen(false);
+    setSelectedPackage(null);
   };
 
   const handleOpenDepodaDetails = (group: IPackageGroup) => {
@@ -1434,6 +1453,7 @@ const PendingPackagesList: React.FC = () => {
                           <Chip 
                             label={item.sevkDurumu}
                             size="small"
+                            onClick={() => handleOpenTracking(item)}
                             sx={{
                               backgroundColor: 
                                 item.sevkDurumu === 'Gönderildi' ? '#e8f5e8' :
@@ -1445,7 +1465,12 @@ const PendingPackagesList: React.FC = () => {
                                 '#d32f2f',
                               fontWeight: 500,
                               fontSize: '0.65rem',
-                              height: 20
+                              height: 20,
+                              cursor: 'pointer',
+                              '&:hover': {
+                                opacity: 0.8,
+                                transform: 'scale(1.05)'
+                              }
                             }}
                           />
                         </TableCell>
@@ -1556,6 +1581,266 @@ const PendingPackagesList: React.FC = () => {
                   transform: 'translateY(-1px)'
                 },
                 transition: 'all 0.3s ease'
+              }}
+            >
+              Kapat
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+      
+      {/* Package Tracking Dialog */}
+      {selectedPackage && (
+        <Dialog 
+          open={trackingOpen} 
+          onClose={handleCloseTracking} 
+          fullWidth 
+          maxWidth="md"
+          PaperProps={{
+            sx: {
+              borderRadius: 3,
+              boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+              background: '#ffffff',
+              overflow: 'hidden'
+            }
+          }}
+        >
+          {/* Header */}
+          <DialogTitle sx={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            p: 3,
+            position: 'relative'
+          }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Avatar sx={{ 
+                  backgroundColor: 'rgba(255,255,255,0.15)', 
+                  width: 40, 
+                  height: 40 
+                }}>
+                  <MyLocation sx={{ fontSize: 22 }} />
+                </Avatar>
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5, fontSize: '1.1rem' }}>
+                    Paket Takip Sistemi
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.8rem' }}>
+                    Fiş No: {selectedPackage.fisNo} | Kap No: {selectedPackage.kapNo}
+                  </Typography>
+                </Box>
+              </Box>
+              <IconButton 
+                onClick={handleCloseTracking}
+                sx={{ 
+                  color: 'white',
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' },
+                  width: 32,
+                  height: 32
+                }}
+              >
+                <Close sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Box>
+          </DialogTitle>
+
+          <DialogContent sx={{ p: 0 }}>
+            {/* Package Info Card */}
+            <Box sx={{ p: 3, backgroundColor: '#f8f9fa', borderBottom: '1px solid #dee2e6' }}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <Card sx={{ borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                    <CardContent sx={{ p: 2 }}>
+                      <Typography variant="subtitle2" sx={{ color: '#6c757d', mb: 1, fontSize: '0.75rem' }}>
+                        PAKET BİLGİLERİ
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Typography variant="body2" sx={{ color: '#6c757d' }}>Ürün:</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.urunAdi}</Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Typography variant="body2" sx={{ color: '#6c757d' }}>Adet:</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.adet}</Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Typography variant="body2" sx={{ color: '#6c757d' }}>Ağırlık:</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.kilo} kg</Typography>
+                        </Box>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Card sx={{ borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                    <CardContent sx={{ p: 2 }}>
+                      <Typography variant="subtitle2" sx={{ color: '#6c757d', mb: 1, fontSize: '0.75rem' }}>
+                        DURUM BİLGİSİ
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Typography variant="body2" sx={{ color: '#6c757d' }}>Durum:</Typography>
+                          <Chip 
+                            label={selectedPackage.sevkDurumu}
+                            size="small"
+                            sx={{
+                              backgroundColor: 
+                                selectedPackage.sevkDurumu === 'Gönderildi' ? '#e8f5e8' :
+                                selectedPackage.sevkDurumu === 'Teslim Edildi' ? '#e3f2fd' :
+                                '#ffebee',
+                              color: 
+                                selectedPackage.sevkDurumu === 'Gönderildi' ? '#2e7d32' :
+                                selectedPackage.sevkDurumu === 'Teslim Edildi' ? '#1976d2' :
+                                '#d32f2f',
+                              fontWeight: 600
+                            }}
+                          />
+                        </Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Typography variant="body2" sx={{ color: '#6c757d' }}>Tarih:</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedPackage.tarih}</Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Typography variant="body2" sx={{ color: '#6c757d' }}>Fiyat:</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#2e7d32' }}>{selectedPackage.fiyat}</Typography>
+                        </Box>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grid>
+            </Box>
+
+            {/* Tracking Timeline */}
+            <Box sx={{ p: 3 }}>
+              <Typography variant="h6" sx={{ 
+                fontWeight: 600, 
+                mb: 3, 
+                color: '#495057',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}>
+                <Timeline sx={{ color: '#495057' }} />
+                Paket Yolculuğu
+              </Typography>
+              
+              {/* Timeline Steps */}
+              <Box sx={{ position: 'relative', pl: 3 }}>
+                {/* Vertical Line */}
+                <Box sx={{
+                  position: 'absolute',
+                  left: '20px',
+                  top: '20px',
+                  bottom: '20px',
+                  width: '2px',
+                  backgroundColor: '#dee2e6'
+                }} />
+                
+                {/* Timeline Items */}
+                {[
+                  {
+                    title: 'Çıkış Noktası',
+                    location: 'Yiğit Kemal - Satıcı Şube',
+                    time: '12/04/2025 6:00',
+                    status: 'completed',
+                    icon: <Flag sx={{ fontSize: 18 }} />
+                  },
+                  {
+                    title: 'Kargo Merkezi',
+                    location: 'İstanbul Kargo Merkezi',
+                    time: '12/04/2025 8:30',
+                    status: selectedPackage.sevkDurumu === 'Bekleyen' ? 'current' : 'completed',
+                    icon: <Business sx={{ fontSize: 18 }} />
+                  },
+                  {
+                    title: 'Transit Merkezi',
+                    location: 'Ankara Transit Merkezi',
+                    time: selectedPackage.sevkDurumu === 'Bekleyen' ? 'Bekleniyor' : '12/04/2025 14:15',
+                    status: selectedPackage.sevkDurumu === 'Teslim Edildi' ? 'completed' : 
+                           selectedPackage.sevkDurumu === 'Gönderildi' ? 'current' : 'pending',
+                    icon: <LocalShipping sx={{ fontSize: 18 }} />
+                  },
+                  {
+                    title: 'Varış Noktası',
+                    location: 'İstanbul Şubesi - Teslim Noktası',
+                    time: selectedPackage.sevkDurumu === 'Teslim Edildi' ? '12/04/2025 18:45' : 'Bekleniyor',
+                    status: selectedPackage.sevkDurumu === 'Teslim Edildi' ? 'completed' : 'pending',
+                    icon: <CheckCircle sx={{ fontSize: 18 }} />
+                  }
+                ].map((step, index) => (
+                  <Box key={index} sx={{ 
+                    display: 'flex', 
+                    alignItems: 'flex-start', 
+                    mb: 3,
+                    position: 'relative'
+                  }}>
+                    {/* Timeline Dot */}
+                    <Box sx={{
+                      position: 'absolute',
+                      left: '-32px',
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      backgroundColor: 
+                        step.status === 'completed' ? '#2e7d32' :
+                        step.status === 'current' ? '#1976d2' : '#dee2e6',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: step.status === 'pending' ? '#6c757d' : 'white',
+                      boxShadow: step.status !== 'pending' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
+                      border: step.status === 'current' ? '3px solid #bbdefb' : 'none'
+                    }}>
+                      {step.icon}
+                    </Box>
+                    
+                    {/* Content */}
+                    <Box sx={{ ml: 2, flex: 1 }}>
+                      <Typography variant="subtitle1" sx={{ 
+                        fontWeight: 600, 
+                        color: step.status === 'pending' ? '#6c757d' : '#2c3e50',
+                        mb: 0.5
+                      }}>
+                        {step.title}
+                      </Typography>
+                      <Typography variant="body2" sx={{ 
+                        color: '#6c757d', 
+                        mb: 0.5,
+                        fontSize: '0.85rem'
+                      }}>
+                        {step.location}
+                      </Typography>
+                      <Typography variant="body2" sx={{ 
+                        color: step.status === 'pending' ? '#6c757d' : '#495057',
+                        fontSize: '0.8rem',
+                        fontWeight: 500
+                      }}>
+                        {step.time}
+                      </Typography>
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          </DialogContent>
+
+          {/* Action Buttons */}
+          <DialogActions sx={{ 
+            p: 3, 
+            backgroundColor: '#f8f9fa',
+            borderTop: '1px solid #dee2e6'
+          }}>
+            <Button 
+              onClick={handleCloseTracking}
+              variant="contained"
+              startIcon={<Close />}
+              sx={{
+                backgroundColor: '#495057',
+                '&:hover': {
+                  backgroundColor: '#343a40'
+                }
               }}
             >
               Kapat
