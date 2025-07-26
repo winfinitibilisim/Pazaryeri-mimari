@@ -736,6 +736,21 @@ const PendingPackagesList: React.FC = () => {
                         <span>Kodu</span>
                       </Tooltip>
                     </TableCell>
+                    <TableCell sx={{ minWidth: 120 }}>
+                      <Tooltip title="Satıcı Bilgisi" arrow>
+                        <span>Satıcı</span>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell sx={{ minWidth: 100 }}>
+                      <Tooltip title="Şube Adı" arrow>
+                        <span>Şube</span>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell sx={{ minWidth: 120 }}>
+                      <Tooltip title="Varış Yeri" arrow>
+                        <span>Varış</span>
+                      </Tooltip>
+                    </TableCell>
 
                     <TableCell sx={{ minWidth: 60 }}>
                       <Tooltip title="Araç Tipi" arrow>
@@ -818,6 +833,34 @@ const PendingPackagesList: React.FC = () => {
                             border: '1px solid #ffcc02'
                           }}
                         />
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Person sx={{ color: '#6c757d', fontSize: 18 }} />
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            {pkg.satici}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Chip 
+                          label={pkg.subeAdi} 
+                          size="small"
+                          sx={{
+                            backgroundColor: '#e8f5e8',
+                            color: '#2e7d32',
+                            fontWeight: 500,
+                            border: '1px solid #4caf50'
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <LocationOn sx={{ color: '#6c757d', fontSize: 18 }} />
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            {pkg.varisYeri}
+                          </Typography>
+                        </Box>
                       </TableCell>
 
                       <TableCell>
