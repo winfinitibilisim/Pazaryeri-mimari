@@ -1562,9 +1562,17 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
   };
 
   return (
-    <Box sx={{ display: 'flex', height: 'calc(100% - 64px)' }}>
+    <Box sx={{ display: 'flex', height: 'calc(100% - 64px)', flexDirection: { xs: 'column', md: 'row' } }}>
       {/* Sol Sidebar */}
-      <Box sx={{ width: { xs: '100%', md: '280px' }, bgcolor: '#f8f9fa', borderRight: '1px solid #e9ecef', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ 
+        width: { xs: '100%', md: '280px' }, 
+        minHeight: { xs: 'auto', md: '100%' },
+        bgcolor: '#f8f9fa', 
+        borderRight: { xs: 'none', md: '1px solid #e9ecef' },
+        borderBottom: { xs: '1px solid #e9ecef', md: 'none' },
+        display: 'flex', 
+        flexDirection: 'column' 
+      }}>
         <Box sx={{ p: 2, borderBottom: '1px solid #e9ecef' }}>
           <TextField
             fullWidth
@@ -1580,31 +1588,58 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
           />
         </Box>
         
-        <Box sx={{ flex: 1, overflow: 'auto', p: 1 }}>
+        <Box sx={{ 
+          flex: 1, 
+          overflow: 'auto', 
+          p: 1,
+          display: { xs: 'flex', md: 'block' },
+          flexDirection: { xs: 'row', md: 'column' },
+          gap: { xs: 1, md: 0 },
+          overflowX: { xs: 'auto', md: 'visible' },
+          overflowY: { xs: 'visible', md: 'auto' },
+          '&::-webkit-scrollbar': {
+            height: { xs: '4px', md: '8px' },
+            width: { xs: '4px', md: '8px' }
+          },
+          '&::-webkit-scrollbar-track': {
+            background: '#f1f1f1',
+            borderRadius: '4px'
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: '#c1c1c1',
+            borderRadius: '4px',
+            '&:hover': {
+              background: '#a8a8a8'
+            }
+          }
+        }}>
           {categories.map((category) => (
             <Box
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
               sx={{
-                p: 1.5,
-                mb: 0.5,
+                p: { xs: 1, md: 1.5 },
+                mb: { xs: 0, md: 0.5 },
+                mr: { xs: 0.5, md: 0 },
                 borderRadius: 2,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 2,
+                minWidth: { xs: '140px', md: 'auto' },
+                whiteSpace: { xs: 'nowrap', md: 'normal' },
                 bgcolor: selectedCategory === category.id ? '#667eea' : 'transparent',
                 color: selectedCategory === category.id ? 'white' : '#495057',
                 fontWeight: selectedCategory === category.id ? 600 : 400,
                 transition: 'all 0.2s ease',
                 '&:hover': {
                   bgcolor: selectedCategory === category.id ? '#667eea' : '#e9ecef',
-                  transform: 'translateX(4px)'
+                  transform: { xs: 'translateY(-2px)', md: 'translateX(4px)' }
                 }
               }}
             >
-              <Box sx={{ fontSize: '18px' }}>{category.icon}</Box>
-              <Typography variant="body2" sx={{ fontWeight: 'inherit' }}>
+              <Box sx={{ fontSize: { xs: '16px', md: '18px' } }}>{category.icon}</Box>
+              <Typography variant="body2" sx={{ fontWeight: 'inherit', fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
                 {category.label}
               </Typography>
             </Box>
@@ -2583,17 +2618,16 @@ const CustomersPage: React.FC = () => {
               }
             }}
           >
-            <CardContent sx={{ p: 3, textAlign: 'center' }}>
-              <PersonAddIcon sx={{ fontSize: 40, mb: 2 }} />
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                Yeni
-              </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                Müşteri
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Müşteri ekle
-              </Typography>
+            <CardContent sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+              <PersonAddIcon sx={{ fontSize: 32, color: 'white' }} />
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5, color: 'white' }}>
+                  Yeni Müşteri
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9, color: 'white' }}>
+                  Müşteri ekle
+                </Typography>
+              </Box>
             </CardContent>
           </Card>
         </Grid>
@@ -2613,14 +2647,16 @@ const CustomersPage: React.FC = () => {
               }
             }}
           >
-            <CardContent sx={{ p: 3, textAlign: 'center' }}>
-              <QuickAddIcon sx={{ fontSize: 40, mb: 2 }} />
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                Hızlı Ekle
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Hızlı müşteri
-              </Typography>
+            <CardContent sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+              <QuickAddIcon sx={{ fontSize: 32, color: 'white' }} />
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5, color: 'white' }}>
+                  Hızlı Ekle
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9, color: 'white' }}>
+                  Hızlı müşteri
+                </Typography>
+              </Box>
             </CardContent>
           </Card>
         </Grid>
@@ -2640,14 +2676,16 @@ const CustomersPage: React.FC = () => {
               }
             }}
           >
-            <CardContent sx={{ p: 3, textAlign: 'center' }}>
-              <CloudUploadIcon sx={{ fontSize: 40, mb: 2 }} />
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                İçe Aktar
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Excel'den aktar
-              </Typography>
+            <CardContent sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+              <CloudUploadIcon sx={{ fontSize: 32, color: 'white' }} />
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5, color: 'white' }}>
+                  İçe Aktar
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9, color: 'white' }}>
+                  Excel'den aktar
+                </Typography>
+              </Box>
             </CardContent>
           </Card>
         </Grid>
@@ -2667,17 +2705,16 @@ const CustomersPage: React.FC = () => {
               }
             }}
           >
-            <CardContent sx={{ p: 3, textAlign: 'center' }}>
-              <EmailIcon sx={{ fontSize: 40, mb: 2 }} />
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                Mail
-              </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                Gönder
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Toplu mail
-              </Typography>
+            <CardContent sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+              <EmailIcon sx={{ fontSize: 32, color: 'white' }} />
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5, color: 'white' }}>
+                  Mail Gönder
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9, color: 'white' }}>
+                  Toplu mail
+                </Typography>
+              </Box>
             </CardContent>
           </Card>
         </Grid>
@@ -3493,10 +3530,13 @@ const CustomersPage: React.FC = () => {
         onClose={handleCustomerFormClose}
         maxWidth="lg"
         fullWidth
+        fullScreen={window.innerWidth < 768}
         sx={{
           '& .MuiDialog-paper': {
-            height: '80vh',
-            maxHeight: '800px'
+            height: { xs: '100vh', md: '85vh' },
+            maxHeight: { xs: '100vh', md: '900px' },
+            borderRadius: { xs: 0, md: 3 },
+            margin: { xs: 0, md: 2 }
           }
         }}
       >
