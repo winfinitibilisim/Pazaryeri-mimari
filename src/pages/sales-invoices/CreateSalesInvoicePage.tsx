@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useForm, Controller, useFieldArray, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -59,6 +59,7 @@ interface InvoiceItem {
 }
 
 interface IFormInputs {
+  invoiceNumber?: string;
   customerId: Customer | null;
   invoiceDate: Date | null;
   dueDate: Date | null;
@@ -89,6 +90,7 @@ interface ItemFieldsVisibility {
 
 // --- VALIDATION SCHEMA ---
 const validationSchema: yup.ObjectSchema<IFormInputs> = yup.object().shape({
+    invoiceNumber: yup.string().optional(),
     customerId: yup.mixed<Customer>().nullable().required('Müşteri seçimi zorunludur'),
     invoiceDate: yup.date().nullable().required('Fatura tarihi zorunludur'),
     dueDate: yup.date().nullable().required('Vade tarihi zorunludur'),
@@ -171,6 +173,7 @@ const CreateSalesInvoicePage: React.FC = () => {
   const { control, handleSubmit, watch, setValue, formState: { errors }, getValues } = useForm<IFormInputs>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
+      invoiceNumber: '',
       customerId: null,
       invoiceDate: new Date(),
       dueDate: new Date(),
@@ -190,6 +193,43 @@ const CreateSalesInvoicePage: React.FC = () => {
     control,
     name: 'items',
   });
+
+  // Dialog'dan gelen verileri localStorage'dan oku ve form'a doldur
+  useEffect(() => {
+    const savedInvoiceData = localStorage.getItem('newInvoiceData');
+    if (savedInvoiceData) {
+      try {
+        const invoiceData = JSON.parse(savedInvoiceData);
+        
+        // Form alanlarını doldur
+        if (invoiceData.invoiceNumber) {
+          setValue('invoiceNumber', invoiceData.invoiceNumber);
+        }
+        if (invoiceData.invoiceDate) {
+          setValue('invoiceDate', new Date(invoiceData.invoiceDate));
+        }
+        if (invoiceData.dueDate) {
+          setValue('dueDate', new Date(invoiceData.dueDate));
+        }
+        if (invoiceData.customerName) {
+          // Müşteri adından geçici bir customer objesi oluştur
+          const tempCustomer: Customer = {
+            id: 999, // Geçici ID
+            label: invoiceData.customerName,
+            address: '',
+            taxOffice: '',
+            taxNo: ''
+          };
+          setValue('customerId', tempCustomer);
+        }
+        
+        // localStorage'ı temizle
+        localStorage.removeItem('newInvoiceData');
+      } catch (error) {
+        console.error('Dialog verilerini okurken hata:', error);
+      }
+    }
+  }, [setValue]);
 
   const watchedItems = watch('items');
   const stopajRateForm = watch('stopajRate');
@@ -530,6 +570,26 @@ const CreateSalesInvoicePage: React.FC = () => {
                 </Typography>
                 
                 <Grid container spacing={3}>
+                  <Grid item xs={12}>
+                    <Controller
+                      name="invoiceNumber"
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          fullWidth
+                          label="Fatura Numarası"
+                          placeholder="SATIS-2024-001"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '12px'
+                            }
+                          }}
+                        />
+                      )}
+                    />
+                  </Grid>
+                  
                   <Grid item xs={12} sm={6}>
                     <Controller
                       name="invoiceDate"
