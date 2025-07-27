@@ -57,6 +57,7 @@ import SalesInvoicesListPage from './pages/sales-invoices/SalesInvoicesListPage'
 import SalesInvoiceDetailPage from './pages/sales-invoices/SalesInvoiceDetailPage';
 import EditSalesInvoicePage from './pages/sales-invoices/EditSalesInvoicePage';
 import CreateSalesInvoicePage from './pages/sales-invoices/CreateSalesInvoicePage';
+import ViewSalesInvoicePage from './pages/sales-invoices/ViewSalesInvoicePage';
 import CreateReturnInvoicePage from './pages/sales-invoices/CreateReturnInvoicePage';
 import PurchaseInvoiceDetailPage from './pages/purchase-invoices/PurchaseInvoiceDetailPage';
 
@@ -216,9 +217,9 @@ const AppWithLanguage = () => {
         { path: 'purchase-invoices/new', element: <CreatePurchaseInvoicePage /> },
 
         { path: 'sales-invoices', element: <SalesInvoicesListPage /> },
-        { path: 'sales-invoices/new', element: <CreateSalesInvoicePage /> },
-        { path: 'sales-invoices/:id', element: <SalesInvoiceDetailPage /> },
-        { path: 'sales-invoices/:id/edit', element: <EditSalesInvoicePage /> },
+        { path: 'sales-invoices/create', element: <CreateSalesInvoicePage /> },
+        { path: 'sales-invoices/view/:id', element: <ViewSalesInvoicePage /> },
+        { path: 'sales-invoices/edit/:id', element: <EditSalesInvoicePage /> },
         { path: 'sales-invoices/create-return', element: <CreateReturnInvoicePage /> },
         { path: 'draft-invoices', element: <DraftInvoicesPage /> },
         { path: 'draft-invoices/:id', element: <DraftInvoiceDetailPage /> },

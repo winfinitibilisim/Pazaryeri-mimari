@@ -106,7 +106,7 @@ const SalesInvoicesListPage: React.FC = () => {
       {/* Başlık ve Butonlar */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#2c3e50' }}>
-          Alış Faturaları
+          Satış Faturaları
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           <Button 
@@ -262,7 +262,7 @@ const SalesInvoicesListPage: React.FC = () => {
                     </TableCell>
                     <TableCell sx={{ textAlign: 'center' }}>
                       <IconButton 
-                        onClick={() => navigate(`/purchase-invoices/${invoice.id}`)} 
+                        onClick={() => navigate(`/sales-invoices/view/${invoice.id}`)} 
                         size="small"
                         sx={{
                           backgroundColor: '#e3f2fd',
