@@ -398,9 +398,35 @@ const CreateReturnInvoicePage: React.FC = () => {
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
-      <Typography variant="h4" gutterBottom sx={{ mb: 3 }}>
-        Yeni İade Faturası Oluştur
-      </Typography>
+      <Box sx={{ 
+        mb: 4, 
+        textAlign: 'center',
+        background: 'linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%)',
+        borderRadius: '16px',
+        p: 3,
+        border: '1px solid #e0e0e0'
+      }}>
+        <Typography 
+          variant="h3" 
+          sx={{ 
+            fontWeight: 'bold',
+            color: '#d32f2f',
+            mb: 1,
+            textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          }}
+        >
+          🔄 Yeni İade Faturası Oluştur
+        </Typography>
+        <Typography 
+          variant="h6" 
+          sx={{ 
+            color: '#666',
+            fontWeight: 'normal'
+          }}
+        >
+          İade işlemlerinizi hızlı ve kolay bir şekilde gerçekleştirin
+        </Typography>
+      </Box>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* Fatura Bilgileri */}
