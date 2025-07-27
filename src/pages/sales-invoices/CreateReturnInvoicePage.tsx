@@ -398,35 +398,17 @@ const CreateReturnInvoicePage: React.FC = () => {
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
-      <Box sx={{ 
-        mb: 4, 
-        textAlign: 'center',
-        background: 'linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%)',
-        borderRadius: '16px',
-        p: 3,
-        border: '1px solid #e0e0e0'
-      }}>
-        <Typography 
-          variant="h3" 
-          sx={{ 
-            fontWeight: 'bold',
-            color: '#d32f2f',
-            mb: 1,
-            textShadow: '0 2px 4px rgba(0,0,0,0.1)'
-          }}
-        >
-          🔄 Yeni İade Faturası Oluştur
-        </Typography>
-        <Typography 
-          variant="h6" 
-          sx={{ 
-            color: '#666',
-            fontWeight: 'normal'
-          }}
-        >
-          İade işlemlerinizi hızlı ve kolay bir şekilde gerçekleştirin
-        </Typography>
-      </Box>
+      <Typography 
+        variant="h4" 
+        sx={{ 
+          fontWeight: 'bold',
+          color: '#333',
+          mb: 3,
+          fontSize: '1.75rem'
+        }}
+      >
+        Yeni İade Faturası Oluştur
+      </Typography>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* Fatura Bilgileri */}
@@ -458,13 +440,13 @@ const CreateReturnInvoicePage: React.FC = () => {
 
         <Box sx={{ p: { xs: 3, md: 4 } }}>
           {/* İade Faturası Özel Alanları */}
-          <Grid container spacing={4} sx={{ mb: 4 }}>
+          <Grid container spacing={3} sx={{ mb: 3 }}>
             <Grid item xs={12}>
               <Paper 
                 elevation={2} 
                 sx={{ 
-                  p: 3, 
-                  borderRadius: '16px',
+                  p: 2.5, 
+                  borderRadius: '12px',
                   background: 'linear-gradient(135deg, #ffebee 0%, #fce4ec 100%)',
                   border: '1px solid #f8bbd9'
                 }}
@@ -474,7 +456,7 @@ const CreateReturnInvoicePage: React.FC = () => {
                   sx={{ 
                     color: '#d32f2f', 
                     fontWeight: 'bold', 
-                    mb: 3,
+                    mb: 2,
                     display: 'flex',
                     alignItems: 'center',
                     '&:before': {
@@ -490,7 +472,7 @@ const CreateReturnInvoicePage: React.FC = () => {
                   🔄 İade Faturası Bilgileri
                 </Typography>
                 
-                <Grid container spacing={3}>
+                <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <Controller
                       name="originalInvoiceNo"
@@ -577,7 +559,7 @@ const CreateReturnInvoicePage: React.FC = () => {
             </Grid>
           </Grid>
 
-          <Grid container spacing={4}>
+          <Grid container spacing={3}>
             {/* Sol Kolon - Müşteri Bilgileri */}
             <Grid item xs={12} lg={6}>
               <Box sx={{ mb: 3 }}>
