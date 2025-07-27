@@ -169,7 +169,7 @@ const EditSalesInvoicePage: React.FC = () => {
   };
 
   const { control, handleSubmit, watch, setValue, formState: { errors }, getValues } = useForm<IFormInputs>({
-    resolver: yupResolver(validationSchema),
+    resolver: yupResolver(validationSchema) as any,
     defaultValues: {
       customerId: null,
       invoiceDate: new Date(),
@@ -536,12 +536,15 @@ const EditSalesInvoicePage: React.FC = () => {
                       control={control}
                       render={({ field }) => (
                         <DatePicker 
-                          {...field} 
+                          value={field.value}
+                          onChange={field.onChange}
                           label="Fatura Tarihi" 
                           renderInput={(params) => (
                             <TextField 
                               {...params} 
                               fullWidth 
+                              error={!!errors.invoiceDate}
+                              helperText={errors.invoiceDate?.message}
                               sx={{
                                 '& .MuiOutlinedInput-root': {
                                   borderRadius: '12px'
@@ -560,12 +563,15 @@ const EditSalesInvoicePage: React.FC = () => {
                       control={control}
                       render={({ field }) => (
                         <DatePicker 
-                          {...field} 
+                          value={field.value}
+                          onChange={field.onChange}
                           label="Vade Tarihi" 
                           renderInput={(params) => (
                             <TextField 
                               {...params} 
                               fullWidth 
+                              error={!!errors.dueDate}
+                              helperText={errors.dueDate?.message}
                               sx={{
                                 '& .MuiOutlinedInput-root': {
                                   borderRadius: '12px'
