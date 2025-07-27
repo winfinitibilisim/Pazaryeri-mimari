@@ -13,21 +13,21 @@ const Footer: React.FC = () => {
     <Box
       component="footer"
       sx={{
-        py: 3,
-        px: 2,
+        py: 2,
+        px: 1,
         mt: 'auto',
         backgroundColor: colors.grey100,
         borderTop: `1px solid ${colors.grey300}`,
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="md">
         <Box
           sx={{
             display: 'flex',
             flexDirection: { xs: 'column', md: 'row' },
             justifyContent: 'space-between',
             alignItems: { xs: 'center', md: 'flex-start' },
-            mb: 2,
+            mb: 1.5,
           }}
         >
           <Box sx={{ mb: { xs: 2, md: 0 } }}>
@@ -43,7 +43,7 @@ const Footer: React.FC = () => {
             sx={{
               display: 'flex',
               flexDirection: { xs: 'column', sm: 'row' },
-              gap: { xs: 2, sm: 4 },
+              gap: { xs: 1.5, sm: 3 },
               textAlign: { xs: 'center', sm: 'left' },
             }}
           >
@@ -79,7 +79,7 @@ const Footer: React.FC = () => {
           </Box>
         </Box>
         
-        <Divider sx={{ my: 2 }} />
+        <Divider sx={{ my: 1.5 }} />
         
         <Box
           sx={{

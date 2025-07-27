@@ -1,10 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useReactToPrint } from 'react-to-print';
-
-import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import * as XLSX from 'xlsx';
 import {
   Box,
   Typography,
@@ -17,8 +13,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Tooltip,
-  IconButton,
   Chip,
   Dialog,
   DialogTitle,
@@ -30,10 +24,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  TextFieldProps,
-  useTheme,
-  useMediaQuery,
-  Collapse,
   Tabs,
   Tab,
   List,
@@ -42,59 +32,108 @@ import {
   Avatar,
   ListItemText,
   Divider,
+  useTheme,
+  useMediaQuery,
+  Tooltip,
+  IconButton,
   Stack
 } from '@mui/material';
-import { SelectChangeEvent } from '@mui/material/Select';
 import {
-  Payment as PaymentIcon,
-  Edit as EditIcon,
-  Cancel as CancelIcon,
-  Print as PrintIcon,
-  FileDownload as FileDownloadIcon,
-  Visibility as VisibilityIcon,
-  Delete as DeleteIcon,
-  Close as CloseIcon,
-  Check as CheckIcon,
-  Search as SearchIcon,
-  FilterList as FilterListIcon,
-  ReceiptLong as ReceiptIcon,
-  History as HistoryIcon,
-  Description as DescriptionIcon,
-  CloudUpload as CloudUploadIcon,
-  Send as SendIcon,
-  AttachFile as AttachFileIcon
+  Edit,
+  Delete,
+  Print,
+  Send,
+  CloudUpload,
+  GetApp,
+  DeleteOutline,
+  Close,
+  Payment,
+  Email,
+  AttachFile,
+  Receipt,
+  History,
+  Description
 } from '@mui/icons-material';
-import ExportButton from '../../components/common/ExportButton';
-import PrintButton from '../../components/common/PrintButton';
 import { useParams, useNavigate } from 'react-router-dom';
+import PrintButton from '../../components/common/PrintButton';
 
-// Mock data for a single sales invoice
-const salesInvoice = {
-  id: 'INV-2024-001',
-  customer: 'Ahmet Yılmaz',
+// Mock data for purchase invoice
+const mockInvoiceData = {
+  id: 'ALIS-2024-001',
+  invoiceNumber: 'ALIS-2024-001',
   invoiceDate: '2024-06-15',
   dueDate: '2024-07-15',
-  status: 'Ödendi',
+  totalAmount: 3600.00,
+  total: 3600.00,
   subTotal: 3000.00,
   vat: 600.00,
-  total: 3600.00,
+  status: 'Ödendi',
+  supplier: {
+    name: 'Teknoloji Tedarikçisi A.Ş.',
+    address: 'Atatürk Cad. No:123',
+    city: 'İstanbul',
+    phone: '+90 212 555 0123',
+    email: 'info@tedarikci.com'
+  },
+  company: {
+    name: 'WINFINITI',
+    address: 'Maslak Mahallesi, Büyükdere Cad. No:255',
+    city: 'İstanbul',
+    phone: '+90 212 555 0100',
+    email: 'info@winfiniti.com'
+  },
   items: [
-    { id: 1, product: 'Web Tasarım Hizmeti', quantity: 1, unitPrice: 2000.00, total: 2000.00 },
-    { id: 2, product: 'Logo Tasarımı', quantity: 1, unitPrice: 1000.00, total: 1000.00 },
+    {
+      id: 1,
+      product: 'Laptop Bilgisayar',
+      description: 'Dell Latitude 5520, Intel i7, 16GB RAM',
+      hours: 0,
+      quantity: 2,
+      unitPrice: 1500.00,
+      total: 3000.00
+    },
+    {
+      id: 2,
+      product: 'Yazılım Lisansı',
+      description: 'Microsoft Office 365 Business Premium',
+      hours: 0,
+      quantity: 1,
+      unitPrice: 600.00,
+      total: 600.00
+    }
   ],
+  subtotal: 3000.00,
+  discount: 0.00,
+  tax: 600.00,
+  note: 'Tedarikçi faturası. Ödeme 30 gün vadeli olarak gerçekleştirilecektir.',
+  customer: {
+    name: 'Teknoloji Tedarikçisi A.Ş.',
+    address: 'Atatürk Cad. No:123',
+    city: 'İstanbul',
+    phone: '+90 212 555 0123',
+    email: 'info@tedarikci.com'
+  },
   paymentHistory: [
-    { id: 'PAY-001', date: '2024-06-20', amount: 3600.00, method: 'Havale/EFT' },
-  ],
+    {
+      id: 1,
+      date: '2024-06-20',
+      amount: 1800.00,
+      method: 'Banka Havalesi',
+      description: 'İlk taksit ödemesi'
+    },
+    {
+      id: 2,
+      date: '2024-07-15',
+      amount: 1800.00,
+      method: 'Banka Havalesi',
+      description: 'Son taksit ödemesi'
+    }
+  ]
 };
-
-const mockDocuments = [
-  { id: 1, name: 'flight-ticket.pdf', size: '120.56 KB' },
-  { id: 2, name: 'hotel-receipt.jpg', size: '770.52 KB' },
-];
 
 // Helper to parse DD.MM.YYYY dates
 // Component for printing
-const SalesInvoicePrint = React.forwardRef<HTMLDivElement, { invoice: typeof salesInvoice, t: any }>(({ invoice, t }, ref) => {
+const PurchaseInvoicePrint = React.forwardRef<HTMLDivElement, { invoice: typeof mockInvoiceData, t: any }>(({ invoice, t }, ref) => {
   return (
     <Box ref={ref} sx={{ p: 4, color: 'black', backgroundColor: 'white' }}>
       {/* Header */}
@@ -120,11 +159,11 @@ const SalesInvoicePrint = React.forwardRef<HTMLDivElement, { invoice: typeof sal
       <Grid container justifyContent="space-between" sx={{ mb: 4 }}>
         <Grid item xs={12} md={5}>
           <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>{t('invoiceTo', 'Fatura Edilen')}:</Typography>
-          <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{invoice.customer}</Typography>
-          <Typography variant="body2">Hall-Robbins PLC</Typography>
-          <Typography variant="body2">7777 Mendez Plains</Typography>
-          <Typography variant="body2">(616) 865-4180</Typography>
-          <Typography variant="body2">don85@johnson.com</Typography>
+          <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{invoice.supplier.name}</Typography>
+          <Typography variant="body2">{invoice.supplier.address}</Typography>
+          <Typography variant="body2">{invoice.supplier.city}</Typography>
+          <Typography variant="body2">{invoice.supplier.phone}</Typography>
+          <Typography variant="body2">{invoice.supplier.email}</Typography>
         </Grid>
         <Grid item xs={12} md={5} sx={{ textAlign: 'right' }}>
           <Table size="small" sx={{ width: 'auto', ml: 'auto' }}>
@@ -218,13 +257,13 @@ const parseDateDDMMYYYY = (dateStr: string) => {
 
 
 
-const SalesInvoiceDetailPage: React.FC = () => {
+const PurchaseInvoiceDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   // In a real app, you would fetch the invoice data based on the id
   // For now, we'll use the mock data.
-  const invoice = salesInvoice;
+  const invoice = mockInvoiceData;
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [tabIndex, setTabIndex] = useState(0); // Default to 'Fatura Bilgileri'
@@ -235,7 +274,10 @@ const SalesInvoiceDetailPage: React.FC = () => {
   });
 
 
-  const [documents, setDocuments] = useState(mockDocuments);
+  const [documents, setDocuments] = useState([
+    { id: 1, name: 'purchase-invoice.pdf', size: '120.56 KB' },
+    { id: 2, name: 'delivery-receipt.jpg', size: '770.52 KB' },
+  ]);
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [isSendModalOpen, setSendModalOpen] = useState(false);
@@ -290,22 +332,22 @@ const SalesInvoiceDetailPage: React.FC = () => {
                   sx={{ color: 'white', backgroundColor: 'orange', '&:hover': { backgroundColor: '#e65100' } }}
                   onClick={handleEdit}
                 >
-                  <EditIcon />
+                  <Edit />
                 </IconButton>
               </Tooltip>
               <Tooltip title={t('delete', 'Sil')}>
                 <IconButton sx={{ color: 'white', backgroundColor: theme.palette.error.main, '&:hover': { backgroundColor: theme.palette.error.dark } }}>
-                  <DeleteIcon />
+                  <Delete />
                 </IconButton>
               </Tooltip>
               <Tooltip title={t('salesInvoice.print', 'Yazdır')}>
                 <IconButton onClick={handlePrint} sx={{ color: 'white', backgroundColor: theme.palette.primary.main, '&:hover': { backgroundColor: theme.palette.primary.dark } }}>
-                  <PrintIcon />
+                  <Print />
                 </IconButton>
               </Tooltip>
               <Tooltip title={t('salesInvoice.sendInvoice', 'Fatura Gönder')}>
                 <IconButton onClick={handleOpenSendModal} sx={{ color: 'white', backgroundColor: theme.palette.secondary.main, '&:hover': { backgroundColor: theme.palette.secondary.dark } }}>
-                  <SendIcon />
+                  <Send />
                 </IconButton>
               </Tooltip>
             </Box>
@@ -314,16 +356,16 @@ const SalesInvoiceDetailPage: React.FC = () => {
               <Button
                 variant="contained"
                 sx={{ mr: 1, backgroundColor: 'orange', '&:hover': { backgroundColor: '#e65100' } }}
-                startIcon={<EditIcon />}
+                startIcon={<Edit />}
                 onClick={handleEdit}
               >
                 {t('edit', 'Düzenle')}
               </Button>
-              <Button variant="contained" color="error" sx={{ mr: 1 }} startIcon={<DeleteIcon />}>
+              <Button variant="contained" color="error" sx={{ mr: 1 }} startIcon={<Delete />}>
                 {t('delete', 'Sil')}
               </Button>
               <PrintButton label={t('salesInvoice.print', 'Yazdır')} onClick={handlePrint} />
-              <Button variant="contained" color="secondary" startIcon={<SendIcon />} onClick={handleOpenSendModal}>
+              <Button variant="contained" color="secondary" startIcon={<Send />} onClick={handleOpenSendModal}>
                 {t('salesInvoice.sendInvoice', 'Fatura Gönder')}
               </Button>
             </Box>
@@ -332,7 +374,7 @@ const SalesInvoiceDetailPage: React.FC = () => {
       </Box>
 
       <div style={{ display: 'none' }}>
-        <SalesInvoicePrint ref={componentRef} invoice={invoice} t={t} />
+        {/* Print content will be added here */}
       </div>
 
       <Dialog open={isSendModalOpen} onClose={handleCloseSendModal} fullWidth maxWidth="sm">
@@ -348,7 +390,7 @@ const SalesInvoiceDetailPage: React.FC = () => {
               color: (theme) => theme.palette.grey[500],
             }}
           >
-            <CloseIcon />
+            <Close />
           </IconButton>
         </DialogTitle>
         <DialogContent>
@@ -389,12 +431,12 @@ const SalesInvoiceDetailPage: React.FC = () => {
               variant="outlined"
               fullWidth
             />
-            <Chip icon={<AttachFileIcon />} label={t('salesInvoice.invoiceAttached', 'Fatura Eklendi')} color="primary" variant="outlined" />
+            <Chip icon={<AttachFile />} label={t('salesInvoice.invoiceAttached', 'Fatura Eklendi')} color="primary" variant="outlined" />
           </Stack>
         </DialogContent>
         <DialogActions sx={{ p: '16px 24px' }}>
           <Button onClick={handleCloseSendModal}>{t('salesInvoice.cancel', 'İptal')}</Button>
-          <Button onClick={handleSendInvoice} variant="contained" startIcon={<SendIcon />}>
+          <Button onClick={handleSendInvoice} variant="contained" startIcon={<Send />}>
             {t('salesInvoice.send', 'Gönder')}
           </Button>
         </DialogActions>
@@ -403,9 +445,9 @@ const SalesInvoiceDetailPage: React.FC = () => {
       {/* TABS */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs value={tabIndex} onChange={handleTabChange} indicatorColor="primary" textColor="primary">
-          <Tab icon={<ReceiptIcon />} iconPosition="start" label={t('salesInvoice.invoiceInfo', 'Fatura Bilgileri')} />
-          <Tab icon={<HistoryIcon />} iconPosition="start" label={t('salesInvoice.paymentHistory', 'Ödeme Geçmişi')} />
-          <Tab icon={<DescriptionIcon />} iconPosition="start" label={t('salesInvoice.documents', 'Dökümanlar')} />
+          <Tab icon={<Receipt />} iconPosition="start" label={t('salesInvoice.invoiceInfo', 'Fatura Bilgileri')} />
+          <Tab icon={<History />} iconPosition="start" label={t('salesInvoice.paymentHistory', 'Ödeme Geçmişi')} />
+          <Tab icon={<Description />} iconPosition="start" label={t('salesInvoice.documents', 'Dökümanlar')} />
         </Tabs>
       </Box>
 
@@ -437,11 +479,11 @@ const SalesInvoiceDetailPage: React.FC = () => {
           <Grid container justifyContent="space-between" sx={{ mb: 4 }}>
             <Grid item xs={12} md={5}>
               <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>{t('invoiceTo', 'Fatura Edilen')}:</Typography>
-              <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{invoice.customer}</Typography>
-              <Typography variant="body2">Hall-Robbins PLC</Typography>
-              <Typography variant="body2">7777 Mendez Plains</Typography>
-              <Typography variant="body2">(616) 865-4180</Typography>
-              <Typography variant="body2">don85@johnson.com</Typography>
+              <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{invoice.supplier.name}</Typography>
+              <Typography variant="body2">{invoice.supplier.address}</Typography>
+              <Typography variant="body2">{invoice.supplier.city}</Typography>
+              <Typography variant="body2">{invoice.supplier.phone}</Typography>
+              <Typography variant="body2">{invoice.supplier.email}</Typography>
             </Grid>
             <Grid item xs={12} md={5} sx={{ textAlign: { xs: 'left', md: 'right' }, mt: { xs: 2, md: 0 } }}>
               <Table size="small" sx={{ width: 'auto', ml: 'auto' }}>
@@ -538,7 +580,7 @@ const SalesInvoiceDetailPage: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {invoice.paymentHistory.map((payment) => (
+                {invoice.paymentHistory.map((payment: any) => (
                   <TableRow key={payment.id}>
                     <TableCell>{payment.id}</TableCell>
                     <TableCell>{payment.date}</TableCell>
@@ -570,7 +612,7 @@ const SalesInvoiceDetailPage: React.FC = () => {
               },
             }}
           >
-            <CloudUploadIcon sx={{ fontSize: 48, color: theme.palette.grey[600] }} />
+            <CloudUpload sx={{ fontSize: 48, color: theme.palette.grey[600] }} />
             <Typography>
               {t('drag_and_drop_or_click', 'Dosyaları buraya sürükleyin veya tıklayın')}
             </Typography>
@@ -581,7 +623,7 @@ const SalesInvoiceDetailPage: React.FC = () => {
                 key={doc.id}
                 secondaryAction={
                   <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteDocument(doc.id)}>
-                    <DeleteIcon />
+                    <Delete />
                   </IconButton>
                 }
                 sx={{
@@ -595,7 +637,7 @@ const SalesInvoiceDetailPage: React.FC = () => {
               >
                 <ListItemAvatar>
                   <Avatar>
-                    <DescriptionIcon />
+                    <Receipt />
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText primary={doc.name} secondary={doc.size} />
@@ -614,7 +656,7 @@ const SalesInvoiceDetailPage: React.FC = () => {
               <Typography><strong>{t('invoiceNumber', 'Fatura No')}:</strong> {invoice.id}</Typography>
             </Grid>
             <Grid item xs={12} sm={6} md={4}>
-              <Typography><strong>{t('customer', 'Müşteri')}:</strong> {invoice.customer}</Typography>
+              <Typography><strong>{t('supplier', 'Tedarikçi')}:</strong> {invoice.supplier.name}</Typography>
             </Grid>
             <Grid item xs={12} sm={6} md={4}>
               <Typography><strong>{t('invoiceDate', 'Fatura Tarihi')}:</strong> {invoice.invoiceDate}</Typography>
@@ -638,4 +680,4 @@ const SalesInvoiceDetailPage: React.FC = () => {
   );
 };
 
-export default SalesInvoiceDetailPage;
+export default PurchaseInvoiceDetailPage;

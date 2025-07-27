@@ -21,9 +21,13 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
-import { Add, Visibility, FilterList, Search } from '@mui/icons-material';
+import { Add, Visibility, FilterList, Search, Close, CalendarToday, AccessTime, FileDownload } from '@mui/icons-material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -100,6 +104,98 @@ const SalesInvoicesListPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [dateFilter, setDateFilter] = useState<Date | null>(null);
+  const [createInvoiceDialogOpen, setCreateInvoiceDialogOpen] = useState(false);
+  const [invoiceData, setInvoiceData] = useState({
+    invoiceNumber: '',
+    customerName: '',
+    invoiceDate: new Date().toISOString().split('T')[0],
+    invoiceTime: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+    dueDate: new Date().toISOString().split('T')[0]
+  });
+  const [dueDateOption, setDueDateOption] = useState('Aynı gün');
+
+  // Excel export function
+  const exportToExcel = () => {
+    // Filtered data
+    const filteredInvoices = invoices.filter(invoice => 
+      (searchTerm === '' || 
+       invoice.supplier.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      (statusFilter === '' || invoice.status === statusFilter)
+    );
+
+    // Create detailed CSV content with additional columns
+    const headers = [
+      'Sıra No',
+      'Fatura Numarası', 
+      'Müşteri Adı', 
+      'Fatura Tarihi', 
+      'KDV Tutarı', 
+      'Toplam Tutar', 
+      'Durum',
+      'Rapor Tarihi',
+      'Rapor Saati',
+      'Toplam Kayıt Sayısı'
+    ];
+    
+    const currentDate = new Date();
+    const reportDate = currentDate.toLocaleDateString('tr-TR');
+    const reportTime = currentDate.toLocaleTimeString('tr-TR');
+    const totalRecords = filteredInvoices.length;
+    
+    const csvContent = [
+      // Header row
+      headers.join(','),
+      // Data rows
+      ...filteredInvoices.map((invoice, index) => [
+        index + 1, // Sıra No
+        `"${invoice.invoiceNumber}"`,
+        `"${invoice.supplier}"`,
+        `"${invoice.date}"`,
+        `"${invoice.vat}"`,
+        `"${invoice.total}"`,
+        `"${invoice.status}"`,
+        index === 0 ? `"${reportDate}"` : '""', // Sadece ilk satırda göster
+        index === 0 ? `"${reportTime}"` : '""', // Sadece ilk satırda göster
+        index === 0 ? totalRecords : '""' // Sadece ilk satırda göster
+      ].join(',')),
+      // Summary row
+      '',
+      '"=== ÖZET BİLGİLER ==="',
+      '',
+      `"Toplam Fatura Sayısı: ${totalRecords}"`,
+      `"Rapor Tarihi: ${reportDate}"`,
+      `"Rapor Saati: ${reportTime}"`,
+      `"Durum Dağılımı:"`,
+      ...getStatusSummary(filteredInvoices)
+    ].join('\n');
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `satis-faturalari-detay-raporu-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Success message
+    console.log(`Excel raporu başarıyla indirildi: ${totalRecords} kayıt`);
+  };
+  
+  // Status summary helper function
+  const getStatusSummary = (invoices: any[]) => {
+    const statusCounts = invoices.reduce((acc, invoice) => {
+      acc[invoice.status] = (acc[invoice.status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    return Object.entries(statusCounts).map(([status, count]) => 
+      `"${status}: ${count} adet"`
+    );
+  };
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
@@ -110,11 +206,35 @@ const SalesInvoicesListPage: React.FC = () => {
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           <Button 
+            variant="outlined"
+            startIcon={<FileDownload />} 
+            onClick={exportToExcel}
+            sx={{ 
+              borderRadius: '20px', 
+              px: 3,
+              borderColor: '#25638f',
+              color: '#25638f',
+              '&:hover': {
+                borderColor: '#1e4f73',
+                backgroundColor: 'rgba(37, 99, 143, 0.1)'
+              }
+            }}
+          >
+            Excel İndir
+          </Button>
+          <Button 
             variant="contained" 
             color="primary" 
             startIcon={<Add />} 
-            onClick={() => navigate('/sales-invoices/create')}
-            sx={{ borderRadius: '20px', px: 3 }}
+            onClick={() => setCreateInvoiceDialogOpen(true)}
+            sx={{ 
+              borderRadius: '20px', 
+              px: 3,
+              backgroundColor: '#25638f',
+              '&:hover': {
+                backgroundColor: '#1e4f73'
+              }
+            }}
           >
             Yeni Satış Faturası
           </Button>
@@ -208,7 +328,7 @@ const SalesInvoicesListPage: React.FC = () => {
         <TableContainer>
           <Table>
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#343a40' }}>
+              <TableRow sx={{ backgroundColor: '#25638f' }}>
                 <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '16px' }}>Fatura No</TableCell>
                 <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '16px' }}>Müşteri</TableCell>
                 <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '16px' }}>Tarih</TableCell>
@@ -284,6 +404,239 @@ const SalesInvoicesListPage: React.FC = () => {
           </Table>
         </TableContainer>
       </Paper>
+
+      {/* Create Invoice Dialog */}
+      <Dialog 
+        open={createInvoiceDialogOpen} 
+        onClose={() => setCreateInvoiceDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '16px',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          pb: 2
+        }}>
+          <Box component="span" sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
+            Yeni Fatura Oluştur
+          </Box>
+          <Button
+            onClick={() => setCreateInvoiceDialogOpen(false)}
+            sx={{ 
+              minWidth: 'auto',
+              p: 0.5,
+              color: '#666',
+              '&:hover': { bgcolor: 'rgba(0,0,0,0.1)' }
+            }}
+          >
+            <Close />
+          </Button>
+        </DialogTitle>
+        
+        <Typography variant="body2" sx={{ px: 3, pb: 2, color: '#666' }}>
+          Fatura bilgilerini girin.
+        </Typography>
+        
+        <DialogContent sx={{ px: 3, py: 0 }}>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Fatura Numarası"
+                placeholder="Fatura Numarası"
+                value={invoiceData.invoiceNumber}
+                onChange={(e) => setInvoiceData({ ...invoiceData, invoiceNumber: e.target.value })}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '12px'
+                  }
+                }}
+              />
+            </Grid>
+            
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Müşteri Adı"
+                placeholder="Müşteri Adı"
+                value={invoiceData.customerName}
+                onChange={(e) => setInvoiceData({ ...invoiceData, customerName: e.target.value })}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '12px'
+                  }
+                }}
+              />
+            </Grid>
+            
+            <Grid item xs={6}>
+              <TextField
+                fullWidth
+                label="Fatura Tarihi"
+                type="date"
+                value={invoiceData.invoiceDate}
+                onChange={(e) => setInvoiceData({ ...invoiceData, invoiceDate: e.target.value })}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <CalendarToday sx={{ color: '#666' }} />
+                    </InputAdornment>
+                  )
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '12px'
+                  }
+                }}
+              />
+            </Grid>
+            
+            <Grid item xs={6}>
+              <TextField
+                fullWidth
+                label="Fatura Saati"
+                type="time"
+                value={invoiceData.invoiceTime}
+                onChange={(e) => setInvoiceData({ ...invoiceData, invoiceTime: e.target.value })}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <AccessTime sx={{ color: '#666' }} />
+                    </InputAdornment>
+                  )
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '12px'
+                  }
+                }}
+              />
+            </Grid>
+            
+            <Grid item xs={12}>
+              <Typography variant="body2" sx={{ mb: 1, fontWeight: 'medium' }}>
+                Vade Tarihi
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+                {['Aynı gün', '7 Gün', '30 Gün', '60 Gün', '90 Gün'].map((option) => (
+                  <Button
+                    key={option}
+                    variant={dueDateOption === option ? 'contained' : 'outlined'}
+                    size="small"
+                    onClick={() => {
+                      setDueDateOption(option);
+                      const today = new Date();
+                      let newDate = new Date(today);
+                      
+                      switch(option) {
+                        case '7 Gün':
+                          newDate.setDate(today.getDate() + 7);
+                          break;
+                        case '30 Gün':
+                          newDate.setDate(today.getDate() + 30);
+                          break;
+                        case '60 Gün':
+                          newDate.setDate(today.getDate() + 60);
+                          break;
+                        case '90 Gün':
+                          newDate.setDate(today.getDate() + 90);
+                          break;
+                        default:
+                          newDate = today;
+                      }
+                      
+                      setInvoiceData({ 
+                        ...invoiceData, 
+                        dueDate: newDate.toISOString().split('T')[0] 
+                      });
+                    }}
+                    sx={{ 
+                      borderRadius: '8px',
+                      textTransform: 'none',
+                      fontSize: '12px',
+                      px: 2,
+                      py: 0.5,
+                      ...(dueDateOption === option && {
+                        background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)'
+                      })
+                    }}
+                  >
+                    {option}
+                  </Button>
+                ))}
+              </Box>
+              
+              <TextField
+                fullWidth
+                type="date"
+                value={invoiceData.dueDate}
+                onChange={(e) => setInvoiceData({ ...invoiceData, dueDate: e.target.value })}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <CalendarToday sx={{ color: '#666' }} />
+                    </InputAdornment>
+                  )
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '12px'
+                  }
+                }}
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        
+        <DialogActions sx={{ p: 3, pt: 2 }}>
+          <Button
+            onClick={() => setCreateInvoiceDialogOpen(false)}
+            variant="outlined"
+            sx={{ 
+              borderRadius: '10px',
+              textTransform: 'none',
+              fontWeight: 'bold',
+              borderColor: '#e0e0e0',
+              color: '#666',
+              px: 3
+            }}
+          >
+            İptal
+          </Button>
+          <Button
+            onClick={() => {
+              // Fatura oluşturma sayfasına yönlendir ve verileri state olarak gönder
+              navigate('/sales-invoices/create', { 
+                state: { 
+                  initialData: invoiceData 
+                } 
+              });
+              setCreateInvoiceDialogOpen(false);
+            }}
+            variant="contained"
+            disabled={!invoiceData.invoiceNumber || !invoiceData.customerName}
+            sx={{ 
+              background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+              '&:hover': { 
+                background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)'
+              },
+              borderRadius: '10px',
+              textTransform: 'none',
+              fontWeight: 'bold',
+              px: 3
+            }}
+          >
+            Devam Et
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
