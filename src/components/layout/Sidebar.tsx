@@ -11,16 +11,23 @@ import {
   Divider,
   Tooltip,
   Typography,
-
 } from '@mui/material';
 import {
   HourglassEmpty as HourglassEmptyIcon,
-  Send as SendIcon,
-  CheckCircle as CheckCircleIcon,
-  LocalShipping as LocalShippingIcon,
-  PriceCheck as PriceCheckIcon,
   Inventory as InventoryIcon,
   Assignment as AssignmentIcon,
+  Category as CategoryIcon,
+  People as PeopleIcon,
+  Receipt as ReceiptIcon,
+  Description as DescriptionIcon,
+  Work as WorkIcon,
+  TrendingUp as TrendingUpIcon,
+  Warning as WarningIcon,
+  Assessment as AssessmentIcon,
+  ArrowDownward as ArrowDownwardIcon,
+  ArrowUpward as ArrowUpwardIcon,
+  SwapHoriz as SwapHorizIcon,
+  AccountBalance as AccountBalanceIcon,
 } from '@mui/icons-material';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
@@ -51,23 +58,58 @@ interface MenuGroup {
   items: MenuItem[];
 }
 
-const menuGroups: MenuGroup[] = [
+// Kargo menüleri
+const cargoMenuGroups: MenuGroup[] = [
   {
-    title: 'Sevkiyatlar',
+    title: 'KARGO & SEVKİYAT',
     items: [
-      { text: 'Bekleyen', path: '/shipping/pending', icon: <HourglassEmptyIcon /> },
-      { text: 'Gönderilen', path: '/shipping/sent', icon: <SendIcon /> },
-      { text: 'Teslim Edilen', path: '/shipping/delivered', icon: <CheckCircleIcon /> },
-    ],
-  },
-  {
-    title: 'Kargo',
-    items: [
-      { text: 'Kargo Listesi', path: '/shipping-list', icon: <LocalShippingIcon /> },
-      { text: 'Kargo Fiyatları', path: '/shipping-prices', icon: <PriceCheckIcon /> },
       { text: 'Mal Kabul', path: '/shipping/goods-acceptance', icon: <InventoryIcon /> },
       { text: 'Bekleyen Paketler', path: '/shipping/pending-packages', icon: <HourglassEmptyIcon /> },
       { text: 'Tüm Paketler', path: '/shipping/all-packages', icon: <AssignmentIcon /> },
+    ],
+  },
+];
+
+// Ürün menüleri
+const productMenuGroups: MenuGroup[] = [
+  {
+    title: 'PRODUCT',
+    items: [
+      { text: 'Ürünler', path: '/products', icon: <InventoryIcon /> },
+      { text: 'Kategori', path: '/categories', icon: <CategoryIcon /> },
+      { text: 'Markalar', path: '/brands', icon: <CategoryIcon /> },
+    ],
+  },
+];
+
+// Muhasebe menüleri
+const accountingMenuGroups: MenuGroup[] = [
+  {
+    title: 'FATURALAR & FİŞLER',
+    items: [
+      { text: 'Müşteriler', path: '/customers', icon: <PeopleIcon /> },
+      { text: 'Satış Faturaları', path: '/sales-invoices', icon: <ReceiptIcon /> },
+      { text: 'Taslak Faturalar', path: '/draft-invoices', icon: <DescriptionIcon /> },
+      { text: 'Alış Faturaları', path: '/purchase-invoices', icon: <ReceiptIcon /> },
+    ],
+  },
+  {
+    title: 'PERSONEL',
+    items: [
+      { text: 'Çalışanlar', path: '/employees', icon: <WorkIcon /> },
+      { text: 'Gider Fişleri', path: '/expense-receipts', icon: <ReceiptIcon /> },
+    ],
+  },
+  {
+    title: 'FİNANS',
+    items: [
+      { text: 'Müşteri Alacakları', path: '/receivables/customer', icon: <TrendingUpIcon /> },
+      { text: 'Vadesi Geçen Alacaklar', path: '/receivables/overdue', icon: <WarningIcon /> },
+      { text: 'Alacak Raporları', path: '/receivables/reports', icon: <AssessmentIcon /> },
+      { text: 'Gelen Ödemeler', path: '/payments/incoming', icon: <ArrowDownwardIcon /> },
+      { text: 'Giden Ödemeler', path: '/payments/outgoing', icon: <ArrowUpwardIcon /> },
+      { text: 'Cari Hareketler', path: '/current-account-transactions', icon: <SwapHorizIcon /> },
+      { text: 'Kasalar', path: '/safes', icon: <AccountBalanceIcon /> },
     ],
   },
 ];
@@ -77,6 +119,35 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onToggle, activeMenu }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [openMenu, setOpenMenu] = useState<Record<string, boolean>>({});
+
+  // Hangi menü grubunu göstereceğimizi belirle
+  const getMenuGroups = () => {
+    const currentPath = location.pathname;
+    
+    // Kargo sayfalarında kargo menülerini göster
+    if (currentPath.startsWith('/shipping/')) {
+      return cargoMenuGroups;
+    }
+    
+    // Ürün sayfalarında ürün menülerini göster
+    if (currentPath.startsWith('/products') || currentPath.startsWith('/categories') || currentPath.startsWith('/brands')) {
+      return productMenuGroups;
+    }
+    
+    // Muhasebe sayfalarında muhasebe menülerini göster
+    if (currentPath.startsWith('/customers') || currentPath.startsWith('/sales-invoices') || 
+        currentPath.startsWith('/draft-invoices') || currentPath.startsWith('/purchase-invoices') ||
+        currentPath.startsWith('/employees') || currentPath.startsWith('/expense-receipts') ||
+        currentPath.startsWith('/receivables') || currentPath.startsWith('/payments') ||
+        currentPath.startsWith('/current-account-transactions') || currentPath.startsWith('/safes')) {
+      return accountingMenuGroups;
+    }
+    
+    // Varsayılan olarak kargo menülerini göster
+    return cargoMenuGroups;
+  };
+
+  const menuGroups = getMenuGroups();
 
   const handleLogoClick = () => {
     navigate('/');
