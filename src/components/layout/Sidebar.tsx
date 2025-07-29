@@ -17,6 +17,10 @@ import {
   HourglassEmpty as HourglassEmptyIcon,
   Send as SendIcon,
   CheckCircle as CheckCircleIcon,
+  LocalShipping as LocalShippingIcon,
+  PriceCheck as PriceCheckIcon,
+  Inventory as InventoryIcon,
+  Assignment as AssignmentIcon,
 } from '@mui/icons-material';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
@@ -54,6 +58,16 @@ const menuGroups: MenuGroup[] = [
       { text: 'Bekleyen', path: '/shipping/pending', icon: <HourglassEmptyIcon /> },
       { text: 'Gönderilen', path: '/shipping/sent', icon: <SendIcon /> },
       { text: 'Teslim Edilen', path: '/shipping/delivered', icon: <CheckCircleIcon /> },
+    ],
+  },
+  {
+    title: 'Kargo',
+    items: [
+      { text: 'Kargo Listesi', path: '/shipping-list', icon: <LocalShippingIcon /> },
+      { text: 'Kargo Fiyatları', path: '/shipping-prices', icon: <PriceCheckIcon /> },
+      { text: 'Mal Kabul', path: '/shipping/goods-acceptance', icon: <InventoryIcon /> },
+      { text: 'Bekleyen Paketler', path: '/shipping/pending-packages', icon: <HourglassEmptyIcon /> },
+      { text: 'Tüm Paketler', path: '/shipping/all-packages', icon: <AssignmentIcon /> },
     ],
   },
 ];

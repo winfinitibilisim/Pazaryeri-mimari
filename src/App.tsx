@@ -80,10 +80,10 @@ import ShippingListPage from './pages/ShippingListPage';
 import AccountingPage from './pages/AccountingPage';
 import ShipmentsPage from './pages/ShipmentsPage';
 import ShippingPricesPage from './pages/ShippingPricesPage';
-// import GoodsAcceptancePage from './pages/GoodsAcceptancePage';
-// import PendingPackagesPage from './pages/PendingPackagesPage';
-// import SentPackagesPage from './pages/SentPackagesPage';
-// import AllPackagesPage from './pages/AllPackagesPage';
+import GoodsAcceptancePage from './pages/shipping/GoodsAcceptancePage';
+import PendingPackagesPage from './pages/shipping/PendingPackagesPage';
+import SentPackagesPage from './pages/shipping/SentPackagesPage';
+import AllPackagesPage from './pages/shipping/AllPackagesPage';
 
 // Shipping Management Pages
 import PendingShipmentsPage from './pages/shipping/PendingShipmentsPage';
@@ -249,10 +249,10 @@ const AppWithLanguage = () => {
         { path: 'accounting', element: <AccountingPage /> },
         { path: 'shipments', element: <ShipmentsPage /> },
                 { path: 'shipping-prices', element: <ShippingPricesPage /> },
-        // { path: 'shipping/goods-acceptance', element: <GoodsAcceptancePage /> },
-        // { path: 'shipping/pending-packages', element: <PendingPackagesPage /> },
-        // { path: 'shipping/sent-packages', element: <SentPackagesPage /> },
-        // { path: 'shipping/all-packages', element: <AllPackagesPage /> },
+        { path: 'shipping/goods-acceptance', element: <GoodsAcceptancePage /> },
+        { path: 'shipping/pending-packages', element: <PendingPackagesPage /> },
+        { path: 'shipping/sent-packages', element: <SentPackagesPage /> },
+        { path: 'shipping/all-packages', element: <AllPackagesPage /> },
         
         // Shipping Management Routes
         { path: 'shipping/pending', element: <PendingShipmentsPage /> },
