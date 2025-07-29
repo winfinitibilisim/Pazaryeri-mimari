@@ -111,6 +111,9 @@ export interface Warehouse {
   productCount: number;
   lastInventory: string;
   fillRate: number;
+  floors?: number;
+  shelfSections?: string;
+  description?: string;
 }
 
 interface WarehouseListProps {

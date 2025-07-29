@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNotifications } from '../contexts/NotificationContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { 
@@ -11,14 +11,36 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  TextField
+  TextField,
+  Grid,
+  Card,
+  CardContent,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Chip,
+  Avatar
 } from '@mui/material';
 
 // Material UI ikonları
 import WarningIcon from '@mui/icons-material/Warning';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import StoreIcon from '@mui/icons-material/Store';
+import BusinessIcon from '@mui/icons-material/Business';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 
 // Özel bileşenler
 import AddButton from '../components/common/AddButton';
+import ExportButton from '../components/common/ExportButton';
+import PrintButton from '../components/common/PrintButton';
 
 // Warehouse bileşenleri
 import WarehouseStats, { WarehouseStats as WarehouseStatsType } from '../components/warehouses/WarehouseStats';
@@ -40,7 +62,10 @@ const initialWarehouses: Warehouse[] = [
     status: 'Aktif', 
     productCount: 250, 
     lastInventory: '2023-05-15', 
-    fillRate: 75 
+    fillRate: 75,
+    floors: 3,
+    shelfSections: 'A1-A20, B1-B25, C1-C15',
+    description: 'Ana merkez deposu. Tüm ürün kategorileri için kullanılır.'
   },
   { 
     id: 2, 
@@ -52,7 +77,10 @@ const initialWarehouses: Warehouse[] = [
     status: 'Aktif', 
     productCount: 120, 
     lastInventory: '2023-06-10', 
-    fillRate: 40 
+    fillRate: 40,
+    floors: 2,
+    shelfSections: 'A1-A15, B1-B10',
+    description: 'Ankara bölgesi için şube deposu.'
   },
   { 
     id: 3, 
@@ -64,7 +92,10 @@ const initialWarehouses: Warehouse[] = [
     status: 'Pasif', 
     productCount: 80, 
     lastInventory: '2023-04-22', 
-    fillRate: 12.5 
+    fillRate: 12.5,
+    floors: 2,
+    shelfSections: 'A1-A12, B1-B18',
+    description: 'İzmir bölgesi deposu. Şu anda bakım aşamasında.'
   },
   { 
     id: 4, 
@@ -98,11 +129,18 @@ const WarehousesPage: React.FC = () => {
   
   // Depo verileri ve durumları
   const [warehouses, setWarehouses] = useState<Warehouse[]>(initialWarehouses);
+  const [filteredWarehouses, setFilteredWarehouses] = useState<Warehouse[]>(initialWarehouses);
   const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null);
   
   // Sayfalama durumu
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  
+  // Filtre durumları
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [locationFilter, setLocationFilter] = useState('');
+  const [capacityFilter, setCapacityFilter] = useState('');
   
   // Dialog durumları
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -114,6 +152,48 @@ const WarehousesPage: React.FC = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [warehouseToDelete, setWarehouseToDelete] = useState<number | null>(null);
   
+  // Filtreleme fonksiyonu
+  useEffect(() => {
+    let filtered = warehouses;
+
+    if (searchTerm) {
+      filtered = filtered.filter(warehouse =>
+        warehouse.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        warehouse.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        warehouse.manager.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (statusFilter) {
+      filtered = filtered.filter(warehouse => warehouse.status === statusFilter);
+    }
+
+    if (locationFilter) {
+      filtered = filtered.filter(warehouse => warehouse.location === locationFilter);
+    }
+
+    if (capacityFilter) {
+      if (capacityFilter === 'small') {
+        filtered = filtered.filter(warehouse => warehouse.capacity < 500);
+      } else if (capacityFilter === 'medium') {
+        filtered = filtered.filter(warehouse => warehouse.capacity >= 500 && warehouse.capacity < 1000);
+      } else if (capacityFilter === 'large') {
+        filtered = filtered.filter(warehouse => warehouse.capacity >= 1000);
+      }
+    }
+
+    setFilteredWarehouses(filtered);
+    setPage(0); // Reset page when filters change
+  }, [warehouses, searchTerm, statusFilter, locationFilter, capacityFilter]);
+
+  // Filtreleri temizle
+  const clearFilters = () => {
+    setSearchTerm('');
+    setStatusFilter('');
+    setLocationFilter('');
+    setCapacityFilter('');
+  };
+
   // Depo istatistiklerini hesapla
   const calculateStats = (): WarehouseStatsType => {
     const totalWarehouses = warehouses.length;
@@ -123,15 +203,16 @@ const WarehousesPage: React.FC = () => {
     const totalUsedCapacity = warehouses.reduce((sum, w) => sum + w.usedCapacity, 0);
     const totalProducts = warehouses.reduce((sum, w) => sum + w.productCount, 0);
     const capacityUtilization = totalCapacity > 0 ? (totalUsedCapacity / totalCapacity) * 100 : 0;
+
     const lowStockWarehouses = warehouses.filter(w => (w.usedCapacity / w.capacity) < 0.2).length;
     
     return {
       totalWarehouses,
+      activeWarehouses,
+      inactiveWarehouses,
       totalCapacity,
       totalUsedCapacity,
       totalProducts,
-      activeWarehouses,
-      inactiveWarehouses,
       capacityUtilization,
       lowStockWarehouses
     };
@@ -272,37 +353,278 @@ const WarehousesPage: React.FC = () => {
     notifications.showSuccess(translations.issueReportSuccess);
   };
   
+  // Unique values for filter options
+  const uniqueLocations = Array.from(new Set(warehouses.map(w => w.location)));
+
   return (
     <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1">
-          {translations.warehouseManagement}
-        </Typography>
-        <Box>
-          <AddButton 
+      {/* Modern Header */}
+      <Paper 
+        elevation={0}
+        sx={{ 
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          borderRadius: 3,
+          p: 4,
+          mb: 3,
+          color: 'white'
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <StoreIcon sx={{ fontSize: 40, mr: 2 }} />
+          <Box>
+            <Typography variant="h4" component="h1" sx={{ fontWeight: 600, mb: 1 }}>
+              Depo Yönetimi
+            </Typography>
+            <Typography variant="body1" sx={{ opacity: 0.9 }}>
+              Depo bilgilerini yönetin, envanter takibi yapın ve raporlar oluşturun
+            </Typography>
+          </Box>
+        </Box>
+        
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+          <Button
+            variant="contained"
+            startIcon={<BusinessIcon />}
             onClick={() => setIsAddDialogOpen(true)}
-            label={translations.addWarehouse}
+            sx={{
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.3)',
+              }
+            }}
+          >
+            Yeni Depo
+          </Button>
+          
+          <ExportButton
+            label="Excel'e Aktar"
+            onClick={() => {}}
+            sx={{
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.3)',
+              }
+            }}
+          />
+          
+          <PrintButton
+            label="Yazdır"
+            onClick={() => {}}
+            sx={{
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.3)',
+              }
+            }}
           />
         </Box>
-      </Box>
-      
-      {/* Depo istatistikleri */}
-      <WarehouseStats stats={calculateStats()} />
+      </Paper>
+
+      {/* İstatistik Kartları */}
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box>
+                  <Typography variant="h4" sx={{ fontWeight: 600 }}>
+                    {calculateStats().totalWarehouses}
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    Toplam Depo
+                  </Typography>
+                </Box>
+                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
+                  <StoreIcon sx={{ fontSize: 30 }} />
+                </Avatar>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', color: 'white' }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box>
+                  <Typography variant="h4" sx={{ fontWeight: 600 }}>
+                    {calculateStats().activeWarehouses}
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    Aktif Depo
+                  </Typography>
+                </Box>
+                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
+                  <BusinessIcon sx={{ fontSize: 30 }} />
+                </Avatar>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white' }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box>
+                  <Typography variant="h4" sx={{ fontWeight: 600 }}>
+                    {calculateStats().totalProducts.toLocaleString()}
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    Toplam Ürün
+                  </Typography>
+                </Box>
+                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
+                  <InventoryIcon sx={{ fontSize: 30 }} />
+                </Avatar>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', color: 'white' }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box>
+                  <Typography variant="h4" sx={{ fontWeight: 600 }}>
+                    {calculateStats().capacityUtilization.toFixed(1)}%
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    Kapasite Kullanımı
+                  </Typography>
+                </Box>
+                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
+                  <TrendingUpIcon sx={{ fontSize: 30 }} />
+                </Avatar>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Filtre Paneli */}
+      <Accordion sx={{ mb: 3, boxShadow: 2 }}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          sx={{ 
+            backgroundColor: '#f5f5f5',
+            '&:hover': { backgroundColor: '#eeeeee' }
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <FilterListIcon sx={{ mr: 1, color: '#495057' }} />
+            <Typography variant="h6" sx={{ color: '#495057', fontWeight: 600 }}>
+              Filtreler
+            </Typography>
+            {(searchTerm || statusFilter || locationFilter || capacityFilter) && (
+              <Chip 
+                label={`${filteredWarehouses.length} sonuç`} 
+                size="small" 
+                color="primary" 
+                sx={{ ml: 2 }} 
+              />
+            )}
+          </Box>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={3}>
+              <TextField
+                fullWidth
+                label="Arama"
+                placeholder="Depo adı, konum veya yönetici"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                }}
+              />
+            </Grid>
+            
+            <Grid item xs={12} md={2}>
+              <FormControl fullWidth>
+                <InputLabel>Durum</InputLabel>
+                <Select
+                  value={statusFilter}
+                  label="Durum"
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <MenuItem value="">Tümü</MenuItem>
+                  <MenuItem value="Aktif">Aktif</MenuItem>
+                  <MenuItem value="Pasif">Pasif</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            
+            <Grid item xs={12} md={2}>
+              <FormControl fullWidth>
+                <InputLabel>Konum</InputLabel>
+                <Select
+                  value={locationFilter}
+                  label="Konum"
+                  onChange={(e) => setLocationFilter(e.target.value)}
+                >
+                  <MenuItem value="">Tümü</MenuItem>
+                  {uniqueLocations.map(location => (
+                    <MenuItem key={location} value={location}>{location}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            
+            <Grid item xs={12} md={2}>
+              <FormControl fullWidth>
+                <InputLabel>Kapasite</InputLabel>
+                <Select
+                  value={capacityFilter}
+                  label="Kapasite"
+                  onChange={(e) => setCapacityFilter(e.target.value)}
+                >
+                  <MenuItem value="">Tümü</MenuItem>
+                  <MenuItem value="small">Küçük (&lt;500)</MenuItem>
+                  <MenuItem value="medium">Orta (500-1000)</MenuItem>
+                  <MenuItem value="large">Büyük (&gt;1000)</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            
+            <Grid item xs={12} md={3}>
+              <Button
+                fullWidth
+                variant="outlined"
+                startIcon={<ClearIcon />}
+                onClick={clearFilters}
+                sx={{ height: '56px' }}
+              >
+                Filtreleri Temizle
+              </Button>
+            </Grid>
+          </Grid>
+        </AccordionDetails>
+      </Accordion>
       
       {/* Depo listesi */}
-      <Paper sx={{ width: '100%', mb: 3, overflow: 'hidden' }}>
-        <WarehouseList
-          warehouses={warehouses}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          onChangePage={handleChangePage}
-          onChangeRowsPerPage={handleChangeRowsPerPage}
-          onEdit={handleEdit}
-          onDelete={handleDeleteClick}
-          onViewDetails={handleViewDetails}
-          onStatusChange={handleStatusChange}
-        />
-      </Paper>
+      <WarehouseList
+        warehouses={filteredWarehouses}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        onChangePage={handleChangePage}
+        onChangeRowsPerPage={handleChangeRowsPerPage}
+        onEdit={handleEdit}
+        onDelete={handleDeleteClick}
+        onViewDetails={handleViewDetails}
+        onStatusChange={handleStatusChange}
+      />
       
       {/* Depo ekleme dialog'u */}
       <Dialog 
@@ -311,14 +633,26 @@ const WarehousesPage: React.FC = () => {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>{translations.addWarehouse}</DialogTitle>
+        <DialogTitle>{translations.addWarehouse || 'Depo Ekle'}</DialogTitle>
         <DialogContent>
           <WarehouseForm 
-            open={isAddDialogOpen}
-            onClose={() => setIsAddDialogOpen(false)}
-            onSubmit={handleAddWarehouse} 
+            onSubmit={handleAddWarehouse}
+            formId="warehouse-add-form"
           />
         </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsAddDialogOpen(false)} color="inherit">
+            {translations.close || 'Kapat'}
+          </Button>
+          <Button 
+            type="submit" 
+            form="warehouse-add-form" 
+            color="primary" 
+            variant="contained"
+          >
+            {translations.saveChanges || 'Kaydet'}
+          </Button>
+        </DialogActions>
       </Dialog>
       
       {/* Depo düzenleme dialog'u */}
@@ -328,18 +662,30 @@ const WarehousesPage: React.FC = () => {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>{translations.editWarehouse}</DialogTitle>
+        <DialogTitle>{translations.editWarehouse || 'Depo Düzenle'}</DialogTitle>
         <DialogContent>
           {selectedWarehouse && (
             <WarehouseForm 
-              open={isEditDialogOpen}
-              onClose={() => setIsEditDialogOpen(false)}
               initialData={selectedWarehouse} 
               onSubmit={handleEditSave}
               isEdit
+              formId="warehouse-edit-form"
             />
           )}
         </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsEditDialogOpen(false)} color="inherit">
+            {translations.close || 'Kapat'}
+          </Button>
+          <Button 
+            type="submit" 
+            form="warehouse-edit-form" 
+            color="primary" 
+            variant="contained"
+          >
+            {translations.saveChanges || 'Kaydet'}
+          </Button>
+        </DialogActions>
       </Dialog>
       
       {/* Depo detayları dialog'u */}

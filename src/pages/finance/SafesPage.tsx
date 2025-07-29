@@ -20,8 +20,18 @@ import {
   SelectChangeEvent,
   TextField,
   Typography,
+  Card,
+  CardContent
 } from '@mui/material';
-import { Add as AddIcon, AccountBalance as AccountBalanceIcon, FilterList as FilterListIcon, Search as SearchIcon } from '@mui/icons-material';
+import { 
+  Add as AddIcon, 
+  AccountBalance as AccountBalanceIcon, 
+  FilterList as FilterListIcon, 
+  Search as SearchIcon,
+  Wallet as WalletIcon,
+  TrendingUp as TrendingUpIcon,
+  Assessment as AssessmentIcon
+} from '@mui/icons-material';
 import { useSafes } from '../../hooks/useSafes';
 import { Safe } from '../../types/Safe';
 import SafesList from './safes/SafesList';
@@ -122,82 +132,287 @@ const SafesPage: React.FC = () => {
     });
   }, [safes, searchTerm, statusFilters, currencyFilters]);
 
+  // Calculate statistics
+  const totalBalance = useMemo(() => {
+    return safes.reduce((sum, safe) => {
+      if (safe.currency === 'TRY') {
+        return sum + safe.balance;
+      }
+      // Simple conversion for demo (in real app, use actual exchange rates)
+      const rate = safe.currency === 'USD' ? 30 : safe.currency === 'EUR' ? 33 : 1;
+      return sum + (safe.balance * rate);
+    }, 0);
+  }, [safes]);
+
+  const activeSafesCount = useMemo(() => safes.filter(safe => safe.isActive).length, [safes]);
+  const bankAccountsCount = useMemo(() => safes.filter(safe => safe.type === 'bank').length, [safes]);
+
   return (
-    <Paper sx={{ p: 3, m: 2, borderRadius: 2, boxShadow: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h5" gutterBottom>{t('safes.title')}</Typography>
-        <ButtonGroup variant="contained">
-          <Button startIcon={<AddIcon />} onClick={() => setIsModalOpen(true)}>{t('safes.addNewSafe')}</Button>
-          <Button startIcon={<AccountBalanceIcon />} onClick={() => setIsBankModalOpen(true)}>{t('safes.addNewBank')}</Button>
-        </ButtonGroup>
+    <Box sx={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
+      {/* Modern Header with Gradient */}
+      <Box sx={{
+        background: 'linear-gradient(135deg, #25638f 0%, #1e4a6f 100%)',
+        color: 'white',
+        p: 4,
+        mb: 3
+      }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+            <Box sx={{
+              p: 2,
+              borderRadius: 3,
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(10px)'
+            }}>
+              <WalletIcon sx={{ fontSize: 40 }} />
+            </Box>
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+                Kasalar
+              </Typography>
+              <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                Nakit ve banka hesaplarınızı yönetin
+              </Typography>
+            </Box>
+          </Box>
+          <ButtonGroup variant="contained">
+            <Button 
+              startIcon={<AddIcon />} 
+              onClick={() => setIsModalOpen(true)}
+              sx={{
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                color: 'white',
+                borderRadius: '8px 0 0 8px',
+                px: 3,
+                py: 1.5,
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.3)'
+                }
+              }}
+            >
+              Yeni Kasa
+            </Button>
+            <Button 
+              startIcon={<AccountBalanceIcon />} 
+              onClick={() => setIsBankModalOpen(true)}
+              sx={{
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                color: 'white',
+                borderRadius: '0 8px 8px 0',
+                px: 3,
+                py: 1.5,
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.3)'
+                }
+              }}
+            >
+              Yeni Banka
+            </Button>
+          </ButtonGroup>
+        </Box>
       </Box>
 
-      <Accordion expanded={filtersOpen} onChange={() => setFiltersOpen(!filtersOpen)} sx={{ mb: 2, border: '1px solid #e0e0e0', boxShadow: 'none' }}>
-        <AccordionSummary expandIcon={<FilterListIcon />} aria-controls="filters-content" id="filters-header">
-          <Typography>{t('common.filters')}</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Grid container spacing={2} sx={{ flexDirection: 'column' }}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder={t('safes.searchPlaceholder')}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>{t('common.status')}</InputLabel>
-                <Select
-                  multiple
-                  value={statusFilters}
-                  onChange={handleFilterChange(setStatusFilters)}
-                  input={<OutlinedInput label={t('common.status')} />}
-                  renderValue={(selected) => selected.map(s => t(`common.${s}`)).join(', ')}
-                >
-                  {statusOptions.map((status) => (
-                    <MenuItem key={status} value={status}>
-                      <ListItemText primary={t(`common.${status}`)} />
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>{t('safes.currency')}</InputLabel>
-                <Select
-                  multiple
-                  value={currencyFilters}
-                  onChange={handleFilterChange(setCurrencyFilters)}
-                  input={<OutlinedInput label={t('safes.currency')} />}
-                  renderValue={(selected) => selected.join(', ')}
-                >
-                  {uniqueCurrencies.map((currency) => (
-                    <MenuItem key={currency} value={currency}>
-                      <ListItemText primary={currency} />
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Button variant="outlined" onClick={clearFilters}>{t('common.clearFilters')}</Button>
-            </Grid>
+      <Box sx={{ px: 4, pb: 4 }}>
+        {/* Quick Stats Cards */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} md={4}>
+            <Card sx={{ 
+              borderRadius: 3, 
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+              border: '1px solid rgba(0, 0, 0, 0.05)',
+              background: 'linear-gradient(135deg, #fff 0%, #f8fafc 100%)'
+            }}>
+              <CardContent sx={{ textAlign: 'center', p: 3 }}>
+                <WalletIcon sx={{ fontSize: 48, color: '#25638f', mb: 2 }} />
+                <Typography variant="h4" sx={{ fontWeight: 700, color: '#25638f', mb: 1 }}>
+                  ₺{totalBalance.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Toplam Bakiye
+                </Typography>
+              </CardContent>
+            </Card>
           </Grid>
-        </AccordionDetails>
-      </Accordion>
+          <Grid item xs={12} md={4}>
+            <Card sx={{ 
+              borderRadius: 3, 
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+              border: '1px solid rgba(0, 0, 0, 0.05)',
+              background: 'linear-gradient(135deg, #fff 0%, #f8fafc 100%)'
+            }}>
+              <CardContent sx={{ textAlign: 'center', p: 3 }}>
+                <TrendingUpIcon sx={{ fontSize: 48, color: '#28a745', mb: 2 }} />
+                <Typography variant="h4" sx={{ fontWeight: 700, color: '#28a745', mb: 1 }}>
+                  {activeSafesCount}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Aktif Kasa
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card sx={{ 
+              borderRadius: 3, 
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+              border: '1px solid rgba(0, 0, 0, 0.05)',
+              background: 'linear-gradient(135deg, #fff 0%, #f8fafc 100%)'
+            }}>
+              <CardContent sx={{ textAlign: 'center', p: 3 }}>
+                <AccountBalanceIcon sx={{ fontSize: 48, color: '#fd7e14', mb: 2 }} />
+                <Typography variant="h4" sx={{ fontWeight: 700, color: '#fd7e14', mb: 1 }}>
+                  {bankAccountsCount}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Banka Hesabı
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
 
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>
-      ) : error ? (
-        <Typography color="error" align="center">{error}</Typography>
-      ) : (
-        <SafesList safes={filteredSafes} onEdit={handleEdit} onDelete={handleDelete} />
-      )}
+        {/* Filters */}
+        <Accordion 
+          expanded={filtersOpen} 
+          onChange={() => setFiltersOpen(!filtersOpen)}
+          sx={{ 
+            mb: 3,
+            borderRadius: 2,
+            '&:before': { display: 'none' },
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+          }}
+        >
+          <AccordionSummary 
+            expandIcon={<FilterListIcon />}
+            sx={{
+              backgroundColor: '#f8fafc',
+              '&:hover': { backgroundColor: '#f1f5f9' }
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <FilterListIcon sx={{ color: '#25638f' }} />
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Filtreler
+              </Typography>
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 3 }}>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  placeholder="Kasa adı veya kodu ile ara..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ color: '#25638f' }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                      backgroundColor: '#f8fafc',
+                      '&:hover': { backgroundColor: '#f1f5f9' },
+                      '&.Mui-focused': { backgroundColor: 'white' }
+                    }
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <FormControl fullWidth>
+                  <InputLabel>Durum</InputLabel>
+                  <Select
+                    multiple
+                    value={statusFilters}
+                    onChange={handleFilterChange(setStatusFilters)}
+                    input={<OutlinedInput label="Durum" />}
+                    renderValue={(selected) => selected.map(s => s === 'active' ? 'Aktif' : 'Pasif').join(', ')}
+                    sx={{
+                      borderRadius: 2,
+                      backgroundColor: '#f8fafc',
+                      '&:hover': { backgroundColor: '#f1f5f9' },
+                      '&.Mui-focused': { backgroundColor: 'white' }
+                    }}
+                  >
+                    {statusOptions.map((status) => (
+                      <MenuItem key={status} value={status}>
+                        <ListItemText primary={status === 'active' ? 'Aktif' : 'Pasif'} />
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <FormControl fullWidth>
+                  <InputLabel>Para Birimi</InputLabel>
+                  <Select
+                    multiple
+                    value={currencyFilters}
+                    onChange={handleFilterChange(setCurrencyFilters)}
+                    input={<OutlinedInput label="Para Birimi" />}
+                    renderValue={(selected) => selected.join(', ')}
+                    sx={{
+                      borderRadius: 2,
+                      backgroundColor: '#f8fafc',
+                      '&:hover': { backgroundColor: '#f1f5f9' },
+                      '&.Mui-focused': { backgroundColor: 'white' }
+                    }}
+                  >
+                    {uniqueCurrencies.map((currency) => (
+                      <MenuItem key={currency} value={currency}>
+                        <ListItemText primary={currency} />
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={2}>
+                <Button 
+                  variant="outlined" 
+                  onClick={clearFilters}
+                  fullWidth
+                  sx={{
+                    height: '56px',
+                    borderColor: '#e2e8f0',
+                    color: '#64748b',
+                    '&:hover': {
+                      borderColor: '#cbd5e1',
+                      backgroundColor: '#f8fafc'
+                    }
+                  }}
+                >
+                  Temizle
+                </Button>
+              </Grid>
+            </Grid>
+          </AccordionDetails>
+        </Accordion>
+
+        {/* Main Content */}
+        <Paper sx={{ 
+          borderRadius: 3, 
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+          border: '1px solid rgba(0, 0, 0, 0.05)',
+          overflow: 'hidden'
+        }}>
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+              <CircularProgress sx={{ color: '#25638f' }} />
+            </Box>
+          ) : error ? (
+            <Typography color="error" align="center" sx={{ p: 4 }}>{error}</Typography>
+          ) : (
+            <SafesList safes={filteredSafes} onEdit={handleEdit} onDelete={handleDelete} />
+          )}
+        </Paper>
+      </Box>
 
       <AddSafeModal
         open={isModalOpen}
@@ -217,7 +432,7 @@ const SafesPage: React.FC = () => {
         onConfirm={handleConfirmDelete}
         itemName={safeToDelete?.name}
       />
-    </Paper>
+    </Box>
   );
 };
 

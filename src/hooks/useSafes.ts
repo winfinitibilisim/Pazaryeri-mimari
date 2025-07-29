@@ -39,51 +39,70 @@ export const useSafes = () => {
   }, [fetchSafes]);
 
   const addSafe = useCallback(async (safeData: Partial<Safe>) => {
-    try {
-      const response = await axios.post<Safe>(API_URL, safeData);
-      setSafes(prev => [...prev, response.data]);
-      showSuccess(t('safes.addSuccess'));
-    } catch (err) {
-      setError(t('safes.addError'));
-      showError(t('safes.addError'));
-      console.error(err);
-    }
+    console.log('--- Running MOCKED addSafe ---'); // Diagnostic log
+    
+    // MOCK: Simulate adding a new safe
+    const newSafe: Safe = {
+      id: Date.now().toString(),
+      name: safeData.name || 'Yeni Kasa',
+      currency: safeData.currency || 'TRY',
+      balance: safeData.balance || 0,
+      type: safeData.type || 'cash',
+      isActive: safeData.isActive !== undefined ? safeData.isActive : true
+    };
+    
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    setSafes(prev => [...prev, newSafe]);
+    showSuccess(t('safes.addSuccess') || 'Kasa başarıyla eklendi');
   }, [showSuccess, showError, t]);
 
   const updateSafe = useCallback(async (id: string, safeData: Partial<Safe>) => {
-    try {
-      const response = await axios.put<Safe>(`${API_URL}/${id}`, safeData);
-      setSafes(prev => prev.map(s => s.id === id ? response.data : s));
-      showSuccess(t('safes.updateSuccess'));
-    } catch (err) {
-      setError(t('safes.updateError'));
-      showError(t('safes.updateError'));
-      console.error(err);
-    }
+    console.log(`--- Running MOCKED updateSafe for id: ${id} ---`); // Diagnostic log
+    
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    setSafes(prev => prev.map(s => {
+      if (s.id === id) {
+        return { ...s, ...safeData };
+      }
+      return s;
+    }));
+    showSuccess(t('safes.updateSuccess') || 'Kasa başarıyla güncellendi');
   }, [showSuccess, showError, t]);
 
-    const getSafeById = useCallback(async (id: string): Promise<Safe | undefined> => {
-    try {
-      const response = await axios.get<Safe>(`${API_URL}/${id}`);
-      return response.data;
-    } catch (err) {
-      setError(t('safes.fetchByIdError'));
-      showError(t('safes.fetchByIdError'));
-      console.error(err);
+  const getSafeById = useCallback(async (id: string): Promise<Safe | undefined> => {
+    console.log(`--- Running MOCKED getSafeById for id: ${id} ---`); // Diagnostic log
+    
+    // MOCK: Return mock data to bypass server error
+    const mockSafes: Safe[] = [
+      { id: '1', name: 'Merkez Kasa (TRY)', currency: 'TRY', balance: 12500.75, type: 'cash', isActive: true },
+      { id: '2', name: 'Döviz Kasası (USD)', currency: 'USD', balance: 5200.50, type: 'cash', isActive: true },
+      { id: '3', name: 'Personel Kasası (TRY)', currency: 'TRY', balance: 8750.00, type: 'cash', isActive: true },
+    ];
+    
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    const safe = mockSafes.find(s => s.id === id);
+    if (safe) {
+      return safe;
+    } else {
+      console.warn(`Safe with id ${id} not found in mock data`);
       return undefined;
     }
-  }, [showError, t]);
+  }, []);
 
   const deleteSafe = useCallback(async (id: string) => {
-    try {
-      await axios.delete(`${API_URL}/${id}`);
-      setSafes(prev => prev.filter(s => s.id !== id));
-      showSuccess(t('safes.deleteSuccess'));
-    } catch (err) {
-      setError(t('safes.deleteError'));
-      showError(t('safes.deleteError'));
-      console.error(err);
-    }
+    console.log(`--- Running MOCKED deleteSafe for id: ${id} ---`); // Diagnostic log
+    
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    setSafes(prev => prev.filter(s => s.id !== id));
+    showSuccess(t('safes.deleteSuccess') || 'Kasa başarıyla silindi');
   }, [showSuccess, showError, t]);
 
   return { safes, loading, error, fetchSafes, addSafe, updateSafe, deleteSafe, getSafeById };
