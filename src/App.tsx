@@ -255,9 +255,9 @@ const AppWithLanguage = () => {
         { path: 'shipping/all-packages', element: <AllPackagesPage /> },
         
         // Shipping Management Routes
-        { path: 'shipping/pending', element: <PendingShipmentsPage /> },
-        { path: 'shipping/sent', element: <SentShipmentsPage /> },
-        { path: 'shipping/delivered', element: <DeliveredShipmentsPage /> },
+        { path: 'shipping/pending-shipments', element: <PendingShipmentsPage /> },
+        { path: 'shipping/sent-shipments', element: <SentShipmentsPage /> },
+        { path: 'shipping/delivered-shipments', element: <DeliveredShipmentsPage /> },
       ],
     },
     { path: '*', element: <Navigate to="/" /> }, // Redirect any unknown paths to dashboard

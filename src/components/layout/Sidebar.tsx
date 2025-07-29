@@ -28,6 +28,8 @@ import {
   ArrowUpward as ArrowUpwardIcon,
   SwapHoriz as SwapHorizIcon,
   AccountBalance as AccountBalanceIcon,
+  PlayArrow as PlayArrowIcon,
+  CheckCircle as CheckCircleIcon,
 } from '@mui/icons-material';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
@@ -76,8 +78,8 @@ const shipmentMenuGroups: MenuGroup[] = [
     title: 'SEVKİYATLAR',
     items: [
       { text: 'Bekleyen', path: '/shipping/pending-shipments', icon: <HourglassEmptyIcon /> },
-      { text: 'Gönderilen', path: '/shipping/sent-shipments', icon: <ArrowUpwardIcon /> },
-      { text: 'Teslim Edilen', path: '/shipping/delivered-shipments', icon: <AssignmentIcon /> },
+      { text: 'Gönderilen', path: '/shipping/sent-shipments', icon: <PlayArrowIcon /> },
+      { text: 'Teslim Edilen', path: '/shipping/delivered-shipments', icon: <CheckCircleIcon /> },
     ],
   },
 ];
