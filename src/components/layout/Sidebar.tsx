@@ -70,6 +70,18 @@ const cargoMenuGroups: MenuGroup[] = [
   },
 ];
 
+// Sevkiyat menüleri
+const shipmentMenuGroups: MenuGroup[] = [
+  {
+    title: 'SEVKİYATLAR',
+    items: [
+      { text: 'Bekleyen', path: '/shipping/pending-shipments', icon: <HourglassEmptyIcon /> },
+      { text: 'Gönderilen', path: '/shipping/sent-shipments', icon: <ArrowUpwardIcon /> },
+      { text: 'Teslim Edilen', path: '/shipping/delivered-shipments', icon: <AssignmentIcon /> },
+    ],
+  },
+];
+
 // Ürün menüleri
 const productMenuGroups: MenuGroup[] = [
   {
@@ -123,6 +135,13 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onToggle, activeMenu }) => {
   // Hangi menü grubunu göstereceğimizi belirle
   const getMenuGroups = () => {
     const currentPath = location.pathname;
+    
+    // Sevkiyat sayfalarında sevkiyat menülerini göster
+    if (currentPath.startsWith('/shipping/pending-shipments') || 
+        currentPath.startsWith('/shipping/sent-shipments') || 
+        currentPath.startsWith('/shipping/delivered-shipments')) {
+      return shipmentMenuGroups;
+    }
     
     // Kargo sayfalarında kargo menülerini göster
     if (currentPath.startsWith('/shipping/')) {

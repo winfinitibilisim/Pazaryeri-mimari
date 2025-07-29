@@ -37,8 +37,8 @@ const mainCategories = [
   {
     title: 'Sevkiyatlar',
     icon: <SevkiyatlarIcon sx={{ fontSize: 56, color: '#E91E63' }} />,
-    path: '/shipments',
-    menuKey: 'default'
+    path: '/shipping/pending-shipments',
+    menuKey: 'shipments'
   },
   {
     title: 'Kargo Fiyatları',
