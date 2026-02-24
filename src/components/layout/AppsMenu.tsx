@@ -18,6 +18,7 @@ import {
   LocationOn as LocationIcon,
   LocalShipping as ShippingIcon,
   Lock as LockIcon,
+  Inventory2 as PackageIcon,
   // Kullanılmayan ikonlar kaldırıldı
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
@@ -93,9 +94,14 @@ const AppsMenu: React.FC<AppsMenuProps> = ({
       name: t('sidebar.countries') 
     },
     { 
-      id: 'shipping-areas', 
-      icon: <ShippingIcon sx={{ color: '#333', fontSize: 40 }} />, 
-      name: t('sidebar.shippingAreas') 
+      id: 'package-shipment', 
+      icon: <PackageIcon sx={{ color: '#4CAF50', fontSize: 40 }} />, 
+      name: 'Paket Sevkiyatı',
+      onClick: () => {
+        handleMenuItemClick('package-shipment');
+        navigate('/shipping/pending-shipments');
+        handleClose();
+      }
     },
     { 
       id: 'privacy', 

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { 
-  Drawer, 
-  List, 
-  ListItem, 
-  ListItemButton, 
-  ListItemIcon, 
-  ListItemText, 
-  Box, 
+import {
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Box,
   useTheme,
   Divider,
   Tooltip,
@@ -30,6 +30,7 @@ import {
   AccountBalance as AccountBalanceIcon,
   PlayArrow as PlayArrowIcon,
   CheckCircle as CheckCircleIcon,
+  ShoppingCart as ShoppingCartIcon,
 } from '@mui/icons-material';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
@@ -60,29 +61,11 @@ interface MenuGroup {
   items: MenuItem[];
 }
 
-// Kargo menüleri
-const cargoMenuGroups: MenuGroup[] = [
-  {
-    title: 'KARGO & SEVKİYAT',
-    items: [
-      { text: 'Mal Kabul', path: '/shipping/goods-acceptance', icon: <InventoryIcon /> },
-      { text: 'Bekleyen Paketler', path: '/shipping/pending-packages', icon: <HourglassEmptyIcon /> },
-      { text: 'Tüm Paketler', path: '/shipping/all-packages', icon: <AssignmentIcon /> },
-    ],
-  },
-];
+// Kargo menüleri (KALDIRILDI)
 
-// Sevkiyat menüleri
-const shipmentMenuGroups: MenuGroup[] = [
-  {
-    title: 'SEVKİYATLAR',
-    items: [
-      { text: 'Bekleyen', path: '/shipping/pending-shipments', icon: <HourglassEmptyIcon /> },
-      { text: 'Gönderilen', path: '/shipping/sent-shipments', icon: <PlayArrowIcon /> },
-      { text: 'Teslim Edilen', path: '/shipping/delivered-shipments', icon: <CheckCircleIcon /> },
-    ],
-  },
-];
+// Sevkiyat menüleri (KALDIRILDI)
+
+// Paket Sevkiyatı menüleri (KALDIRILDI)
 
 // Ürün menüleri
 const productMenuGroups: MenuGroup[] = [
@@ -101,6 +84,7 @@ const accountingMenuGroups: MenuGroup[] = [
   {
     title: 'FATURALAR & FİŞLER',
     items: [
+      { text: 'Siparişler', path: '/orders', icon: <ShoppingCartIcon /> },
       { text: 'Müşteriler', path: '/customers', icon: <PeopleIcon /> },
       { text: 'Satış Faturaları', path: '/sales-invoices', icon: <ReceiptIcon /> },
       { text: 'Taslak Faturalar', path: '/draft-invoices', icon: <DescriptionIcon /> },
@@ -137,35 +121,24 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onToggle, activeMenu }) => {
   // Hangi menü grubunu göstereceğimizi belirle
   const getMenuGroups = () => {
     const currentPath = location.pathname;
-    
-    // Sevkiyat sayfalarında sevkiyat menülerini göster
-    if (currentPath.startsWith('/shipping/pending-shipments') || 
-        currentPath.startsWith('/shipping/sent-shipments') || 
-        currentPath.startsWith('/shipping/delivered-shipments')) {
-      return shipmentMenuGroups;
-    }
-    
-    // Kargo sayfalarında kargo menülerini göster
-    if (currentPath.startsWith('/shipping/')) {
-      return cargoMenuGroups;
-    }
-    
+
     // Ürün sayfalarında ürün menülerini göster
-    if (currentPath.startsWith('/products') || currentPath.startsWith('/categories') || currentPath.startsWith('/brands')) {
+    if (activeMenu === 'products' || currentPath.startsWith('/products') || currentPath.startsWith('/categories') || currentPath.startsWith('/brands')) {
       return productMenuGroups;
     }
-    
+
     // Muhasebe sayfalarında muhasebe menülerini göster
-    if (currentPath.startsWith('/customers') || currentPath.startsWith('/sales-invoices') || 
-        currentPath.startsWith('/draft-invoices') || currentPath.startsWith('/purchase-invoices') ||
-        currentPath.startsWith('/employees') || currentPath.startsWith('/expense-receipts') ||
-        currentPath.startsWith('/receivables') || currentPath.startsWith('/payments') ||
-        currentPath.startsWith('/current-account-transactions') || currentPath.startsWith('/safes')) {
+    if (activeMenu === 'sales' || currentPath.startsWith('/orders') || currentPath.startsWith('/promotions') ||
+      currentPath.startsWith('/customers') || currentPath.startsWith('/sales-invoices') ||
+      currentPath.startsWith('/draft-invoices') || currentPath.startsWith('/purchase-invoices') ||
+      currentPath.startsWith('/employees') || currentPath.startsWith('/expense-receipts') ||
+      currentPath.startsWith('/receivables') || currentPath.startsWith('/payments') ||
+      currentPath.startsWith('/current-account-transactions') || currentPath.startsWith('/safes')) {
       return accountingMenuGroups;
     }
-    
-    // Varsayılan olarak kargo menülerini göster
-    return cargoMenuGroups;
+
+    // Varsayılan olarak ürün menülerini göster
+    return productMenuGroups;
   };
 
   const menuGroups = getMenuGroups();

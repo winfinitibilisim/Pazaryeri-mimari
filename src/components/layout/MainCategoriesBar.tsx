@@ -1,12 +1,12 @@
 import React from 'react';
 import { Box, Paper, Grid, Button, Typography, Container, useTheme } from '@mui/material';
 import {
-  LocalShipping as KargoListesiIcon,
-  AccountBalanceWallet as MuhasebeIcon,
-  Inventory as UrunlerIcon,
-  People as MusterilerIcon,
-  Assessment as SevkiyatlarIcon,
-  PriceCheck as KargoFiyatlariIcon
+  ShoppingBag as UrunlerIcon,
+  Group as SatislarIcon,
+  MonetizationOn as PromosyonlarIcon,
+  TrendingUp as RaporlarIcon,
+  ImportExport as SuperXmlIcon,
+  Mail as ErpCrmIcon
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -16,35 +16,40 @@ interface MainCategoriesBarProps {
 
 const mainCategories = [
   {
-    title: 'Kargo Listesi',
-    icon: <KargoListesiIcon sx={{ fontSize: 56, color: '#FFC107' }} />,
-    path: '/shipping/goods-acceptance',
-    menuKey: 'shipping'
-  },
-  {
-    title: 'Muhasebe',
-    icon: <MuhasebeIcon sx={{ fontSize: 56, color: '#3F51B5' }} />,
-    path: '/customers',
-    menuKey: 'sales'
-  },
-  {
     title: 'Ürünler',
     icon: <UrunlerIcon sx={{ fontSize: 56, color: '#F57C00' }} />,
     path: '/products',
     menuKey: 'products'
   },
-
   {
-    title: 'Sevkiyatlar',
-    icon: <SevkiyatlarIcon sx={{ fontSize: 56, color: '#E91E63' }} />,
-    path: '/shipping/pending-shipments',
-    menuKey: 'shipments'
+    title: 'Satışlar',
+    icon: <SatislarIcon sx={{ fontSize: 56, color: '#2196F3' }} />,
+    path: '/orders', // Assuming 'orders' maps to Satışlar logic
+    menuKey: 'sales'
   },
   {
-    title: 'Kargo Fiyatları',
-    icon: <KargoFiyatlariIcon sx={{ fontSize: 56, color: '#FF5722' }} />,
-    path: '/shipping-prices',
-    menuKey: 'default'
+    title: 'Promosyonlar',
+    icon: <PromosyonlarIcon sx={{ fontSize: 56, color: '#FFC107' }} />,
+    path: '/promotions', // Needs a route or placeholder
+    menuKey: 'promotions'
+  },
+  {
+    title: 'Raporlar',
+    icon: <RaporlarIcon sx={{ fontSize: 56, color: '#E91E63' }} />,
+    path: '/reports',
+    menuKey: 'reports'
+  },
+  {
+    title: 'Süper Xml Aktar',
+    icon: <SuperXmlIcon sx={{ fontSize: 56, color: '#4CAF50' }} />,
+    path: '/xml-export', // Needs a route or placeholder
+    menuKey: 'xml'
+  },
+  {
+    title: 'ERP / CRM',
+    icon: <ErpCrmIcon sx={{ fontSize: 56, color: '#FF5722' }} />,
+    path: '/erp-crm', // Needs a route or placeholder
+    menuKey: 'erp'
   }
 ];
 
@@ -67,7 +72,7 @@ const MainCategoriesBar: React.FC<MainCategoriesBarProps> = ({ setActiveMenu }) 
         <Paper elevation={0} sx={{ p: 2, borderRadius: 2, border: '1px solid #eee' }}>
           <Grid container spacing={3} justifyContent="center">
             {mainCategories.map((category, index) => (
-              <Grid item xs={6} sm={4} md={2.4} key={index}>
+              <Grid item xs={6} sm={4} md={2} key={index}>
                 <Button
                   variant={location.pathname === category.path ? 'contained' : 'outlined'}
                   onClick={() => {
@@ -91,7 +96,7 @@ const MainCategoriesBar: React.FC<MainCategoriesBarProps> = ({ setActiveMenu }) 
                   }}
                 >
                   {category.icon}
-                                    <Typography variant="subtitle1" sx={{ mt: 2, color: 'text.primary', fontWeight: 'medium', fontSize: '1.05rem' }}>
+                  <Typography variant="subtitle1" sx={{ mt: 2, color: 'text.primary', fontWeight: 'medium', fontSize: '1.05rem', textAlign: 'center' }}>
                     {category.title}
                   </Typography>
                 </Button>

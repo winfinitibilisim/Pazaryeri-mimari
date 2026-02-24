@@ -16,6 +16,9 @@ import Login from './pages/Login';
 
 // Page Imports
 import OrdersPage from './pages/OrdersPage';
+import CreateOrderPage from './pages/CreateOrderPage';
+import OrderDetailPage from './pages/OrderDetailPage';
+import OrderLabelPage from './components/orders/OrderLabelPage'; // Import Label Page
 import CustomersPage from './pages/CustomersPage';
 import AddCustomerPage from './pages/AddCustomerPage';
 import ProductsPage from './pages/ProductsPage';
@@ -76,19 +79,8 @@ import SafesPage from './pages/finance/SafesPage';
 import SafeDetailPage from './pages/finance/safes/SafeDetailPage';
 import EmployeesPage from './pages/EmployeesPage';
 import EmployeeDetailPage from './pages/EmployeeDetailPage';
-import ShippingListPage from './pages/ShippingListPage';
 import AccountingPage from './pages/AccountingPage';
-import ShipmentsPage from './pages/ShipmentsPage';
-import ShippingPricesPage from './pages/ShippingPricesPage';
-import GoodsAcceptancePage from './pages/shipping/GoodsAcceptancePage';
-import PendingPackagesPage from './pages/shipping/PendingPackagesPage';
-import SentPackagesPage from './pages/shipping/SentPackagesPage';
-import AllPackagesPage from './pages/shipping/AllPackagesPage';
-
-// Shipping Management Pages
-import PendingShipmentsPage from './pages/shipping/PendingShipmentsPage';
-import SentShipmentsPage from './pages/shipping/SentShipmentsPage';
-import DeliveredShipmentsPage from './pages/shipping/DeliveredShipmentsPage';
+// Shipping Management Pages (REMOVED)
 
 // Contexts
 import { LanguageProvider } from './contexts/LanguageContext';
@@ -179,6 +171,10 @@ const AppWithLanguage = () => {
       element: !isAuthenticated ? <Login onLogin={handleLogin} /> : <Navigate to={localStorage.getItem('lastVisitedPage') || '/dashboard'} />,
     },
     {
+      path: '/orders/:orderId/label',
+      element: isAuthenticated ? <OrderLabelPage /> : <Navigate to="/login" />,
+    },
+    {
       path: '/',
       element: <ProtectedRoute />,
       children: [
@@ -186,6 +182,8 @@ const AppWithLanguage = () => {
         { path: 'dashboard', element: <Dashboard /> },
         { path: 'users', element: <Users /> },
         { path: 'orders', element: <OrdersPage /> },
+        { path: 'orders/create', element: <CreateOrderPage /> },
+        { path: 'orders/:orderId', element: <OrderDetailPage /> },
         { path: 'customers', element: <CustomersPage /> },
         { path: 'add-customer', element: <AddCustomerPage /> },
         { path: 'products', element: <ProductsPage /> },
@@ -245,19 +243,7 @@ const AppWithLanguage = () => {
         { path: 'safes/:id', element: <SafeDetailPage /> },
         { path: 'employees', element: <EmployeesPage /> },
         { path: 'employees/:id', element: <EmployeeDetailPage /> },
-        { path: 'shipping-list', element: <ShippingListPage /> },
         { path: 'accounting', element: <AccountingPage /> },
-        { path: 'shipments', element: <ShipmentsPage /> },
-                { path: 'shipping-prices', element: <ShippingPricesPage /> },
-        { path: 'shipping/goods-acceptance', element: <GoodsAcceptancePage /> },
-        { path: 'shipping/pending-packages', element: <PendingPackagesPage /> },
-        { path: 'shipping/sent-packages', element: <SentPackagesPage /> },
-        { path: 'shipping/all-packages', element: <AllPackagesPage /> },
-        
-        // Shipping Management Routes
-        { path: 'shipping/pending-shipments', element: <PendingShipmentsPage /> },
-        { path: 'shipping/sent-shipments', element: <SentShipmentsPage /> },
-        { path: 'shipping/delivered-shipments', element: <DeliveredShipmentsPage /> },
       ],
     },
     { path: '*', element: <Navigate to="/" /> }, // Redirect any unknown paths to dashboard
