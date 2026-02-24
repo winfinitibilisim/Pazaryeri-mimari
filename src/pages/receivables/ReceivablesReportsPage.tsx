@@ -17,16 +17,16 @@ import {
   AccessTime as AccessTimeIcon,
 } from '@mui/icons-material';
 import {
-  PieChart, 
-  Pie, 
-  Cell, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
   ResponsiveContainer
 } from 'recharts';
 
@@ -116,7 +116,7 @@ const ReceivablesReportsPage: React.FC = () => {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => `₺${value.toFixed(2)}`} />
+                <Tooltip formatter={(value: any) => `₺${Number(value).toFixed(2)}`} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
@@ -134,7 +134,7 @@ const ReceivablesReportsPage: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip formatter={(value: number) => `₺${value.toFixed(2)}`} />
+                <Tooltip formatter={(value: any) => `₺${Number(value).toFixed(2)}`} />
                 <Legend />
                 <Bar dataKey="value" fill={theme.palette.warning.main} name="Tutar" />
               </BarChart>
