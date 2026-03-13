@@ -31,6 +31,18 @@ import {
   PlayArrow as PlayArrowIcon,
   CheckCircle as CheckCircleIcon,
   ShoppingCart as ShoppingCartIcon,
+  LocalOffer as LocalOfferIcon, // İndirimler
+  CardGiftcard as CardGiftcardIcon, // Promosyon Hediye
+  ConfirmationNumber as ConfirmationNumberIcon, // Kuponlar
+  Comment as CommentIcon, // Değerlendirmeler & Yorumlar
+  Storefront as StorefrontIcon, // Vitrin Ürünleri
+  Event as EventIcon, // Önerilen Ürünler (ya da EventIcon)
+  FavoriteBorder as FavoriteBorderIcon, // İstek Listesi
+  ListAlt as ListAltIcon,
+  Tune as TuneIcon,
+  Class as ClassIcon,
+  Label as LabelIcon,
+  EmojiEmotions as EmojiEmotionsIcon
 } from '@mui/icons-material';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
@@ -73,8 +85,13 @@ const productMenuGroups: MenuGroup[] = [
     title: 'PRODUCT',
     items: [
       { text: 'Ürünler', path: '/products', icon: <InventoryIcon /> },
-      { text: 'Kategori', path: '/categories', icon: <CategoryIcon /> },
-      { text: 'Markalar', path: '/brands', icon: <CategoryIcon /> },
+      { text: 'Ürün Seçenekleri', path: '/product-options', icon: <ListAltIcon /> },
+      { text: 'Kategoriler', path: '/categories', icon: <CategoryIcon /> },
+      { text: 'Markalar', path: '/brands', icon: <LocalOfferIcon /> },
+      { text: 'Özellikler', path: '/features', icon: <TuneIcon /> },
+      { text: 'Ürün Sınıfları', path: '/product-classes', icon: <ClassIcon /> },
+      { text: 'Kullanılabilir Etiketler', path: '/available-tags', icon: <LabelIcon /> },
+      { text: 'İkonlar', path: '/icons', icon: <EmojiEmotionsIcon /> },
     ],
   },
 ];
@@ -112,6 +129,23 @@ const accountingMenuGroups: MenuGroup[] = [
   },
 ];
 
+// Promosyon menüleri
+const promotionsMenuGroups: MenuGroup[] = [
+  {
+    title: 'PROMOSYONLAR',
+    items: [
+      { text: 'İndirimler', path: '/promotions/discounts', icon: <LocalOfferIcon /> },
+      { text: 'A ürün + B ürün indirimi', path: '/promotions/ab-discount', icon: <LocalOfferIcon /> },
+      { text: 'X Ürün Al Y Öde', path: '/promotions/gift', icon: <CardGiftcardIcon /> },
+      { text: 'Kuponlar', path: '/promotions/coupons', icon: <ConfirmationNumberIcon /> },
+      { text: 'Değerlendirmeler & Yorumlar', path: '/promotions/reviews', icon: <CommentIcon /> },
+      { text: 'Vitrin Ürünleri', path: '/promotions/showcase', icon: <StorefrontIcon /> },
+      { text: 'Önerilen Ürünler', path: '/promotions/recommended', icon: <EventIcon /> },
+      { text: 'İstek Listesi ( Favoriler )', path: '/promotions/wishlist', icon: <FavoriteBorderIcon /> },
+    ],
+  },
+];
+
 const Sidebar: React.FC<SidebarProps> = ({ open, onToggle, activeMenu }) => {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -127,8 +161,13 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onToggle, activeMenu }) => {
       return productMenuGroups;
     }
 
+    // Promosyon sayfalarında promosyon menülerini göster
+    if (activeMenu === 'promotions' || currentPath.startsWith('/promotions')) {
+      return promotionsMenuGroups;
+    }
+
     // Muhasebe sayfalarında muhasebe menülerini göster
-    if (activeMenu === 'sales' || currentPath.startsWith('/orders') || currentPath.startsWith('/promotions') ||
+    if (activeMenu === 'sales' || currentPath.startsWith('/orders') ||
       currentPath.startsWith('/customers') || currentPath.startsWith('/sales-invoices') ||
       currentPath.startsWith('/draft-invoices') || currentPath.startsWith('/purchase-invoices') ||
       currentPath.startsWith('/employees') || currentPath.startsWith('/expense-receipts') ||

@@ -77,15 +77,15 @@ const getInitials = (name: string): string => {
 // Ülke koduna göre bayrak URL'si döndüren fonksiyon
 const getFlagUrl = (countryCode: string): string => {
   if (!countryCode) return '/flags/tr.svg';
-  
+
   // Ülke kodunu küçük harfe çevir
   const code = countryCode.toLowerCase();
-  
+
   // Özel durumlar için kontrol
   if (code === 'ru') {
     return '/flags/ru.svg';
   }
-  
+
   // Kod-ülke adı eşleştirmeleri - ISO kodlarını kullan
   const codeToCountryName: Record<string, string> = {
     'tr': 'tr',     // Türkiye
@@ -134,10 +134,10 @@ const getFlagUrl = (countryCode: string): string => {
     'il': 'il',
     'eg': 'eg'
   };
-  
+
   // Ülke kodunu eşleştirme tablosundan al, yoksa doğrudan kodu kullan
   const flagCode = codeToCountryName[code] || code;
-  
+
   // Bayrak URL'sini döndür
   return `/flags/${flagCode}.svg`;
 };
@@ -392,7 +392,7 @@ const getCountryName = (countryCode: string): string => {
     'zm': 'Zambiya',
     'zw': 'Zimbabve'
   };
-  
+
   return countries[countryCode.toLowerCase()] || countryCode;
 };
 
@@ -405,7 +405,7 @@ const getCustomerTypeName = (type: string): string => {
     'partner': 'Partner',
     // Daha fazla tip eklenebilir
   };
-  
+
   return types[type.toLowerCase()] || type;
 };
 
@@ -413,56 +413,57 @@ interface CustomerCardProps {
   customer: Customer;
   onClick?: () => void;
   onMenuOpen?: (event: React.MouseEvent<HTMLElement>, customer: Customer) => void;
+  onEditClick?: (customer: Customer) => void;
 }
 
-const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => {
+const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen, onEditClick }) => {
   // Örnek sipariş verileri
   const exampleOrders = [
-    { id: `ORD-${customer.id}-001`, date: '01.06.2025', products: 'Elektronik Ürünler (3)', amount: '1.250 ₺', status: 'Tamamlandı', statusColor: '#4caf50' },
-    { id: `ORD-${customer.id}-002`, date: '15.05.2025', products: 'Ofis Malzemeleri (5)', amount: '850 ₺', status: 'Tamamlandı', statusColor: '#4caf50' },
-    { id: `ORD-${customer.id}-003`, date: '28.04.2025', products: 'Mobilya (2)', amount: '1.750 ₺', status: 'Kargoda', statusColor: '#ff9800' },
-    { id: `ORD-${customer.id}-004`, date: '10.04.2025', products: 'Tekstil Ürünleri (4)', amount: '500 ₺', status: 'Tamamlandı', statusColor: '#4caf50' },
-    { id: `ORD-${customer.id}-005`, date: '05.04.2025', products: 'Mutfak Gereçleri (6)', amount: '1.120 ₺', status: 'Tamamlandı', statusColor: '#4caf50' },
-    { id: `ORD-${customer.id}-006`, date: '20.03.2025', products: 'Spor Malzemeleri (2)', amount: '750 ₺', status: 'Tamamlandı', statusColor: '#4caf50' },
-    { id: `ORD-${customer.id}-007`, date: '10.03.2025', products: 'Elektronik Aksesuarlar (8)', amount: '480 ₺', status: 'İptal Edildi', statusColor: '#f44336' },
-    { id: `ORD-${customer.id}-008`, date: '25.02.2025', products: 'Kitaplar (4)', amount: '320 ₺', status: 'Tamamlandı', statusColor: '#4caf50' },
-    { id: `ORD-${customer.id}-009`, date: '15.02.2025', products: 'Bahçe Mobilyası (3)', amount: '2.350 ₺', status: 'Hazırlanıyor', statusColor: '#2196f3' },
-    { id: `ORD-${customer.id}-010`, date: '05.02.2025', products: 'Bilgisayar Parçaları (5)', amount: '3.750 ₺', status: 'Tamamlandı', statusColor: '#4caf50' },
-    { id: `ORD-${customer.id}-011`, date: '20.01.2025', products: 'Oyuncaklar (7)', amount: '650 ₺', status: 'Tamamlandı', statusColor: '#4caf50' },
-    { id: `ORD-${customer.id}-012`, date: '10.01.2025', products: 'Kırtasiye Ürünleri (10)', amount: '420 ₺', status: 'Tamamlandı', statusColor: '#4caf50' },
+    { id: `ORD-${customer.id}-001`, date: '01.06.2025', store: 'Teknoloji Market', products: 'Elektronik Ürünler (3)', amount: '1.250 ₺', status: 'Tamamlandı', statusColor: '#4caf50' },
+    { id: `ORD-${customer.id}-002`, date: '15.05.2025', store: 'Winfiniti AŞ', products: 'Ofis Malzemeleri (5)', amount: '850 ₺', status: 'Tamamlandı', statusColor: '#4caf50' },
+    { id: `ORD-${customer.id}-003`, date: '28.04.2025', store: 'Ev & Yaşam', products: 'Mobilya (2)', amount: '1.750 ₺', status: 'Kargoda', statusColor: '#ff9800' },
+    { id: `ORD-${customer.id}-004`, date: '10.04.2025', store: 'Moda Dünyası', products: 'Tekstil Ürünleri (4)', amount: '500 ₺', status: 'Tamamlandı', statusColor: '#4caf50' },
+    { id: `ORD-${customer.id}-005`, date: '05.04.2025', store: 'Mutfak Sepeti', products: 'Mutfak Gereçleri (6)', amount: '1.120 ₺', status: 'Tamamlandı', statusColor: '#4caf50' },
+    { id: `ORD-${customer.id}-006`, date: '20.03.2025', store: 'Sporaktif', products: 'Spor Malzemeleri (2)', amount: '750 ₺', status: 'Tamamlandı', statusColor: '#4caf50' },
+    { id: `ORD-${customer.id}-007`, date: '10.03.2025', store: 'Teknoloji Market', products: 'Elektronik Aksesuarlar (8)', amount: '480 ₺', status: 'İptal Edildi', statusColor: '#f44336' },
+    { id: `ORD-${customer.id}-008`, date: '25.02.2025', store: 'Kitap Yurdu', products: 'Kitaplar (4)', amount: '320 ₺', status: 'Tamamlandı', statusColor: '#4caf50' },
+    { id: `ORD-${customer.id}-009`, date: '15.02.2025', store: 'Ev & Yaşam', products: 'Bahçe Mobilyası (3)', amount: '2.350 ₺', status: 'Hazırlanıyor', statusColor: '#2196f3' },
+    { id: `ORD-${customer.id}-010`, date: '05.02.2025', store: 'Winfiniti AŞ', products: 'Bilgisayar Parçaları (5)', amount: '3.750 ₺', status: 'Tamamlandı', statusColor: '#4caf50' },
+    { id: `ORD-${customer.id}-011`, date: '20.01.2025', store: 'Oyuncakistan', products: 'Oyuncaklar (7)', amount: '650 ₺', status: 'Tamamlandı', statusColor: '#4caf50' },
+    { id: `ORD-${customer.id}-012`, date: '10.01.2025', store: 'Ofis Deposu', products: 'Kırtasiye Ürünleri (10)', amount: '420 ₺', status: 'Tamamlandı', statusColor: '#4caf50' },
   ];
-  
+
   // Cari hareket verileri kaldırıldı
-  
+
   const [openSmsDialog, setOpenSmsDialog] = useState(false);
   const [openEmailDialog, setOpenEmailDialog] = useState(false);
   const [openOrdersDialog, setOpenOrdersDialog] = useState(false);
   // Cari hareket dialogu kaldırıldı
   const [openPaymentDialog, setOpenPaymentDialog] = useState(false);
-  
+
   const [showAllOrders, setShowAllOrders] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [filteredOrders, setFilteredOrders] = useState<any[]>(exampleOrders);
-  
+
   const [smsMessage, setSmsMessage] = useState('');
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
-  
+
   // Cari hareket dialog state'leri kaldırıldı
-  
+
   // Tahsilat dialog state'leri
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentCurrency, setPaymentCurrency] = useState('TRY');
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [paymentNote, setPaymentNote] = useState('');
-  
+
   // İşlem verileri kaldırıldı
-  
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  
+
   // SMS Dialog açma/kapama
   const handleSmsDialogOpen = () => {
     setOpenSmsDialog(true);
@@ -517,49 +518,49 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
     setPaymentMethod('cash');
     setPaymentNote('');
   };
-  
+
   // Menu açma/kapama
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
-  
+
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
-  
+
   // Para birimi ve işlem tipi değiştirme fonksiyonları kaldırıldı
-  
+
   // Ödeme yöntemi değiştirme
   const handlePaymentMethodChange = (event: SelectChangeEvent) => {
     setPaymentMethod(event.target.value);
   };
-  
+
   // Ödeme para birimi değiştirme
   const handlePaymentCurrencyChange = (event: SelectChangeEvent) => {
     setPaymentCurrency(event.target.value);
   };
-  
+
   // Tüm siparişleri görüntüleme fonksiyonu
   const handleViewAllOrders = () => {
     console.log('Sipariş listesi durumu değiştiriliyor:', customer.id);
     setShowAllOrders(!showAllOrders);
   };
-  
-  
+
+
   // Türkçe tarih formatını (DD.MM.YYYY) JavaScript Date nesnesine çeviren fonksiyon
   const convertToDate = (dateStr: string): Date => {
     if (!dateStr) return new Date();
-    
+
     const parts = dateStr.split('.');
     if (parts.length !== 3) return new Date();
-    
+
     const day = parseInt(parts[0], 10);
     const month = parseInt(parts[1], 10) - 1; // JavaScript'te aylar 0-11 arasında
     const year = parseInt(parts[2], 10);
-    
+
     return new Date(year, month, day);
   };
-  
+
   const formatCurrency = (amount: number, currency: string): string => {
     const currencySymbols: Record<string, string> = {
       'TRY': '₺',
@@ -567,92 +568,93 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
       'EUR': '€',
       'GBP': '£'
     };
-    
+
     const formattedAmount = new Intl.NumberFormat('tr-TR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount);
-    
+
     return `${formattedAmount} ${currencySymbols[currency] || currency}`;
   };
-  
-  
+
+
   // Kullanılmayan fonksiyonlar kaldırıldı
-  
+
   // Ödeme ekleme fonksiyonu
   const handleAddPayment = () => {
     if (!paymentAmount || parseFloat(paymentAmount) <= 0) {
       return;
     }
-    
+
     const paymentAmount_num = parseFloat(paymentAmount);
-    
+
     // Yeni ödeme işlemi oluşturma
     const newTransaction = {
       id: `TRX-${customer.id}-${Math.floor(Math.random() * 10000)}`,
       date: new Date().toLocaleDateString('tr-TR'),
       type: 'Tahsilat',
-      description: `${paymentMethod === 'cash' ? 'Nakit' : 
-                    paymentMethod === 'bank' ? 'Banka' : 
-                    paymentMethod === 'credit_card' ? 'Kredi Kartı' : 'Çek'} Ödeme${paymentNote ? ': ' + paymentNote : ''}`,
+      description: `${paymentMethod === 'cash' ? 'Nakit' :
+        paymentMethod === 'bank' ? 'Banka' :
+          paymentMethod === 'credit_card' ? 'Kredi Kartı' : 'Çek'} Ödeme${paymentNote ? ': ' + paymentNote : ''}`,
       currency: paymentCurrency,
       amount: paymentAmount_num
     };
-    
+
     // Dialog'u kapat
     handlePaymentDialogClose();
-    
+
     console.log('Yeni ödeme eklendi:', newTransaction);
   };
-  
+
   // Siparişleri filtreleme fonksiyonu
   useEffect(() => {
     const filterOrders = () => {
       let filtered = [...exampleOrders];
-      
+
       if (searchTerm) {
-        filtered = filtered.filter(order => 
+        filtered = filtered.filter(order =>
           order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
           order.products.toLowerCase().includes(searchTerm.toLowerCase())
         );
       }
-      
+
       if (statusFilter !== 'all') {
         filtered = filtered.filter(order => order.status === statusFilter);
-        
+
         const start = new Date(startDate);
         const end = new Date(endDate);
-        
+
         filtered = filtered.filter(order => {
           const orderDate = convertToDate(order.date);
           return orderDate >= start && orderDate <= end;
         });
       }
-      
+
       setFilteredOrders(filtered);
     };
-    
+
     filterOrders();
   }, [searchTerm, startDate, endDate, customer.id]);
-  
+
   // Excel raporu indirme fonksiyonu
   const handleExportToExcel = () => {
     try {
       // Excel uyumlu CSV formatında veri oluşturma
       // Tab karakteri kullanarak sütunları ayırma (Excel'de daha iyi çalışır)
-      const headers = ['Sipariş No', 'Tarih', 'Ürünler', 'Tutar', 'Durum'];
-      
+      const headers = ['Sipariş No', 'Tarih', 'Mağaza', 'Ürünler', 'Tutar', 'Durum'];
+
       // Verileri belirli bir sırada oluşturma
       const rows = filteredOrders.map(order => {
         return {
           id: order.id,
           date: order.date,
+          store: order.store,
           products: order.products,
           amount: order.amount,
           status: order.status
         };
       });
-      
+
       // Toplam tutar hesaplama
       let totalAmount = 0;
       rows.forEach(row => {
@@ -663,34 +665,35 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
           totalAmount += numericValue;
         }
       });
-      
+
       // Toplam tutarı formatlı gösterme
       const formattedTotal = totalAmount.toLocaleString('tr-TR', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       }) + ' ₺';
-      
+
       // Excel'in otomatik olarak tanıyacağı şekilde TSV (tab-separated values) formatında içerik oluşturma
       const tsvRows = [
         headers.join('\t'),
         ...rows.map(row => [
           row.id,
           row.date,
+          row.store,
           row.products, // Tab ayracı kullandığımız için tırnak gerekmiyor
           row.amount,
           row.status
         ].join('\t'))
       ];
-      
+
       // Toplam satırını ekleme
-      tsvRows.push(['', '', 'TOPLAM', formattedTotal, ''].join('\t'));
-      
+      tsvRows.push(['', '', '', 'TOPLAM', formattedTotal, ''].join('\t'));
+
       // Toplam sipariş sayısı satırını ekleme
-      tsvRows.push(['', '', `TOPLAM SİPARİŞ SAYISI: ${rows.length} ADET`, '', ''].join('\t'));
-      
+      tsvRows.push(['', '', '', `TOPLAM SİPARİŞ SAYISI: ${rows.length} ADET`, '', ''].join('\t'));
+
       // Tüm satırları birleştirme
       const tsvContent = tsvRows.join('\r\n'); // Windows satır sonu karakteri Excel için daha uyumlu
-      
+
       // TSV dosyasını indirme
       const blob = new Blob([tsvContent], { type: 'text/tab-separated-values;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
@@ -700,13 +703,13 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       console.log('Excel raporu indirildi:', customer.name, 'Toplam:', formattedTotal);
     } catch (error) {
       console.error('Excel raporu oluşturulurken hata:', error);
     }
   };
-  
+
   // SMS gönderme işlevi
   const handleSendSms = () => {
     console.log('SMS gönderiliyor:', { to: customer.phone, message: smsMessage });
@@ -714,21 +717,21 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
     handleSmsDialogClose();
     // Başarılı gönderim bildirimi gösterilebilir
   };
-  
+
   // E-posta gönderme işlevi
   const handleSendEmail = () => {
-    console.log('E-posta gönderiliyor:', { 
-      to: customer.email, 
-      subject: emailSubject, 
-      body: emailBody 
+    console.log('E-posta gönderiliyor:', {
+      to: customer.email,
+      subject: emailSubject,
+      body: emailBody
     });
     // Burada e-posta gönderme API çağrısı yapılacak
     handleEmailDialogClose();
     // Başarılı gönderim bildirimi gösterilebilir
   };
-  
+
   return (
-    <Card sx={{ 
+    <Card sx={{
       position: 'relative',
       overflow: 'visible',
       borderRadius: 2,
@@ -743,8 +746,8 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
       borderBottom: '4px solid #ff5722'
     }}>
       {/* Kart Üst Kısım - Gradient Başlık */}
-      <Box sx={{ 
-        height: 90, 
+      <Box sx={{
+        height: 90,
         background: 'linear-gradient(135deg, #25638f 0%, #1e5172 100%)',
         borderTopLeftRadius: 8,
         borderTopRightRadius: 8,
@@ -754,7 +757,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
         position: 'relative',
         justifyContent: 'space-between'
       }}>
-        <Box sx={{ 
+        <Box sx={{
           position: 'absolute',
           top: 0,
           left: 0,
@@ -764,28 +767,10 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
           backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM-6 60c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z\' fill=\'%23ffffff\' fill-opacity=\'1\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")',
           backgroundSize: '24px 24px'
         }} />
-        
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {/* Üç Nokta Menü Butonu */}
-          <IconButton 
-            size="small" 
-            onClick={(e) => onMenuOpen && onMenuOpen(e, customer)}
-            sx={{ 
-              color: 'white',
-              bgcolor: 'rgba(255,255,255,0.15)',
-              mr: 1,
-              width: 36,
-              height: 36,
-              '&:hover': {
-                bgcolor: 'rgba(255,255,255,0.25)'
-              }
-            }}
-          >
-            <MoreVertIcon fontSize="small" />
-          </IconButton>
-          
+
+        <Box sx={{ display: 'flex', alignItems: 'center', position: 'absolute', top: 12, left: 16 }}>
           {/* Durum Etiketi */}
-          <Box sx={{ 
+          <Box sx={{
             background: 'linear-gradient(90deg, #ff5722 0%, #ff7043 100%)',
             color: 'white',
             fontSize: '0.75rem',
@@ -801,19 +786,19 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
           </Box>
         </Box>
       </Box>
-      
+
       {/* Avatar */}
-      <Box sx={{ 
-        position: 'relative', 
-        display: 'flex', 
+      <Box sx={{
+        position: 'relative',
+        display: 'flex',
         justifyContent: 'center',
         mt: -6,
         mb: 2,
         zIndex: 1
       }}>
-        <Avatar 
+        <Avatar
           src={`https://randomuser.me/api/portraits/${customer.id.charCodeAt(0) % 2 === 0 ? 'men' : 'women'}/${customer.id.charCodeAt(0) % 10}.jpg`}
-          sx={{ 
+          sx={{
             width: 100,
             height: 100,
             border: '5px solid white',
@@ -823,7 +808,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
           {getInitials(customer.name)}
         </Avatar>
       </Box>
-      
+
       {/* Müşteri Bilgileri */}
       <Box sx={{ textAlign: 'center', px: 3, pb: 2 }}>
         <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
@@ -832,15 +817,15 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           {customer.party || 'Firma bilgisi yok'}
         </Typography>
-        
+
         {/* İletişim Butonları */}
         <Box sx={{ display: 'flex', justifyContent: 'space-around', p: 1 }}>
           {/* SMS Butonu */}
           <Box sx={{ textAlign: 'center' }}>
-            <IconButton 
+            <IconButton
               onClick={handleSmsDialogOpen}
-              size="small" 
-              sx={{ 
+              size="small"
+              sx={{
                 bgcolor: '#f5f5f5',
                 '&:hover': { bgcolor: '#e0e0e0' }
               }}
@@ -848,13 +833,13 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
               <SmsIcon fontSize="small" color="primary" />
             </IconButton>
           </Box>
-          
+
           {/* E-posta Butonu */}
           <Box sx={{ textAlign: 'center' }}>
-            <IconButton 
+            <IconButton
               onClick={handleEmailDialogOpen}
-              size="small" 
-              sx={{ 
+              size="small"
+              sx={{
                 bgcolor: '#f5f5f5',
                 '&:hover': { bgcolor: '#e0e0e0' }
               }}
@@ -862,13 +847,13 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
               <EmailIcon fontSize="small" color="primary" />
             </IconButton>
           </Box>
-          
+
           {/* Sepet Butonu */}
           <Box sx={{ textAlign: 'center' }}>
-            <IconButton 
+            <IconButton
               onClick={handleOrdersDialogOpen}
-              size="small" 
-              sx={{ 
+              size="small"
+              sx={{
                 bgcolor: '#f5f5f5',
                 '&:hover': { bgcolor: '#e0e0e0' }
               }}
@@ -876,65 +861,53 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
               <ShoppingCartIcon fontSize="small" color="primary" />
             </IconButton>
           </Box>
-          
-          {/* Görüntüleme Butonu */}
-          <Box sx={{ textAlign: 'center' }}>
-            <IconButton 
-              onClick={handleAccountDialogOpen}
-              size="small" 
-              sx={{ 
-                bgcolor: '#f5f5f5',
-                '&:hover': { bgcolor: '#e0e0e0' }
-              }}
-            >
-              <VisibilityIcon fontSize="small" color="primary" />
-            </IconButton>
-          </Box>
+
+
         </Box>
       </Box>
-      
+
       <Divider />
-      
+
       {/* İletişim Bilgileri - Yeni Format */}
       <Box sx={{ p: 2 }}>
         {/* Müşteri Kodu */}
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          mb: 1.5 
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          mb: 1.5
         }}>
           <PersonIcon fontSize="small" sx={{ color: '#1e5172', mr: 1.5 }} />
           <Typography variant="body2" fontWeight="medium">
             {customer.id || 'TK-4734'}
           </Typography>
         </Box>
-        
+
         {/* E-posta */}
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          mb: 1.5 
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          mb: 1.5
         }}>
           <EmailIcon fontSize="small" sx={{ color: '#1e5172', mr: 1.5 }} />
           <Typography variant="body2">
             {customer.email || 'E-posta bilgisi yok'}
           </Typography>
         </Box>
-        
+
         {/* Ülke ve Şehir */}
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          mb: 1.5 
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          mb: 1.5
         }}>
-          <Box 
+          <Box
             component="img"
             src={getFlagUrl(customer.country)}
             alt={getCountryName(customer.country || 'tr')}
-            sx={{ 
-              width: 30, 
-              height: 30, 
-              borderRadius: '50%', 
+            sx={{
+              width: 30,
+              height: 30,
+              borderRadius: '50%',
               mr: 1.5,
               objectFit: 'cover',
               border: '2px solid #eee',
@@ -954,23 +927,23 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
             {getCountryName(customer.country || 'tr')} / {customer.city || 'İstanbul'}
           </Typography>
         </Box>
-        
+
         {/* Müşteri Tipi */}
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          mb: 1.5 
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          mb: 1.5
         }}>
           <StoreIcon fontSize="small" sx={{ color: '#1e5172', mr: 1.5 }} />
           <Typography variant="body2">
             Alıcı /{customer.party || 'Perakende'}
           </Typography>
         </Box>
-        
+
         {/* Toplam Sipariş */}
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center' 
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center'
         }}>
           <SellIcon fontSize="small" sx={{ color: '#1e5172', mr: 1.5 }} />
           <Typography variant="body2">
@@ -978,21 +951,20 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
           </Typography>
         </Box>
       </Box>
-      
+
       <Divider />
-      
+
       {/* Alt Kısım - Detay Butonu */}
-      <Box sx={{ 
+      <Box sx={{
         display: 'flex',
         justifyContent: 'center',
         p: 2
       }}>
-        <Button 
-          variant="outlined" 
-          component={Link}
-          to={`/account-details/${customer.code}`}
+        <Button
+          variant="outlined"
+          onClick={() => onEditClick && onEditClick(customer)}
           endIcon={<KeyboardArrowRightIcon />}
-          sx={{ 
+          sx={{
             borderRadius: 4,
             textTransform: 'none',
             px: 3
@@ -1001,7 +973,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
           Müşteri Detayları
         </Button>
       </Box>
-      
+
       {/* SMS Dialog */}
       <Dialog open={openSmsDialog} onClose={handleSmsDialogClose} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: '#25638f', color: 'white' }}>
@@ -1044,16 +1016,16 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
           <Button onClick={handleSmsDialogClose} variant="outlined">
             İptal
           </Button>
-          <Button 
-            onClick={handleSendSms} 
-            variant="contained" 
+          <Button
+            onClick={handleSendSms}
+            variant="contained"
             sx={{ bgcolor: '#25638f', '&:hover': { bgcolor: '#1e5070' } }}
           >
             Gönder
           </Button>
         </DialogActions>
       </Dialog>
-      
+
       {/* E-posta Dialog */}
       <Dialog open={openEmailDialog} onClose={handleEmailDialogClose} maxWidth="md" fullWidth>
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: '#25638f', color: 'white' }}>
@@ -1106,9 +1078,9 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
           <Button onClick={handleEmailDialogClose} variant="outlined">
             İptal
           </Button>
-          <Button 
-            onClick={handleSendEmail} 
-            variant="contained" 
+          <Button
+            onClick={handleSendEmail}
+            variant="contained"
             sx={{ bgcolor: '#25638f', '&:hover': { bgcolor: '#1e5070' } }}
           >
             Gönder
@@ -1117,7 +1089,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
       </Dialog>
 
       {/* Cari Hareketler Dialog kaldırıldı */}
-      
+
       {/* Tahsilat Dialog */}
       <Dialog
         open={openPaymentDialog}
@@ -1204,9 +1176,9 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
           <Button onClick={handlePaymentDialogClose} variant="outlined">
             İptal
           </Button>
-          <Button 
-            onClick={handleAddPayment} 
-            variant="contained" 
+          <Button
+            onClick={handleAddPayment}
+            variant="contained"
             color="success"
             disabled={!paymentAmount || parseFloat(paymentAmount) <= 0}
           >
@@ -1214,7 +1186,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
           </Button>
         </DialogActions>
       </Dialog>
-      
+
       {/* Sipariş Listesi Dialog */}
       <Dialog open={openOrdersDialog} onClose={handleOrdersDialogClose} maxWidth="md" fullWidth>
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: '#25638f', color: 'white' }}>
@@ -1232,23 +1204,23 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
               Müşteri: {customer.name}
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Chip 
-                label={`Toplam Sipariş: ${customer.totalOrders || customer.orders || customer.siparisler || '8'}`} 
-                color="primary" 
-                sx={{ 
-                  fontWeight: 'bold', 
-                  mr: 2, 
-                  bgcolor: '#25638f' 
-                }} 
+              <Chip
+                label={`Toplam Sipariş: ${customer.totalOrders || customer.orders || customer.siparisler || '8'}`}
+                color="primary"
+                sx={{
+                  fontWeight: 'bold',
+                  mr: 2,
+                  bgcolor: '#25638f'
+                }}
               />
-              <Chip 
-                label={`Toplam Tutar: ${customer.bakiye || customer.balance || '4.350'} ₺`} 
-                color="secondary" 
-                sx={{ 
-                  fontWeight: 'bold', 
+              <Chip
+                label={`Toplam Tutar: ${customer.bakiye || customer.balance || '4.350'} ₺`}
+                color="secondary"
+                sx={{
+                  fontWeight: 'bold',
                   bgcolor: '#ff5722',
                   color: 'white'
-                }} 
+                }}
               />
             </Box>
           </Box>
@@ -1276,7 +1248,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
               />
             </Grid>
           </Grid>
-            
+
           <Grid container spacing={2}>
             <Grid item xs={12} md={5}>
               <TextField
@@ -1301,9 +1273,9 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
               />
             </Grid>
             <Grid item xs={12} md={2}>
-              <Button 
-                fullWidth 
-                variant="outlined" 
+              <Button
+                fullWidth
+                variant="outlined"
                 onClick={() => {
                   setStartDate('');
                   setEndDate('');
@@ -1321,7 +1293,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
                 startIcon={<FileDownloadIcon />}
                 onClick={handleExportToExcel}
                 disabled={filteredOrders.length === 0}
-                sx={{ 
+                sx={{
                   float: 'right',
                   mt: 1
                 }}
@@ -1337,6 +1309,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
                 <TableRow>
                   <TableCell sx={{ fontWeight: 'bold' }}>Sipariş No</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Tarih</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Mağaza</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Ürünler</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Tutar</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Durum</TableCell>
@@ -1349,6 +1322,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
                     <TableRow key={order.id}>
                       <TableCell>{order.id}</TableCell>
                       <TableCell>{order.date}</TableCell>
+                      <TableCell>{order.store}</TableCell>
                       <TableCell>{order.products}</TableCell>
                       <TableCell>{order.amount}</TableCell>
                       <TableCell>
@@ -1358,7 +1332,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                    <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
                       <Typography variant="body1" color="text.secondary">
                         Arama kriterlerine uygun sipariş bulunamadı.
                       </Typography>
@@ -1373,12 +1347,12 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ customer, onMenuOpen }) => 
             <Typography variant="body2" color="text.secondary">
               Son sipariş: {customer.lastOrder || '01.06.2025'}
             </Typography>
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               size="small"
               onClick={handleViewAllOrders}
-              sx={{ 
-                bgcolor: showAllOrders ? '#ff5722' : '#25638f', 
+              sx={{
+                bgcolor: showAllOrders ? '#ff5722' : '#25638f',
                 '&:hover': { bgcolor: showAllOrders ? '#e64a19' : '#1e5070' },
                 textTransform: 'none'
               }}

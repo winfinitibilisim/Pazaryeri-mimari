@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { CategoryProvider } from './contexts/CategoryContext';
 
 // i18n yapılandırmasını içe aktar
 import './i18n/i18n';
@@ -12,7 +13,9 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <CategoryProvider>
+      <App />
+    </CategoryProvider>
   </React.StrictMode>
 );
 

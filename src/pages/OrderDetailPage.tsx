@@ -35,7 +35,6 @@ const OrderDetailPage: React.FC = () => {
     const { orderId } = useParams();
     const [openAddInvoice, setOpenAddInvoice] = React.useState(false);
     const [hasInvoice, setHasInvoice] = React.useState(false);
-
     const handleInvoiceSave = (file: File | null) => {
         setHasInvoice(true);
     };

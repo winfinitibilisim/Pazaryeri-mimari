@@ -36,7 +36,7 @@ interface CategoryImage {
 interface AddCategoryDialogProps {
     open: boolean;
     onClose: () => void;
-    onAddCategory: (names: { lang: string; name: string }[]) => void;
+    onAddCategory: (categoryData: any) => void;
     parentCategoryName?: string | null;
 }
 
@@ -124,7 +124,7 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, onClose, on
         const categoryNames = languages
             .filter(lang => lang.value.trim() !== '')
             .map(lang => ({ lang: lang.lang, name: lang.value.trim() }));
-        
+
         if (categoryNames.length > 0) {
             const categoryData = {
                 names: categoryNames,
@@ -170,7 +170,7 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, onClose, on
                     <Close />
                 </IconButton>
             </DialogTitle>
-            
+
             <DialogContent dividers sx={{ p: 3 }}>
                 <Grid container spacing={3}>
                     {/* Sol Taraf - Temel Bilgiler */}
@@ -179,7 +179,7 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, onClose, on
                             <Typography variant="h6" sx={{ mb: 2, color: '#667eea', display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Category /> Temel Bilgiler
                             </Typography>
-                            
+
                             {/* Kategori İkonu */}
                             <Box sx={{ mb: 2 }}>
                                 <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>Kategori İkonu</Typography>
@@ -261,7 +261,7 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, onClose, on
                             <Typography variant="h6" sx={{ mb: 2, color: '#667eea', display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Image /> Kategori Resimleri
                             </Typography>
-                            
+
                             {/* Resim Yükleme Alanı */}
                             <Box sx={{ mb: 2 }}>
                                 <input
@@ -363,14 +363,14 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, onClose, on
                     </Grid>
                 </Grid>
             </DialogContent>
-            
+
             <DialogActions sx={{ p: 2, bgcolor: '#f8f9fa', borderTop: '1px solid #e0e0e0' }}>
                 <Button onClick={onClose} color="error" variant="outlined">
                     Vazgeç
                 </Button>
-                <Button 
-                    onClick={handleAdd} 
-                    variant="contained" 
+                <Button
+                    onClick={handleAdd}
+                    variant="contained"
                     sx={{
                         bgcolor: '#667eea',
                         '&:hover': {
@@ -382,19 +382,19 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, onClose, on
                     Kategori Ekle
                 </Button>
             </DialogActions>
-            
+
             <Menu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
                 onClose={handleCloseLangMenu}
             >
                 {allLangs.filter(l => !usedLangs.includes(l)).map(langCode => {
-                     const FlagComponent = flagComponents[langCode];
-                     return (
+                    const FlagComponent = flagComponents[langCode];
+                    return (
                         <MenuItem key={langCode} onClick={() => handleLangChange(langCode)}>
                             <FlagComponent sx={{ width: 20, height: 20, mr: 1 }} /> {langCode.toUpperCase()}
                         </MenuItem>
-                     );
+                    );
                 })}
             </Menu>
         </Dialog>

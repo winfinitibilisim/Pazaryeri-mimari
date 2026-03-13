@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import {
   Box,
@@ -64,6 +65,7 @@ interface Product {
 }
 
 const ProductsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [page, setPage] = useState<number>(0);
@@ -74,7 +76,7 @@ const ProductsPage: React.FC = () => {
   const [quickAddModalOpen, setQuickAddModalOpen] = useState<boolean>(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [advancedFilters, setAdvancedFilters] = useState<Record<string, any>>({});
-  
+
   const { t } = useLanguage();
 
   // Para birimi sembollerini döndüren yardımcı fonksiyon
@@ -92,7 +94,7 @@ const ProductsPage: React.FC = () => {
     };
     return symbols[currency] || currency;
   };
-  
+
 
   const hierarchicalCategories = [
     {
@@ -140,13 +142,13 @@ const ProductsPage: React.FC = () => {
         { id: 'kadin-spor', name: 'Kadın Spor Ayakkabı' },
       ]
     },
-    { 
-      id: 'aksesuar', 
+    {
+      id: 'aksesuar',
       name: 'Aksesuarlar',
-      isMainCategory: true 
+      isMainCategory: true
     }
   ];
-  
+
   const [products, setProducts] = useState<Product[]>([
     {
       id: '1',
@@ -281,28 +283,28 @@ const ProductsPage: React.FC = () => {
         "Renk": product.color,
         "Tarih": product.date
       }));
-      
+
       const worksheet = XLSX.utils.json_to_sheet(exportData);
-      
+
       const wscols = [
-        { wch: 12 }, 
-        { wch: 30 }, 
-        { wch: 15 }, 
-        { wch: 10 }, 
-        { wch: 10 }, 
-        { wch: 10 }, 
-        { wch: 15 }, 
-        { wch: 10 }, 
-        { wch: 15 },  
-        { wch: 15 }  
+        { wch: 12 },
+        { wch: 30 },
+        { wch: 15 },
+        { wch: 10 },
+        { wch: 10 },
+        { wch: 10 },
+        { wch: 15 },
+        { wch: 10 },
+        { wch: 15 },
+        { wch: 15 }
       ];
       worksheet['!cols'] = wscols;
-      
+
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Ürünler");
-      
+
       XLSX.writeFile(workbook, "urun_listesi.xlsx");
-      
+
       notifySuccess("Ürün listesi başarıyla Excel'e aktarıldı!", { autoHideDuration: 4000 });
     } catch (error) {
       console.error("Excel'e aktarma hatası:", error);
@@ -315,36 +317,36 @@ const ProductsPage: React.FC = () => {
   };
 
   const handleAddNew = () => {
-    setQuickAddModalOpen(true);
+    navigate('/products/create');
   };
 
   const handleAdvancedFilterChange = (newFilters: Record<string, any>) => {
     setAdvancedFilters(newFilters);
     setPage(0);
-    
+
     if (newFilters.category) {
       setSelectedCategory(newFilters.category);
     }
-    
+
     if (newFilters.color) {
       setSelectedColor(newFilters.color);
     } else {
       setSelectedColor('all');
     }
   };
-  
+
   const handleViewProduct = (product: Product) => {
     setSelectedProduct(product);
     setDetailModalOpen(true);
   };
-  
+
   const handleCloseDetailModal = () => {
     setDetailModalOpen(false);
     setSelectedProduct(null);
   };
 
 
-  
+
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
   };
@@ -355,11 +357,11 @@ const ProductsPage: React.FC = () => {
   };
 
 
-  
+
   const handleFilter = (filters: Record<string, any>) => {
     console.log('Filtering with:', filters);
   };
-  
+
   const groupedByCategory = products.reduce<Record<string, Product[]>>((acc, product) => {
     if (!acc[product.category]) {
       acc[product.category] = [];
@@ -373,9 +375,9 @@ const ProductsPage: React.FC = () => {
     const { destination, source } = result;
 
     // Eğer hedef yoksa veya başlangıç ve hedef aynıysa işlem yapma
-    if (!destination || 
-        (destination.droppableId === source.droppableId && 
-         destination.index === source.index)) {
+    if (!destination ||
+      (destination.droppableId === source.droppableId &&
+        destination.index === source.index)) {
       return;
     }
 
@@ -408,51 +410,51 @@ const ProductsPage: React.FC = () => {
   // Filtrelenmiş ürünleri hesapla
   const filteredProducts = products.filter(product => {
     // Arama filtresi
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.category.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     // Renk filtreleme
     const matchesColor = selectedColor === 'all' || product.color === selectedColor;
-    
+
     // Kategori filtreleme
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-    
+
     // Gelişmiş filtreler (merkezi yapıdan gelen)
     const matchesAdvancedFilters = Object.entries(advancedFilters).every(([key, value]) => {
       if (!value) return true;
-      
+
       // Fiyat filtresi için özel işlem
       if (key === 'price' && value) {
         return product.price <= parseFloat(value as string);
       }
-      
+
       // Stok durumu filtresi için özel işlem
       if (key === 'stock' && value) {
-        switch(value) {
+        switch (value) {
           case 'inStock': return product.stock > 0;
           case 'lowStock': return product.stock > 0 && product.stock <= 10;
           case 'outOfStock': return product.stock === 0;
           default: return true;
         }
       }
-      
+
       // Tarih filtresi için özel işlem
       if (key === 'createdAt' && value) {
         const productDate = new Date(product.date);
         const filterDate = new Date(value as string);
         return productDate.toDateString() === filterDate.toDateString();
       }
-      
+
       // Diğer filtreler için
       return String(product[key as keyof Product]).toLowerCase().includes(String(value).toLowerCase());
     });
-    
+
     // Tüm filtreleri birleştir
     return matchesSearch && matchesColor && matchesCategory && matchesAdvancedFilters;
   });
-  
+
   // Filtrelenmiş ürünleri kategoriye göre grupla
   const filteredGroupedByCategory = filteredProducts.reduce<Record<string, Product[]>>((acc, product) => {
     if (!acc[product.category]) {
@@ -469,7 +471,7 @@ const ProductsPage: React.FC = () => {
 
   // Tüm sıralanmış ürünleri düz bir diziye dönüştür
   const sortedFilteredProducts = Object.values(filteredGroupedByCategory).flat();
-  
+
   // Sayfalanmış ürünleri hesapla
   const paginatedProducts = sortedFilteredProducts.slice(
     page * rowsPerPage,
@@ -488,7 +490,7 @@ const ProductsPage: React.FC = () => {
             size="small"
             value={searchTerm}
             onChange={handleSearchChange}
-            sx={{ 
+            sx={{
               flex: { xs: 1, md: 1 },
               width: { xs: '100%', md: 'auto' },
               '& .MuiOutlinedInput-root': {
@@ -506,19 +508,19 @@ const ProductsPage: React.FC = () => {
               ),
             }}
           />
-          
+
           {/* Butonlar */}
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: { xs: 'flex-end', md: 'flex-end' }, width: { xs: '100%', md: 'auto' } }}>
-            <IconButton 
+            <IconButton
               onClick={() => setFilterOpen(!filterOpen)}
               size="small"
               sx={{ border: '1px solid #e0e0e0', p: 1 }}
             >
               <FilterIcon fontSize="small" />
             </IconButton>
-            
+
             <ExportButton onClick={handleExport} />
-            
+
             <Button
               variant="contained"
               startIcon={<AddIcon />}
@@ -527,7 +529,7 @@ const ProductsPage: React.FC = () => {
             >
               Hızlı Ekle
             </Button>
-            
+
             <Button
               variant="contained"
               startIcon={<AddIcon />}
@@ -609,131 +611,131 @@ const ProductsPage: React.FC = () => {
                                     ...provided.draggableProps.style,
                                   }}
                                 >
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Avatar 
-                        src={product.imageUrl} 
-                        variant="rounded"
-                        sx={{ 
-                          mr: 2, 
-                          width: 100,
-                          height: 100,
-                          bgcolor: '#f0f0f0',
-                          border: '1px solid #e0e0e0',
-                          borderRadius: 1
-                        }}
-                      />
-                      <Box>
-                        <Typography 
-                          variant="body2" 
-                          fontWeight={500}
-                          sx={{ 
-                            fontSize: '0.875rem',
-                            lineHeight: 1.4,
-                            color: '#333',
-                            letterSpacing: '0.01em',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            maxWidth: '100%'
-                          }}
-                        >
-                          {product.name}
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
-                          <Avatar
-                            sx={{
-                              width: 20,
-                              height: 20,
-                              mr: 0.5,
-                              bgcolor: 
-                                product.category === 'Electronics' ? '#e8e6ff' :
-                                product.category === 'Giyim' ? '#e6f7ff' :
-                                product.category === 'Accessories' ? '#ffebe6' :
-                                product.category === 'Shoes' ? '#e6ffe8' :
-                                product.category === 'Office' ? '#fff9e6' :
-                                product.category === 'Home Decor' ? '#e6f9ff' : '#f0f0f0'
-                            }}
-                          >
-                            {product.category === 'Electronics' ? (
-                              <Box component="span" sx={{ color: '#5045e4', fontSize: 12 }}>💻</Box>
-                            ) : product.category === 'Giyim' ? (
-                              <Box component="span" sx={{ color: '#4091db', fontSize: 12 }}>👕</Box>
-                            ) : product.category === 'Accessories' ? (
-                              <Box component="span" sx={{ color: '#e44545', fontSize: 12 }}>🎧</Box>
-                            ) : product.category === 'Shoes' ? (
-                              <Box component="span" sx={{ color: '#45e454', fontSize: 12 }}>👟</Box>
-                            ) : product.category === 'Office' ? (
-                              <Box component="span" sx={{ color: '#e4a045', fontSize: 12 }}>💼</Box>
-                            ) : product.category === 'Home Decor' ? (
-                              <Box component="span" sx={{ color: '#45c4e4', fontSize: 12 }}>🏠</Box>
-                            ) : (
-                              <Box component="span" sx={{ color: '#808080', fontSize: 12 }}>📦</Box>
-                            )}
-                          </Avatar>
-                          <Typography variant="caption" color="text.secondary">{product.category}</Typography>
-                        </Box>
-                      </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell>{product.sku}</TableCell>
-                  <TableCell>{product.stock}</TableCell>
-                  <TableCell align="right">
-                    <Typography variant="body2" color="text.secondary">
-                      {product.purchasePrice.toFixed(2)} {getCurrencySymbol(product.currency)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography variant="body2" fontWeight={500}>
-                      {product.salePrice.toFixed(2)} {getCurrencySymbol(product.currency)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Chip 
-                      label={product.currency} 
-                      size="small" 
-                      variant="outlined"
-                      sx={{ 
-                        fontSize: '0.75rem',
-                        height: '24px',
-                        borderColor: '#e0e0e0',
-                        color: '#666'
-                      }} 
-                    />
-                  </TableCell>
-                  <TableCell align="center">{product.qty}</TableCell>
-                  <TableCell align="center">
-                    <Chip 
-                      label={product.status} 
-                      size="small" 
-                      sx={{ 
-                        color: product.status === 'Aktif' ? '#1976d2' : '#7f8c8d', 
-                        backgroundColor: product.status === 'Aktif' ? 'rgba(25, 118, 210, 0.1)' : 'rgba(127, 140, 141, 0.1)',
-                        borderRadius: '4px',
-                        fontWeight: 500,
-                      }} 
-                    />
-                  </TableCell>
-                  <TableCell align="center">
-                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                      <IconButton 
-                        size="small" 
-                        sx={{ mr: 1 }} 
-                        color="info"
-                        onClick={() => handleViewProduct(product)}
-                      >
-                        <VisibilityIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton size="small" sx={{ mr: 1 }} color="primary">
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton size="small" color="error">
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
-                  </TableCell>
+                                  <TableCell>
+                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                      <Avatar
+                                        src={product.imageUrl}
+                                        variant="rounded"
+                                        sx={{
+                                          mr: 2,
+                                          width: 100,
+                                          height: 100,
+                                          bgcolor: '#f0f0f0',
+                                          border: '1px solid #e0e0e0',
+                                          borderRadius: 1
+                                        }}
+                                      />
+                                      <Box>
+                                        <Typography
+                                          variant="body2"
+                                          fontWeight={500}
+                                          sx={{
+                                            fontSize: '0.875rem',
+                                            lineHeight: 1.4,
+                                            color: '#333',
+                                            letterSpacing: '0.01em',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            display: '-webkit-box',
+                                            WebkitLineClamp: 2,
+                                            WebkitBoxOrient: 'vertical',
+                                            maxWidth: '100%'
+                                          }}
+                                        >
+                                          {product.name}
+                                        </Typography>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                                          <Avatar
+                                            sx={{
+                                              width: 20,
+                                              height: 20,
+                                              mr: 0.5,
+                                              bgcolor:
+                                                product.category === 'Electronics' ? '#e8e6ff' :
+                                                  product.category === 'Giyim' ? '#e6f7ff' :
+                                                    product.category === 'Accessories' ? '#ffebe6' :
+                                                      product.category === 'Shoes' ? '#e6ffe8' :
+                                                        product.category === 'Office' ? '#fff9e6' :
+                                                          product.category === 'Home Decor' ? '#e6f9ff' : '#f0f0f0'
+                                            }}
+                                          >
+                                            {product.category === 'Electronics' ? (
+                                              <Box component="span" sx={{ color: '#5045e4', fontSize: 12 }}>💻</Box>
+                                            ) : product.category === 'Giyim' ? (
+                                              <Box component="span" sx={{ color: '#4091db', fontSize: 12 }}>👕</Box>
+                                            ) : product.category === 'Accessories' ? (
+                                              <Box component="span" sx={{ color: '#e44545', fontSize: 12 }}>🎧</Box>
+                                            ) : product.category === 'Shoes' ? (
+                                              <Box component="span" sx={{ color: '#45e454', fontSize: 12 }}>👟</Box>
+                                            ) : product.category === 'Office' ? (
+                                              <Box component="span" sx={{ color: '#e4a045', fontSize: 12 }}>💼</Box>
+                                            ) : product.category === 'Home Decor' ? (
+                                              <Box component="span" sx={{ color: '#45c4e4', fontSize: 12 }}>🏠</Box>
+                                            ) : (
+                                              <Box component="span" sx={{ color: '#808080', fontSize: 12 }}>📦</Box>
+                                            )}
+                                          </Avatar>
+                                          <Typography variant="caption" color="text.secondary">{product.category}</Typography>
+                                        </Box>
+                                      </Box>
+                                    </Box>
+                                  </TableCell>
+                                  <TableCell>{product.sku}</TableCell>
+                                  <TableCell>{product.stock}</TableCell>
+                                  <TableCell align="right">
+                                    <Typography variant="body2" color="text.secondary">
+                                      {product.purchasePrice.toFixed(2)} {getCurrencySymbol(product.currency)}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell align="right">
+                                    <Typography variant="body2" fontWeight={500}>
+                                      {product.salePrice.toFixed(2)} {getCurrencySymbol(product.currency)}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <Chip
+                                      label={product.currency}
+                                      size="small"
+                                      variant="outlined"
+                                      sx={{
+                                        fontSize: '0.75rem',
+                                        height: '24px',
+                                        borderColor: '#e0e0e0',
+                                        color: '#666'
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">{product.qty}</TableCell>
+                                  <TableCell align="center">
+                                    <Chip
+                                      label={product.status}
+                                      size="small"
+                                      sx={{
+                                        color: product.status === 'Aktif' ? '#1976d2' : '#7f8c8d',
+                                        backgroundColor: product.status === 'Aktif' ? 'rgba(25, 118, 210, 0.1)' : 'rgba(127, 140, 141, 0.1)',
+                                        borderRadius: '4px',
+                                        fontWeight: 500,
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                                      <IconButton
+                                        size="small"
+                                        sx={{ mr: 1 }}
+                                        color="info"
+                                        onClick={() => handleViewProduct(product)}
+                                      >
+                                        <VisibilityIcon fontSize="small" />
+                                      </IconButton>
+                                      <IconButton size="small" sx={{ mr: 1 }} color="primary">
+                                        <EditIcon fontSize="small" />
+                                      </IconButton>
+                                      <IconButton size="small" color="error">
+                                        <DeleteIcon fontSize="small" />
+                                      </IconButton>
+                                    </Box>
+                                  </TableCell>
                                 </TableRow>
                               )}
                             </Draggable>
@@ -746,7 +748,7 @@ const ProductsPage: React.FC = () => {
             </DragDropContext>
           </Table>
         </TableContainer>
-        
+
         {/* Pagination */}
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
@@ -760,7 +762,7 @@ const ProductsPage: React.FC = () => {
           labelDisplayedRows={({ from, to, count }) => `${from}-${to} ${t('productsPage.of')} ${count}`}
         />
       </Paper>
-      
+
       {/* Ürün Detay Modalı */}
       <ProductDetailModal
         open={detailModalOpen}

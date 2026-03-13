@@ -1,72 +1,84 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useScreenInches } from '../hooks/useScreenInches';
-import { 
-  Box, 
-  Typography, 
-  Button, 
-  TextField, 
+import {
+  Box,
+  Typography,
+  Button,
+  TextField,
   InputAdornment,
-  Select, 
-  MenuItem, 
-  SelectChangeEvent, 
-  FormControl, 
-  InputLabel, 
-  Collapse, 
-  Paper, 
-  IconButton, 
-  Grid, 
-  Card, 
-  CardContent, 
-  CardActions, 
-  Avatar, 
-  Menu, 
-  Divider, 
-  ListItemIcon, 
-  ListItemText, 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogActions, 
-  Chip, 
-  TablePagination, 
-  FormControlLabel, 
-  Switch, 
-  Stack, 
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  FormControl,
+  InputLabel,
+  Collapse,
+  Paper,
+  IconButton,
+  Grid,
+  Card,
+  CardContent,
+  Menu,
+  Checkbox,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Tab,
+  Switch,
+  FormControlLabel,
   Tooltip,
+  List,
+  ListItem,
+  ListItemText,
+  Badge,
   Alert,
-  Snackbar
+  Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Chip,
+  Divider,
+  Avatar
 } from '@mui/material';
 import {
+  Add as AddIcon,
   Search as SearchIcon,
   FilterList as FilterListIcon,
-  Add as AddIcon,
-  PersonAdd as PersonAddIcon,
-  Login as LoginIcon,
-  ShoppingCart as ShoppingCartIcon,
-  Visibility as VisibilityIcon,
   MoreVert as MoreVertIcon,
   Edit as EditIcon,
+  Delete as DeleteIcon,
+  Visibility as VisibilityIcon,
+  Email as EmailIcon,
+  Sms as SmsIcon,
+  ShoppingCart as ShoppingCartIcon,
+  LocationOn as LocationOnIcon,
+  Business as BusinessIcon,
+  AccountBalance as AccountBalanceIcon,
+  Phone as PhoneIcon,
+  Close as CloseIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  Person,
+  Person as PersonIcon,
+  ArrowBack as ArrowBackIcon,
+  CloudUpload as CloudUploadIcon,
+  Mail as MailIcon,
+  PersonAdd as PersonAddIcon,
+  Login as LoginIcon,
   ExpandMore as ExpandMoreIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
   ExpandLess as ExpandLessIcon,
-  Close as CloseIcon,
-  Email as EmailIcon,
-  Phone as PhoneIcon,
-  Sms as SmsIcon,
   LocalShipping as ShippingIcon,
-  CloudUpload as CloudUploadIcon,
-  Delete as DeleteIcon,
-  AccountBalance as AccountBalanceIcon,
   Menu as MenuIcon,
   FileDownload as ExportIcon,
   Print as PrintIcon,
-
-  ShoppingCart as SalesIcon,
   Description as KargolarIcon,
-  Person as PersonIcon,
-  Person,
   Public as PublicIcon,
   Sell as SellIcon,
   FormatBold as FormatBoldIcon,
@@ -77,7 +89,6 @@ import {
   FormatAlignLeft as FormatAlignLeftIcon,
   FormatAlignCenter as FormatAlignCenterIcon,
   FormatAlignRight as FormatAlignRightIcon,
-  LocationOn as LocationOnIcon,
   DateRange as DateRangeIcon,
 } from '@mui/icons-material';
 
@@ -110,8 +121,8 @@ interface FilterField {
   id: string;
   label: string;
   type: string;
-  options?: Array<{value: string, label: string}>;
-  children?: Array<{value: string, label: string, parent: string, children?: Array<{value: string, label: string, parent: string}>}>;
+  options?: Array<{ value: string, label: string }>;
+  children?: Array<{ value: string, label: string, parent: string, children?: Array<{ value: string, label: string, parent: string }> }>;
 }
 
 // Konum veri tipi
@@ -168,7 +179,9 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
   const [selectedCategory, setSelectedCategory] = useState('info');
   const [selectedCountryCode, setSelectedCountryCode] = useState('tr');
   const [countryMenuAnchor, setCountryMenuAnchor] = useState<null | HTMLElement>(null);
-  
+  const [customerMailDetailOpen, setCustomerMailDetailOpen] = useState(false);
+  const [selectedCustomerMail, setSelectedCustomerMail] = useState<any>(null);
+
   // Form state
   const [customerType, setCustomerType] = useState('individual');
   const [formCountry, setFormCountry] = useState('turkey');
@@ -180,7 +193,7 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
   const [selectedBank, setSelectedBank] = useState('');
   const [selectedBankCountry, setSelectedBankCountry] = useState('TR');
   const [selectedBranchCode, setSelectedBranchCode] = useState('');
-  
+
   const countries = [
     { code: 'tr', name: 'Türkiye', flag: '🇹🇷', dialCode: '+90' },
     { code: 'us', name: 'Amerika', flag: '🇺🇸', dialCode: '+1' },
@@ -204,14 +217,14 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
     { code: 'ae', name: 'BAE', flag: '🇦🇪', dialCode: '+971' },
     { code: 'sa', name: 'Suudi Arabistan', flag: '🇸🇦', dialCode: '+966' }
   ];
-  
+
   const selectedCountry = countries.find(c => c.code === selectedCountryCode) || countries[0];
-  
+
   const handleCountrySelect = (countryCode: string) => {
     setSelectedCountryCode(countryCode);
     setCountryMenuAnchor(null);
   };
-  
+
   const categories = [
     { id: 'info', label: 'Müşteri Bilgileri', icon: '👤', active: true },
     { id: 'address', label: 'Adresler', icon: '📍', active: false },
@@ -246,8 +259,8 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     <Grid item xs={12}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Müşteri Tipi *</InputLabel>
-                        <Select 
-                          value={customerType} 
+                        <Select
+                          value={customerType}
                           onChange={(e) => setCustomerType(e.target.value)}
                         >
                           <MenuItem value="individual">Gerçek Kişi</MenuItem>
@@ -262,10 +275,10 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                       <TextField fullWidth label="Soyad *" size="small" required />
                     </Grid>
                     <Grid item xs={12} md={6}>
-                      <TextField 
-                        fullWidth 
-                        label="Müşteri Kodu" 
-                        size="small" 
+                      <TextField
+                        fullWidth
+                        label="Müşteri Kodu"
+                        size="small"
                         defaultValue="M554967"
                         InputProps={{
                           endAdornment: (
@@ -279,12 +292,12 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                       />
                     </Grid>
                     <Grid item xs={12} md={6}>
-                      <TextField 
-                        fullWidth 
-                        label="E-mail *" 
-                        type="email" 
-                        size="small" 
-                        required 
+                      <TextField
+                        fullWidth
+                        label="E-mail *"
+                        type="email"
+                        size="small"
+                        required
                         InputProps={{
                           endAdornment: (
                             <InputAdornment position="end">
@@ -297,20 +310,20 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                       />
                     </Grid>
                     <Grid item xs={12} md={6}>
-                      <TextField 
-                        fullWidth 
-                        label="Telefon" 
+                      <TextField
+                        fullWidth
+                        label="Telefon"
                         size="small"
                         placeholder="5xx xxx xx xx"
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mr: 1 }}>
-                                <Box 
+                                <Box
                                   onClick={(e) => setCountryMenuAnchor(e.currentTarget)}
-                                  sx={{ 
-                                    width: 20, 
-                                    height: 14, 
+                                  sx={{
+                                    width: 20,
+                                    height: 14,
                                     background: '#e30a17',
                                     borderRadius: 0.5,
                                     border: '1px solid #ccc',
@@ -334,20 +347,20 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                       />
                     </Grid>
                     <Grid item xs={12} md={6}>
-                      <TextField 
-                        fullWidth 
-                        label="Cep Telefonu" 
+                      <TextField
+                        fullWidth
+                        label="Cep Telefonu"
                         size="small"
                         placeholder="5xx xxx xx xx"
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mr: 1 }}>
-                                <Box 
+                                <Box
                                   onClick={(e) => setCountryMenuAnchor(e.currentTarget)}
-                                  sx={{ 
-                                    width: 20, 
-                                    height: 14, 
+                                  sx={{
+                                    width: 20,
+                                    height: 14,
                                     background: '#e30a17',
                                     borderRadius: 0.5,
                                     border: '1px solid #ccc',
@@ -373,8 +386,8 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     <Grid item xs={12} md={4}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Ülke</InputLabel>
-                        <Select 
-                          value={formCountry} 
+                        <Select
+                          value={formCountry}
                           onChange={(e) => setFormCountry(e.target.value)}
                         >
                           <MenuItem value="turkey">Türkiye</MenuItem>
@@ -386,8 +399,8 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     <Grid item xs={12} md={4}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Şehir</InputLabel>
-                        <Select 
-                          value={selectedCity} 
+                        <Select
+                          value={selectedCity}
                           onChange={(e) => setSelectedCity(e.target.value)}
                         >
                           <MenuItem value="istanbul">İstanbul</MenuItem>
@@ -401,8 +414,8 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     <Grid item xs={12} md={4}>
                       <FormControl fullWidth size="small">
                         <InputLabel>İlçe</InputLabel>
-                        <Select 
-                          value={selectedDistrict} 
+                        <Select
+                          value={selectedDistrict}
                           onChange={(e) => setSelectedDistrict(e.target.value)}
                         >
                           <MenuItem value="kadikoy">Kadıköy</MenuItem>
@@ -415,8 +428,8 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     <Grid item xs={12} md={4}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Durum</InputLabel>
-                        <Select 
-                          value={customerStatus} 
+                        <Select
+                          value={customerStatus}
                           onChange={(e) => setCustomerStatus(e.target.value)}
                         >
                           <MenuItem value="active">Aktif</MenuItem>
@@ -427,8 +440,8 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     <Grid item xs={12} md={4}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Para Birimi *</InputLabel>
-                        <Select 
-                          value={currency} 
+                        <Select
+                          value={currency}
                           onChange={(e) => setCurrency(e.target.value)}
                         >
                           <MenuItem value="try">TRY</MenuItem>
@@ -440,8 +453,8 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     <Grid item xs={12} md={4}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Müşteri Grubu *</InputLabel>
-                        <Select 
-                          value={customerGroup} 
+                        <Select
+                          value={customerGroup}
                           onChange={(e) => setCustomerGroup(e.target.value)}
                         >
                           <MenuItem value="turkey">TÜRKİYE</MenuItem>
@@ -450,12 +463,12 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                       </FormControl>
                     </Grid>
                     <Grid item xs={12}>
-                      <TextField 
-                        fullWidth 
-                        label="Açıklama" 
-                        multiline 
-                        rows={3} 
-                        size="small" 
+                      <TextField
+                        fullWidth
+                        label="Açıklama"
+                        multiline
+                        rows={3}
+                        size="small"
                         placeholder="Müşteri hakkında açıklama..."
                       />
                     </Grid>
@@ -472,7 +485,7 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
             <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', mb: 3 }}>
               <CardContent sx={{ p: 3 }}>
                 <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Yeni Adres Ekle</Typography>
-                
+
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={6}>
                     <FormControl fullWidth size="small">
@@ -488,35 +501,35 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                   <Grid item xs={12} md={6}>
                     <TextField fullWidth label="Adı" size="small" placeholder="Adres adı giriniz" />
                   </Grid>
-                  
+
                   <Grid item xs={12}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                      <Box sx={{ 
-                        width: 20, 
-                        height: 20, 
-                        bgcolor: '#f0f0f0', 
-                        borderRadius: 1, 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center' 
+                      <Box sx={{
+                        width: 20,
+                        height: 20,
+                        bgcolor: '#f0f0f0',
+                        borderRadius: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
                       }}>
                         📁
                       </Box>
                       <Typography variant="body2" sx={{ color: '#666' }}>Varsayılan Adres</Typography>
                     </Box>
                   </Grid>
-                  
+
                   <Grid item xs={12}>
-                    <TextField 
-                      fullWidth 
-                      label="Adres" 
-                      multiline 
-                      rows={3} 
-                      size="small" 
+                    <TextField
+                      fullWidth
+                      label="Adres"
+                      multiline
+                      rows={3}
+                      size="small"
                       placeholder="Detaylı adres bilgisi giriniz"
                     />
                   </Grid>
-                  
+
                   <Grid item xs={12}>
                     <FormControlLabel
                       control={<Switch size="small" />}
@@ -524,7 +537,7 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                       sx={{ mb: 2 }}
                     />
                   </Grid>
-                  
+
                   <Grid item xs={12} md={4}>
                     <FormControl fullWidth size="small">
                       <InputLabel>Ülke</InputLabel>
@@ -556,7 +569,7 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                       </Select>
                     </FormControl>
                   </Grid>
-                  
+
                   <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
                     <Button variant="outlined" color="error" size="small">
                       Vazgeç
@@ -568,20 +581,20 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                 </Grid>
               </CardContent>
             </Card>
-            
+
             {/* Kayıtlı Adresler Listesi */}
             <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
               <CardContent sx={{ p: 3 }}>
                 <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Kayıtlı Adresler</Typography>
-                
+
                 {/* Adres Listesi Başlıkları */}
-                <Box sx={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: '1fr 1fr 2fr 1fr 80px', 
-                  gap: 2, 
-                  p: 2, 
-                  bgcolor: '#f8f9fa', 
-                  borderRadius: 1, 
+                <Box sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr 2fr 1fr 80px',
+                  gap: 2,
+                  p: 2,
+                  bgcolor: '#f8f9fa',
+                  borderRadius: 1,
                   mb: 2,
                   fontWeight: 600,
                   fontSize: '14px'
@@ -592,13 +605,13 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>İl/İlçe</Typography>
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>İşlem</Typography>
                 </Box>
-                
+
                 {/* Örnek Adres */}
-                <Box sx={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: '1fr 1fr 2fr 1fr 80px', 
-                  gap: 2, 
-                  p: 2, 
+                <Box sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr 2fr 1fr 80px',
+                  gap: 2,
+                  p: 2,
                   borderBottom: '1px solid #eee',
                   alignItems: 'center'
                 }}>
@@ -617,15 +630,15 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     </IconButton>
                   </Box>
                 </Box>
-                
+
                 {/* Toplam Kayıt */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center', 
-                  mt: 2, 
-                  pt: 2, 
-                  borderTop: '1px solid #eee' 
+                <Box sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mt: 2,
+                  pt: 2,
+                  borderTop: '1px solid #eee'
                 }}>
                   <Typography variant="body2" sx={{ color: '#666' }}>
                     Toplam Kayıt: 1
@@ -651,18 +664,18 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
               <CardContent sx={{ p: 3 }}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={3}>
-                    <TextField 
-                      fullWidth 
-                      label="İndirim Adı" 
-                      size="small" 
+                    <TextField
+                      fullWidth
+                      label="İndirim Adı"
+                      size="small"
                       placeholder="İndirim adı giriniz"
                     />
                   </Grid>
                   <Grid item xs={12} md={2}>
-                    <TextField 
-                      fullWidth 
-                      label="İndirim Değeri" 
-                      size="small" 
+                    <TextField
+                      fullWidth
+                      label="İndirim Değeri"
+                      size="small"
                       type="number"
                       InputProps={{
                         endAdornment: <InputAdornment position="end">%</InputAdornment>
@@ -670,10 +683,10 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     />
                   </Grid>
                   <Grid item xs={12} md={2}>
-                    <TextField 
-                      fullWidth 
-                      label="Alt Limit" 
-                      size="small" 
+                    <TextField
+                      fullWidth
+                      label="Alt Limit"
+                      size="small"
                       type="number"
                       placeholder="0.00"
                     />
@@ -690,10 +703,10 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     </FormControl>
                   </Grid>
                   <Grid item xs={12} md={1.5}>
-                    <TextField 
-                      fullWidth 
-                      label="Başlangıç Tarihi" 
-                      size="small" 
+                    <TextField
+                      fullWidth
+                      label="Başlangıç Tarihi"
+                      size="small"
                       type="date"
                       defaultValue="2025-01-01"
                       InputLabelProps={{ shrink: true }}
@@ -709,10 +722,10 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     />
                   </Grid>
                   <Grid item xs={12} md={1.5}>
-                    <TextField 
-                      fullWidth 
-                      label="Bitiş Tarihi" 
-                      size="small" 
+                    <TextField
+                      fullWidth
+                      label="Bitiş Tarihi"
+                      size="small"
                       type="date"
                       defaultValue="2025-12-31"
                       InputLabelProps={{ shrink: true }}
@@ -727,7 +740,7 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                       }}
                     />
                   </Grid>
-                  
+
                   <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 1 }}>
                     <Button variant="outlined" color="error" size="small">
                       Temizle
@@ -739,20 +752,20 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                 </Grid>
               </CardContent>
             </Card>
-            
+
             {/* Eklenmiş İndirimler Listesi */}
             <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
               <CardContent sx={{ p: 3 }}>
                 <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Eklenmiş İndirimler</Typography>
-                
+
                 {/* Liste Başlıkları */}
-                <Box sx={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr 80px', 
-                  gap: 2, 
-                  p: 2, 
-                  bgcolor: '#f8f9fa', 
-                  borderRadius: 1, 
+                <Box sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr 80px',
+                  gap: 2,
+                  p: 2,
+                  bgcolor: '#f8f9fa',
+                  borderRadius: 1,
                   mb: 2,
                   fontWeight: 600,
                   fontSize: '14px'
@@ -764,13 +777,13 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>Bitiş Tarihi</Typography>
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>İşlem</Typography>
                 </Box>
-                
+
                 {/* Örnek İndirim */}
-                <Box sx={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr 80px', 
-                  gap: 2, 
-                  p: 2, 
+                <Box sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr 80px',
+                  gap: 2,
+                  p: 2,
                   borderBottom: '1px solid #eee',
                   alignItems: 'center'
                 }}>
@@ -785,15 +798,15 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     </IconButton>
                   </Box>
                 </Box>
-                
+
                 {/* Alt Butonlar */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'flex-end', 
-                  gap: 2, 
-                  mt: 3, 
-                  pt: 2, 
-                  borderTop: '1px solid #eee' 
+                <Box sx={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: 2,
+                  mt: 3,
+                  pt: 2,
+                  borderTop: '1px solid #eee'
                 }}>
                   <Button variant="outlined" size="small">
                     İptal
@@ -808,19 +821,98 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
         );
       case 'discount':
         return (
-          <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" sx={{ mb: 2 }}>💰 İndirim Tanımları</Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
-                  <TextField fullWidth label="Genel İndirim %" size="small" type="number" />
+          <Box>
+            <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', mb: 3 }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>% İndirim Tanımı Ekle</Typography>
+                <Grid container spacing={3} alignItems="flex-end">
+                  <Grid item xs={12} md={3}>
+                    <TextField fullWidth label="İndirim Adı" size="small" placeholder="Örn: Yılbaşı İndirimi" />
+                  </Grid>
+                  <Grid item xs={12} md={2}>
+                    <TextField fullWidth label="İndirim Oranı (%)" size="small" type="number" placeholder="Örn: 15" />
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <TextField fullWidth label="Açıklama" size="small" placeholder="İndirim detayı..." />
+                  </Grid>
+                  <Grid item xs={12} md={3}>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <Button fullWidth variant="outlined" color="error" size="small">Temizle</Button>
+                      <Button fullWidth variant="contained" color="primary" size="small">Ekle</Button>
+                    </Box>
+                  </Grid>
                 </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField fullWidth label="Özel İndirim %" size="small" type="number" />
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Kayıtlı İndirim Tanımları</Typography>
+
+                <Box sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '2fr 1fr 3fr 1fr',
+                  gap: 2,
+                  p: 2,
+                  bgcolor: '#f8f9fa',
+                  borderRadius: 2,
+                  mb: 2,
+                  fontWeight: 600,
+                  fontSize: '0.875rem'
+                }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>İndirim Adı</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Oran (%)</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Açıklama</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, textAlign: 'center' }}>İşlem</Typography>
+                </Box>
+
+                <Box sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '2fr 1fr 3fr 1fr',
+                  gap: 2,
+                  p: 2,
+                  borderBottom: '1px solid #eee',
+                  alignItems: 'center',
+                  fontSize: '0.875rem'
+                }}>
+                  <Typography variant="body2">Hoş Geldin İndirimi</Typography>
+                  <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 600 }}>%10</Typography>
+                  <Typography variant="body2">Yeni kayıtlara özel indirim oranı</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+                    <IconButton size="small" sx={{ color: '#1976d2' }}>
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" sx={{ color: '#d32f2f' }}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </Box>
+
+                <Box sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '2fr 1fr 3fr 1fr',
+                  gap: 2,
+                  p: 2,
+                  borderBottom: '1px solid #eee',
+                  alignItems: 'center',
+                  fontSize: '0.875rem'
+                }}>
+                  <Typography variant="body2">Toptan Müşteri İndirimi</Typography>
+                  <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 600 }}>%20</Typography>
+                  <Typography variant="body2">Toptan satışlar için belirlenen özel sabit oran</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+                    <IconButton size="small" sx={{ color: '#1976d2' }}>
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" sx={{ color: '#d32f2f' }}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </Box>
+
+              </CardContent>
+            </Card>
+          </Box>
         );
       case 'notes':
         return (
@@ -829,17 +921,17 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
             <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', mb: 3 }}>
               <CardContent sx={{ p: 3 }}>
                 <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Notlar</Typography>
-                
-                <TextField 
-                  fullWidth 
-                  label="Notlar *" 
-                  multiline 
-                  rows={6} 
-                  size="small" 
+
+                <TextField
+                  fullWidth
+                  label="Notlar *"
+                  multiline
+                  rows={6}
+                  size="small"
                   placeholder="Müşteri hakkında önemli notlarınızı buraya yazabilirsiniz..."
                   sx={{ mb: 3 }}
                 />
-                
+
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
                   <Button variant="outlined" color="error" size="small">
                     Vazgeç
@@ -850,21 +942,21 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                 </Box>
               </CardContent>
             </Card>
-            
+
             {/* Mevcut Notlar Listesi */}
             <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
               <CardContent sx={{ p: 3 }}>
                 {/* Örnek Not */}
-                <Box sx={{ 
-                  border: '1px solid #e9ecef', 
-                  borderRadius: 2, 
-                  p: 2, 
+                <Box sx={{
+                  border: '1px solid #e9ecef',
+                  borderRadius: 2,
+                  p: 2,
                   mb: 2,
                   bgcolor: '#fafafa'
                 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                     <Avatar sx={{ width: 32, height: 32, bgcolor: '#e0e0e0', color: '#666' }}>
-                      <PersonIcon fontSize="small" />
+                      <Person fontSize="small" />
                     </Avatar>
                     <Box sx={{ flex: 1 }}>
                       <Typography variant="body2" sx={{ fontWeight: 600, color: '#333' }}>
@@ -883,16 +975,16 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                       </IconButton>
                     </Box>
                   </Box>
-                  
+
                   <Typography variant="body2" sx={{ color: '#555', lineHeight: 1.6 }}>
                     riskli birisi
                   </Typography>
                 </Box>
-                
+
                 {/* Boş Durum Mesajı (Eğer başka not yoksa) */}
-                <Box sx={{ 
-                  textAlign: 'center', 
-                  py: 4, 
+                <Box sx={{
+                  textAlign: 'center',
+                  py: 4,
                   color: '#999',
                   display: 'none' // Örnek not olduğu için gizli
                 }}>
@@ -900,15 +992,15 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     Henüz not eklenmemiş.
                   </Typography>
                 </Box>
-                
+
                 {/* Alt Butonlar */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'flex-end', 
-                  gap: 2, 
-                  mt: 3, 
-                  pt: 2, 
-                  borderTop: '1px solid #eee' 
+                <Box sx={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: 2,
+                  mt: 3,
+                  pt: 2,
+                  borderTop: '1px solid #eee'
                 }}>
                   <Button variant="outlined" size="small">
                     İptal
@@ -925,13 +1017,13 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
         return (
           <Box>
             <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Yüklenmeesi Gereken Belgeler</Typography>
-            
+
             <Grid container spacing={3}>
               {/* Onaylı Fiyat Teklifi */}
               <Grid item xs={12} md={6}>
-                <Card sx={{ 
-                  border: '1px solid #e9ecef', 
-                  borderRadius: 3, 
+                <Card sx={{
+                  border: '1px solid #e9ecef',
+                  borderRadius: 3,
                   boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                   height: '200px',
                   display: 'flex',
@@ -939,16 +1031,16 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                 }}>
                   <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
-                      Onaylı Fiyat Teklifi
+                      İmza Sirküsü
                     </Typography>
                     <Typography variant="body2" sx={{ color: '#666', mb: 3, flex: 1 }}>
-                      Firmanıza ait Onaylı Fiyat Teklifi yükleyiniz
+                      Firmanıza ait İmza Sirküsü yükleyiniz
                     </Typography>
-                    <Button 
-                      variant="contained" 
+                    <Button
+                      variant="contained"
                       component="label"
                       startIcon={<CloudUploadIcon />}
-                      sx={{ 
+                      sx={{
                         bgcolor: '#6c757d',
                         '&:hover': { bgcolor: '#5a6268' },
                         borderRadius: 2
@@ -961,12 +1053,12 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                   </CardContent>
                 </Card>
               </Grid>
-              
+
               {/* Onaylı Sözleşme */}
               <Grid item xs={12} md={6}>
-                <Card sx={{ 
-                  border: '1px solid #e9ecef', 
-                  borderRadius: 3, 
+                <Card sx={{
+                  border: '1px solid #e9ecef',
+                  borderRadius: 3,
                   boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                   height: '200px',
                   display: 'flex',
@@ -974,16 +1066,16 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                 }}>
                   <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
-                      Onaylı Sözleşme
+                      Faaliyet Belgesi
                     </Typography>
                     <Typography variant="body2" sx={{ color: '#666', mb: 3, flex: 1 }}>
-                      Firmanıza ait Onaylı Sözleşme yükleyiniz
+                      Firmanıza ait Faaliyet Belgesi yükleyiniz
                     </Typography>
-                    <Button 
-                      variant="contained" 
+                    <Button
+                      variant="contained"
                       component="label"
                       startIcon={<CloudUploadIcon />}
-                      sx={{ 
+                      sx={{
                         bgcolor: '#6c757d',
                         '&:hover': { bgcolor: '#5a6268' },
                         borderRadius: 2
@@ -996,12 +1088,12 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                   </CardContent>
                 </Card>
               </Grid>
-              
+
               {/* Vergi Levhası */}
               <Grid item xs={12} md={6}>
-                <Card sx={{ 
-                  border: '1px solid #e9ecef', 
-                  borderRadius: 3, 
+                <Card sx={{
+                  border: '1px solid #e9ecef',
+                  borderRadius: 3,
                   boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                   height: '200px',
                   display: 'flex',
@@ -1015,11 +1107,11 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                       Firmanıza ait Vergi Levhası yükleyiniz
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 1 }}>
-                      <Button 
-                        variant="outlined" 
+                      <Button
+                        variant="outlined"
                         size="small"
                         startIcon={<VisibilityIcon />}
-                        sx={{ 
+                        sx={{
                           color: '#1976d2',
                           borderColor: '#1976d2',
                           flex: 1
@@ -1027,10 +1119,10 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                       >
                         Görüntüle
                       </Button>
-                      <Button 
-                        variant="contained" 
+                      <Button
+                        variant="contained"
                         size="small"
-                        sx={{ 
+                        sx={{
                           bgcolor: '#dc3545',
                           '&:hover': { bgcolor: '#c82333' },
                           flex: 1
@@ -1042,12 +1134,12 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                   </CardContent>
                 </Card>
               </Grid>
-              
+
               {/* Kimlik */}
               <Grid item xs={12} md={6}>
-                <Card sx={{ 
-                  border: '1px solid #e9ecef', 
-                  borderRadius: 3, 
+                <Card sx={{
+                  border: '1px solid #e9ecef',
+                  borderRadius: 3,
                   boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                   height: '200px',
                   display: 'flex',
@@ -1060,11 +1152,11 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     <Typography variant="body2" sx={{ color: '#666', mb: 3, flex: 1 }}>
                       Firmanıza ait Kimlik yükleyiniz
                     </Typography>
-                    <Button 
-                      variant="contained" 
+                    <Button
+                      variant="contained"
                       component="label"
                       startIcon={<CloudUploadIcon />}
-                      sx={{ 
+                      sx={{
                         bgcolor: '#6c757d',
                         '&:hover': { bgcolor: '#5a6268' },
                         borderRadius: 2
@@ -1077,12 +1169,12 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                   </CardContent>
                 </Card>
               </Grid>
-              
+
               {/* Fiyat Teklifi */}
               <Grid item xs={12} md={6}>
-                <Card sx={{ 
-                  border: '1px solid #e9ecef', 
-                  borderRadius: 3, 
+                <Card sx={{
+                  border: '1px solid #e9ecef',
+                  borderRadius: 3,
                   boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                   height: '200px',
                   display: 'flex',
@@ -1095,11 +1187,11 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     <Typography variant="body2" sx={{ color: '#666', mb: 3, flex: 1 }}>
                       Firmanıza ait Fiyat Teklifi yükleyiniz
                     </Typography>
-                    <Button 
-                      variant="contained" 
+                    <Button
+                      variant="contained"
                       component="label"
                       startIcon={<CloudUploadIcon />}
-                      sx={{ 
+                      sx={{
                         bgcolor: '#6c757d',
                         '&:hover': { bgcolor: '#5a6268' },
                         borderRadius: 2
@@ -1113,13 +1205,13 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                 </Card>
               </Grid>
             </Grid>
-            
+
             {/* Alt Butonlar */}
-            <Box sx={{ 
-              display: 'flex', 
-              justifyContent: 'flex-end', 
-              gap: 2, 
-              mt: 4 
+            <Box sx={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: 2,
+              mt: 4
             }}>
               <Button variant="outlined" size="small">
                 İptal
@@ -1139,18 +1231,18 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                 <Grid container spacing={3}>
                   {/* İlk Satır */}
                   <Grid item xs={12} md={6}>
-                    <TextField 
-                      fullWidth 
-                      label="Hesap Sahibi" 
-                      size="small" 
+                    <TextField
+                      fullWidth
+                      label="Hesap Sahibi"
+                      size="small"
                       placeholder="Hesap sahibinin adını giriniz"
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
-                    <TextField 
-                      fullWidth 
-                      label="Hesap Numarası" 
-                      size="small" 
+                    <TextField
+                      fullWidth
+                      label="Hesap Numarası"
+                      size="small"
                       placeholder="Hesap numarasını giriniz"
                       InputProps={{
                         endAdornment: (
@@ -1161,7 +1253,7 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                       }}
                     />
                   </Grid>
-                  
+
                   {/* İkinci Satır */}
                   <Grid item xs={12} md={4}>
                     <FormControl fullWidth size="small">
@@ -1199,10 +1291,10 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     </FormControl>
                   </Grid>
                   <Grid item xs={12} md={4}>
-                    <TextField 
-                      fullWidth 
-                      label="IBAN Numarası" 
-                      size="small" 
+                    <TextField
+                      fullWidth
+                      label="IBAN Numarası"
+                      size="small"
                       placeholder="IBAN numarasını giriniz"
                       InputProps={{
                         startAdornment: (
@@ -1213,7 +1305,7 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                       }}
                     />
                   </Grid>
-                  
+
                   {/* Üçüncü Satır */}
                   <Grid item xs={12} md={6}>
                     <FormControl fullWidth size="small">
@@ -1231,7 +1323,7 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                       </Select>
                     </FormControl>
                   </Grid>
-                  
+
                   {/* Butonlar */}
                   <Grid item xs={12}>
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
@@ -1246,20 +1338,20 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                 </Grid>
               </CardContent>
             </Card>
-            
+
             {/* Eklenmiş Bankalar Listesi */}
             <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
               <CardContent sx={{ p: 3 }}>
                 <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Eklenmiş Bankalar</Typography>
-                
+
                 {/* Tablo Başlıkları */}
-                <Box sx={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: '2fr 2fr 2fr 2fr 1fr', 
-                  gap: 2, 
-                  p: 2, 
-                  bgcolor: '#f8f9fa', 
-                  borderRadius: 2, 
+                <Box sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '2fr 2fr 2fr 2fr 1fr',
+                  gap: 2,
+                  p: 2,
+                  bgcolor: '#f8f9fa',
+                  borderRadius: 2,
                   mb: 2,
                   fontWeight: 600
                 }}>
@@ -1269,11 +1361,11 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>IBAN</Typography>
                   <Typography variant="body2" sx={{ fontWeight: 600, textAlign: 'center' }}>İşlem</Typography>
                 </Box>
-                
+
                 {/* Boş Durum Mesajı */}
-                <Box sx={{ 
-                  textAlign: 'center', 
-                  py: 6, 
+                <Box sx={{
+                  textAlign: 'center',
+                  py: 6,
                   color: '#999',
                   border: '1px dashed #ddd',
                   borderRadius: 2
@@ -1286,15 +1378,15 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     Henüz banka hesabı eklenmemiş.
                   </Typography>
                 </Box>
-                
+
                 {/* Alt Butonlar */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'flex-end', 
-                  gap: 2, 
-                  mt: 3, 
-                  pt: 2, 
-                  borderTop: '1px solid #eee' 
+                <Box sx={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: 2,
+                  mt: 3,
+                  pt: 2,
+                  borderTop: '1px solid #eee'
                 }}>
                   <Button variant="outlined" size="small">
                     İptal
@@ -1313,13 +1405,13 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
             <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
               <CardContent sx={{ p: 3 }}>
                 {/* Mail Geçmişi Tablosu */}
-                <Box sx={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: '80px 150px 200px 150px 120px 120px 100px', 
-                  gap: 2, 
-                  p: 2, 
-                  bgcolor: '#f8f9fa', 
-                  borderRadius: 2, 
+                <Box sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '80px 150px 200px 150px 120px 120px 100px',
+                  gap: 2,
+                  p: 2,
+                  bgcolor: '#f8f9fa',
+                  borderRadius: 2,
                   mb: 2,
                   fontWeight: 600,
                   fontSize: '0.875rem'
@@ -1332,40 +1424,46 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>Durum</Typography>
                   <Typography variant="body2" sx={{ fontWeight: 600, textAlign: 'center' }}>İşlemler</Typography>
                 </Box>
-                
+
                 {/* Örnek Mail Kayıtları */}
-                <Box sx={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: '80px 150px 200px 150px 120px 120px 100px', 
-                  gap: 2, 
-                  p: 2, 
+                <Box sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '80px 150px 200px 150px 120px 120px 100px',
+                  gap: 2,
+                  p: 2,
                   borderBottom: '1px solid #eee',
                   alignItems: 'center',
                   fontSize: '0.875rem'
                 }}>
                   <Typography variant="body2">1</Typography>
                   <Typography variant="body2">23/06/2025 14:30</Typography>
-                  <Typography variant="body2" sx={{ 
-                    overflow: 'hidden', 
-                    textOverflow: 'ellipsis', 
-                    whiteSpace: 'nowrap' 
+                  <Typography variant="body2" sx={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
                   }}>
                     Hoş Geldiniz - Üyelik Onayı
                   </Typography>
                   <Typography variant="body2">ahmet@example.com</Typography>
                   <Typography variant="body2">sistem@firma.com</Typography>
-                  <Chip 
-                    label="Gönderildi" 
-                    size="small" 
-                    sx={{ 
-                      bgcolor: '#d1ecf1', 
+                  <Chip
+                    label="Gönderildi"
+                    size="small"
+                    sx={{
+                      bgcolor: '#d1ecf1',
                       color: '#0c5460',
                       fontSize: '0.75rem',
                       height: '24px'
-                    }} 
+                    }}
                   />
                   <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
-                    <IconButton size="small" sx={{ color: '#1976d2' }}>
+                    <IconButton size="small" sx={{ color: '#1976d2' }} onClick={(e) => {
+                      e.stopPropagation();
+                      setCustomerMailDetailOpen(true);
+                      setSelectedCustomerMail({
+                        id: '1', date: '23/06/2025 14:30', subject: 'Hoş Geldiniz - Üyelik Onayı', to: 'ahmet@example.com', from: 'sistem@firma.com', status: 'Gönderildi', content: 'Sayın Müşterimiz,\n\nÜyeliğiniz başarıyla onaylanmıştır. Sisteme giriş yapabilirsiniz.\n\nİyi günler dileriz.'
+                      });
+                    }}>
                       <VisibilityIcon fontSize="small" />
                     </IconButton>
                     <IconButton size="small" sx={{ color: '#d32f2f' }}>
@@ -1373,40 +1471,46 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     </IconButton>
                   </Box>
                 </Box>
-                
+
                 {/* İkinci Örnek Kayıt */}
-                <Box sx={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: '80px 150px 200px 150px 120px 120px 100px', 
-                  gap: 2, 
-                  p: 2, 
+                <Box sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '80px 150px 200px 150px 120px 120px 100px',
+                  gap: 2,
+                  p: 2,
                   borderBottom: '1px solid #eee',
                   alignItems: 'center',
                   fontSize: '0.875rem'
                 }}>
                   <Typography variant="body2">2</Typography>
                   <Typography variant="body2">22/06/2025 09:15</Typography>
-                  <Typography variant="body2" sx={{ 
-                    overflow: 'hidden', 
-                    textOverflow: 'ellipsis', 
-                    whiteSpace: 'nowrap' 
+                  <Typography variant="body2" sx={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
                   }}>
                     Sipariş Onay Bildirimi
                   </Typography>
                   <Typography variant="body2">mehmet@test.com</Typography>
                   <Typography variant="body2">siparis@firma.com</Typography>
-                  <Chip 
-                    label="Başarısız" 
-                    size="small" 
-                    sx={{ 
-                      bgcolor: '#f8d7da', 
+                  <Chip
+                    label="Başarısız"
+                    size="small"
+                    sx={{
+                      bgcolor: '#f8d7da',
                       color: '#721c24',
                       fontSize: '0.75rem',
                       height: '24px'
-                    }} 
+                    }}
                   />
                   <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
-                    <IconButton size="small" sx={{ color: '#1976d2' }}>
+                    <IconButton size="small" sx={{ color: '#1976d2' }} onClick={(e) => {
+                      e.stopPropagation();
+                      setCustomerMailDetailOpen(true);
+                      setSelectedCustomerMail({
+                        id: '2', date: '22/06/2025 09:15', subject: 'Sipariş Onay Bildirimi', to: 'mehmet@test.com', from: 'siparis@firma.com', status: 'Başarısız', content: 'Sayın Müşterimiz,\n\nSiparişiniz sırasında bir hata oluşmuştur. Lütfen bilgilerinizi kontrol edip tekrar deneyiniz.\n\nİyi günler dileriz.'
+                      });
+                    }}>
                       <VisibilityIcon fontSize="small" />
                     </IconButton>
                     <IconButton size="small" sx={{ color: '#d32f2f' }}>
@@ -1414,11 +1518,11 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     </IconButton>
                   </Box>
                 </Box>
-                
+
                 {/* Boş Durum (Eğer başka kayıt yoksa) */}
-                <Box sx={{ 
-                  textAlign: 'center', 
-                  py: 6, 
+                <Box sx={{
+                  textAlign: 'center',
+                  py: 6,
                   color: '#999',
                   display: 'none' // Örnek kayıtlar olduğu için gizli
                 }}>
@@ -1430,15 +1534,15 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     Müşteriye mail gönderdikten sonra burada görüntülenecek.
                   </Typography>
                 </Box>
-                
+
                 {/* Alt Butonlar */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'flex-end', 
-                  gap: 2, 
-                  mt: 3, 
-                  pt: 2, 
-                  borderTop: '1px solid #eee' 
+                <Box sx={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: 2,
+                  mt: 3,
+                  pt: 2,
+                  borderTop: '1px solid #eee'
                 }}>
                   <Button variant="outlined" size="small">
                     İptal
@@ -1457,13 +1561,13 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
             <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
               <CardContent sx={{ p: 3 }}>
                 {/* SMS Geçmişi Tablosu */}
-                <Box sx={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: '80px 150px 120px 120px 120px 120px 120px 100px', 
-                  gap: 2, 
-                  p: 2, 
-                  bgcolor: '#f8f9fa', 
-                  borderRadius: 2, 
+                <Box sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '80px 150px 120px 120px 120px 120px 120px 100px',
+                  gap: 2,
+                  p: 2,
+                  bgcolor: '#f8f9fa',
+                  borderRadius: 2,
                   mb: 2,
                   fontWeight: 600,
                   fontSize: '0.875rem'
@@ -1477,13 +1581,13 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>İçerik</Typography>
                   <Typography variant="body2" sx={{ fontWeight: 600, textAlign: 'center' }}>İşlemler</Typography>
                 </Box>
-                
+
                 {/* Örnek SMS Kayıtları */}
-                <Box sx={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: '80px 150px 120px 120px 120px 120px 120px 100px', 
-                  gap: 2, 
-                  p: 2, 
+                <Box sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '80px 150px 120px 120px 120px 120px 120px 100px',
+                  gap: 2,
+                  p: 2,
                   borderBottom: '1px solid #eee',
                   alignItems: 'center',
                   fontSize: '0.875rem'
@@ -1493,15 +1597,15 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                   <Typography variant="body2">Happ-Sms</Typography>
                   <Typography variant="body2">Yigit Kemal</Typography>
                   <Typography variant="body2">Test Header</Typography>
-                  <Chip 
-                    label="Success" 
-                    size="small" 
-                    sx={{ 
-                      bgcolor: '#d4edda', 
+                  <Chip
+                    label="Success"
+                    size="small"
+                    sx={{
+                      bgcolor: '#d4edda',
                       color: '#155724',
                       fontSize: '0.75rem',
                       height: '24px'
-                    }} 
+                    }}
                   />
                   <Typography variant="body2">This is a test sms</Typography>
                   <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -1510,11 +1614,11 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     </IconButton>
                   </Box>
                 </Box>
-                
+
                 {/* Boş Durum (Eğer başka kayıt yoksa) */}
-                <Box sx={{ 
-                  textAlign: 'center', 
-                  py: 6, 
+                <Box sx={{
+                  textAlign: 'center',
+                  py: 6,
                   color: '#999',
                   display: 'none' // Örnek kayıt olduğu için gizli
                 }}>
@@ -1526,15 +1630,15 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     Müşteriye SMS gönderdikten sonra burada görüntülenecek.
                   </Typography>
                 </Box>
-                
+
                 {/* Alt Butonlar */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'flex-end', 
-                  gap: 2, 
-                  mt: 3, 
-                  pt: 2, 
-                  borderTop: '1px solid #eee' 
+                <Box sx={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: 2,
+                  mt: 3,
+                  pt: 2,
+                  borderTop: '1px solid #eee'
                 }}>
                   <Button variant="outlined" size="small">
                     İptal
@@ -1543,6 +1647,165 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
                     Kaydet
                   </Button>
                 </Box>
+              </CardContent>
+            </Card>
+          </Box>
+        );
+      case 'warehouse':
+        return (
+          <Box>
+            {/* Yeni Depo/Şube Ekle Formu */}
+            <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', mb: 3 }}>
+              <CardContent sx={{ p: 3 }}>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Depo/Şube Adı"
+                      size="small"
+                      placeholder="Örn: Kadıköy Şubesi veya Ana Depo"
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Yetkili Kişi"
+                      size="small"
+                      placeholder="Yetkili kişinin adını giriniz"
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Telefon"
+                      size="small"
+                      placeholder="0(555) 555 55 55"
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="E-posta"
+                      size="small"
+                      placeholder="Email adresini giriniz"
+                    />
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Açık Adres"
+                      size="small"
+                      multiline
+                      rows={2}
+                      placeholder="Adres detayını giriniz"
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>İl</InputLabel>
+                      <Select defaultValue="istanbul" label="İl">
+                        <MenuItem value="istanbul">İstanbul</MenuItem>
+                        <MenuItem value="ankara">Ankara</MenuItem>
+                        <MenuItem value="izmir">İzmir</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="İlçe"
+                      size="small"
+                      placeholder="İlçe adını giriniz"
+                    />
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+                      <Button variant="outlined" color="error" size="small">
+                        Temizle
+                      </Button>
+                      <Button variant="contained" color="primary" size="small">
+                        Kaydet
+                      </Button>
+                    </Box>
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+
+            {/* Eklenmiş Depolar/Şubeler Listesi */}
+            <Card sx={{ border: '1px solid #e9ecef', borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Eklenmiş Depolar ve Şubeler</Typography>
+
+                <Box sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '2fr 2fr 2fr 2fr 1fr',
+                  gap: 2,
+                  p: 2,
+                  bgcolor: '#f8f9fa',
+                  borderRadius: 2,
+                  mb: 2,
+                  fontWeight: 600,
+                  fontSize: '0.875rem'
+                }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Depo/Şube Adı</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Yetkili Kişi</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Telefon</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>İl/İlçe</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, textAlign: 'center' }}>İşlem</Typography>
+                </Box>
+
+                {/* Örnek Kayıt (Gösterim amaçlı) */}
+                <Box sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '2fr 2fr 2fr 2fr 1fr',
+                  gap: 2,
+                  p: 2,
+                  borderBottom: '1px solid #eee',
+                  alignItems: 'center',
+                  fontSize: '0.875rem'
+                }}>
+                  <Typography variant="body2">Kadıköy Şubesi</Typography>
+                  <Typography variant="body2">Ahmet Yılmaz</Typography>
+                  <Typography variant="body2">0555 123 4567</Typography>
+                  <Typography variant="body2">İstanbul / Kadıköy</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+                    <IconButton size="small" sx={{ color: '#1976d2' }}>
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" sx={{ color: '#d32f2f' }}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </Box>
+
+                <Box sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '2fr 2fr 2fr 2fr 1fr',
+                  gap: 2,
+                  p: 2,
+                  borderBottom: '1px solid #eee',
+                  alignItems: 'center',
+                  fontSize: '0.875rem'
+                }}>
+                  <Typography variant="body2">Merkez Depo</Typography>
+                  <Typography variant="body2">Ayşe Demir</Typography>
+                  <Typography variant="body2">0544 987 6543</Typography>
+                  <Typography variant="body2">Ankara / Çankaya</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+                    <IconButton size="small" sx={{ color: '#1976d2' }}>
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" sx={{ color: '#d32f2f' }}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </Box>
+
               </CardContent>
             </Card>
           </Box>
@@ -1564,14 +1827,14 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
   return (
     <Box sx={{ display: 'flex', height: 'calc(100% - 64px)', flexDirection: { xs: 'column', md: 'row' } }}>
       {/* Sol Sidebar */}
-      <Box sx={{ 
-        width: { xs: '100%', md: '280px' }, 
+      <Box sx={{
+        width: { xs: '100%', md: '280px' },
         minHeight: { xs: 'auto', md: '100%' },
-        bgcolor: '#f8f9fa', 
+        bgcolor: '#f8f9fa',
         borderRight: { xs: 'none', md: '1px solid #e9ecef' },
         borderBottom: { xs: '1px solid #e9ecef', md: 'none' },
-        display: 'flex', 
-        flexDirection: 'column' 
+        display: 'flex',
+        flexDirection: 'column'
       }}>
         <Box sx={{ p: 2, borderBottom: '1px solid #e9ecef' }}>
           <TextField
@@ -1587,10 +1850,10 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
             }}
           />
         </Box>
-        
-        <Box sx={{ 
-          flex: 1, 
-          overflow: 'auto', 
+
+        <Box sx={{
+          flex: 1,
+          overflow: 'auto',
           p: 1,
           display: { xs: 'flex', md: 'block' },
           flexDirection: { xs: 'row', md: 'column' },
@@ -1646,7 +1909,7 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
           ))}
         </Box>
       </Box>
-      
+
       {/* Sağ İçerik Alanı */}
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Box sx={{ p: 3, borderBottom: '1px solid #e9ecef', bgcolor: 'white' }}>
@@ -1657,18 +1920,18 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
             Bu kategoride müşteriye ait bilgileri yönetebilirsiniz.
           </Typography>
         </Box>
-        
+
         <Box sx={{ flex: 1, overflow: 'auto', p: 3 }}>
           {renderCategoryContent()}
         </Box>
-        
+
         {/* Alt Butonlar */}
         <Box sx={{ p: 3, borderTop: '1px solid #e9ecef', bgcolor: '#f8f9fa', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
           <Button variant="outlined" onClick={onClose}>
             İptal
           </Button>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             onClick={() => onSubmit({})}
             sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
           >
@@ -1676,7 +1939,7 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
           </Button>
         </Box>
       </Box>
-      
+
       {/* Ülke Seçici Menü */}
       <Menu
         anchorEl={countryMenuAnchor}
@@ -1712,6 +1975,87 @@ const CustomerFormContent: React.FC<CustomerFormContentProps> = ({ editingCustom
           </MenuItem>
         ))}
       </Menu>
+
+      {/* Müşteri Mail Detayı Dialog'u (Edit Modal İçi İçin) */}
+      <Dialog
+        open={customerMailDetailOpen}
+        onClose={() => setCustomerMailDetailOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: 3, boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }
+        }}
+      >
+        {selectedCustomerMail && (
+          <>
+            <DialogTitle sx={{
+              borderBottom: '1px solid #eee',
+              pb: 2,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              bgcolor: '#f8f9fa'
+            }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <MailIcon sx={{ color: '#1976d2' }} />
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>E-posta Detayı</Typography>
+              </Box>
+              <IconButton onClick={() => setCustomerMailDetailOpen(false)} size="small">
+                <CloseIcon />
+              </IconButton>
+            </DialogTitle>
+            <DialogContent sx={{ p: 0 }}>
+              <Box sx={{ p: 3, borderBottom: '1px solid #eee' }}>
+                <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, color: '#333' }}>
+                  {selectedCustomerMail.subject}
+                </Typography>
+
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1.5 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, width: 80, color: '#666' }}>Kimden:</Typography>
+                      <Typography variant="body2">{selectedCustomerMail.from}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, width: 80, color: '#666' }}>Kime:</Typography>
+                      <Typography variant="body2">{selectedCustomerMail.to}</Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5, justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mr: 2, color: '#666' }}>Tarih:</Typography>
+                      <Typography variant="body2">{selectedCustomerMail.date}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mr: 2, color: '#666' }}>Durum:</Typography>
+                      <Chip
+                        label={selectedCustomerMail.status}
+                        size="small"
+                        sx={{
+                          bgcolor: selectedCustomerMail.status === 'Gönderildi' ? '#d1ecf1' : '#f8d7da',
+                          color: selectedCustomerMail.status === 'Gönderildi' ? '#0c5460' : '#721c24',
+                          fontWeight: 500
+                        }}
+                      />
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Box>
+
+              <Box sx={{ p: 3, minHeight: 250, bgcolor: '#fff' }}>
+                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6, color: '#444' }}>
+                  {selectedCustomerMail.content}
+                </Typography>
+              </Box>
+            </DialogContent>
+            <DialogActions sx={{ p: 2, borderTop: '1px solid #eee', bgcolor: '#f8f9fa' }}>
+              <Button onClick={() => setCustomerMailDetailOpen(false)} variant="contained" sx={{ textTransform: 'none', borderRadius: 2 }}>
+                Kapat
+              </Button>
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
     </Box>
   );
 };
@@ -1733,10 +2077,10 @@ const CustomersPage: React.FC = () => {
   const inches = useScreenInches();
   // Dil desteği için LanguageContext'ten çevirileri al
   const { translations } = useLanguage();
-  
+
   // Bildirim sistemi için NotificationContext'i kullan
   const notifications = useNotifications();
-  
+
   // State tanımlamaları
   const [filterOpen, setFilterOpen] = useState(false);
   const [tabValue, setTabValue] = useState<number>(0);
@@ -1746,7 +2090,7 @@ const CustomersPage: React.FC = () => {
   const [activeCustomerId, setActiveCustomerId] = useState<string | null>(null);
   const [actionMenuOpen, setActionMenuOpen] = useState(false);
   const [actionAnchorEl, setActionAnchorEl] = useState<null | HTMLElement>(null);
-  
+
   // Filtre state'leri
   const [activeTab, setActiveTab] = useState<string>('all');
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
@@ -1760,92 +2104,92 @@ const CustomersPage: React.FC = () => {
 
   // Hiyerarşik konum verileri
   const locationData = [
-    { 
-      value: 'Turkey', 
+    {
+      value: 'Turkey',
       label: 'Türkiye',
       cities: [
-        { 
-          value: 'Istanbul', 
+        {
+          value: 'Istanbul',
           label: 'İstanbul',
           districts: [
             { value: 'Kadikoy', label: 'Kadıköy' },
             { value: 'Besiktas', label: 'Beşiktaş' },
             { value: 'Sisli', label: 'Şişli' },
-          ] 
+          ]
         },
-        { 
-          value: 'Ankara', 
+        {
+          value: 'Ankara',
           label: 'Ankara',
           districts: [
             { value: 'Cankaya', label: 'Çankaya' },
             { value: 'Kecioren', label: 'Keçiören' },
-          ] 
+          ]
         },
-        { 
-          value: 'Izmir', 
+        {
+          value: 'Izmir',
           label: 'İzmir',
           districts: [
             { value: 'Karsiyaka', label: 'Karşıyaka' },
             { value: 'Konak', label: 'Konak' },
-          ] 
+          ]
         },
       ]
     },
-    { 
-      value: 'Russia', 
+    {
+      value: 'Russia',
       label: 'Rusya',
       cities: [
-        { 
-          value: 'Moscow', 
+        {
+          value: 'Moscow',
           label: 'Moskova',
           districts: [
             { value: 'Kremlin', label: 'Kremlin' },
             { value: 'Arbat', label: 'Arbat' },
-          ] 
+          ]
         },
-        { 
-          value: 'Saint Petersburg', 
+        {
+          value: 'Saint Petersburg',
           label: 'St. Petersburg',
           districts: [
             { value: 'Nevsky', label: 'Nevsky' },
             { value: 'Vasilievsky', label: 'Vasilievsky' },
-          ] 
+          ]
         },
       ]
     },
-    { 
-      value: 'USA', 
+    {
+      value: 'USA',
       label: 'ABD',
       cities: [
-        { 
-          value: 'New York', 
+        {
+          value: 'New York',
           label: 'New York',
           districts: [
             { value: 'Manhattan', label: 'Manhattan' },
             { value: 'Brooklyn', label: 'Brooklyn' },
-          ] 
+          ]
         },
-        { 
-          value: 'Los Angeles', 
+        {
+          value: 'Los Angeles',
           label: 'Los Angeles',
           districts: [
             { value: 'Hollywood', label: 'Hollywood' },
             { value: 'Beverly Hills', label: 'Beverly Hills' },
-          ] 
+          ]
         },
       ]
     },
   ];
-  
+
   // Şehir ve ilçe seçenekleri
-  const cityOptions = selectedLocation.country !== 'all' 
+  const cityOptions = selectedLocation.country !== 'all'
     ? [{ value: 'all', label: 'Tüm Şehirler' }, ...locationData.find(country => country.value === selectedLocation.country)?.cities.map(city => ({ value: city.value, label: city.label })) || []]
     : [{ value: 'all', label: 'Tüm Şehirler' }];
-    
-  const districtOptions = selectedLocation.country !== 'all' && selectedLocation.city !== 'all' 
+
+  const districtOptions = selectedLocation.country !== 'all' && selectedLocation.city !== 'all'
     ? [{ value: 'all', label: 'Tüm İlçeler' }, ...locationData.find(country => country.value === selectedLocation.country)?.cities.find(city => city.value === selectedLocation.city)?.districts.map(district => ({ value: district.value, label: district.label })) || []]
     : [{ value: 'all', label: 'Tüm İlçeler' }];
-  
+
   // Menü işlemleri için fonksiyonlar
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, customer: Customer) => {
     setActiveCustomerId(customer.id);
@@ -1853,12 +2197,12 @@ const CustomersPage: React.FC = () => {
     setAnchorEl(event.currentTarget);
     setSelectedCustomer(customer);
   };
-  
+
   const handleMenuClose = () => {
     setMenuAnchorEl(null);
     setAnchorEl(null);
   };
-  
+
   const [customers, setCustomers] = useState<Customer[]>([
     {
       id: 'YGTXML',
@@ -1922,17 +2266,17 @@ const CustomersPage: React.FC = () => {
       lastLogin: '22/06/2025:15:00'
     },
   ]);
-  
+
   // Tablo sütunları
   const columns: Column[] = [
-    { 
-      id: 'name', 
-      label: 'Müşteri', 
+    {
+      id: 'name',
+      label: 'Müşteri',
       minWidth: 170,
       format: (value: string, row: Customer) => (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar 
-            sx={{ 
+          <Avatar
+            sx={{
               bgcolor: stringToColor(value),
               width: 35,
               height: 35,
@@ -1975,10 +2319,10 @@ const CustomersPage: React.FC = () => {
         />
       ),
     },
-    { 
-      id: 'actions', 
-      label: 'İşlemler', 
-      minWidth: 100, 
+    {
+      id: 'actions',
+      label: 'İşlemler',
+      minWidth: 100,
       align: 'right',
       format: (value: any, row: Customer) => (
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
@@ -1998,29 +2342,29 @@ const CustomersPage: React.FC = () => {
   ];
 
   // Not: Bu değişkenler yukarıda tanımlandığı için burada tekrar tanımlanmıyor
-  
+
   // Customers state'ini useEffect ile filteredCustomers'a aktar
   useEffect(() => {
     setFilteredCustomers(customers);
   }, [customers]);
-  
+
   // Müşteri durumu filtreleme fonksiyonu
   const handleStatusFilter = (status: string) => {
     setActiveTab(status);
     applyFilters(status);
   };
-  
+
   // Tab değişimi için fonksiyon
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     applyFilters(tab);
   };
-  
+
   // Arama değişikliği için fonksiyon
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
-  
+
   // Ülke değişikliği için fonksiyon
   const handleCountryChange = (event: SelectChangeEvent) => {
     setSelectedLocation({
@@ -2029,7 +2373,7 @@ const CustomersPage: React.FC = () => {
       district: 'all'
     });
   };
-  
+
   // Şehir değişikliği için fonksiyon
   const handleCityChange = (event: SelectChangeEvent) => {
     setSelectedLocation({
@@ -2038,7 +2382,7 @@ const CustomersPage: React.FC = () => {
       district: 'all'
     });
   };
-  
+
   // İlçe değişikliği için fonksiyon
   const handleDistrictChange = (event: SelectChangeEvent) => {
     setSelectedLocation({
@@ -2046,57 +2390,57 @@ const CustomersPage: React.FC = () => {
       district: event.target.value as string
     });
   };
-  
+
   // Taraf değişikliği için fonksiyon
   const handlePartyChange = (event: SelectChangeEvent) => {
     setSelectedParty(event.target.value as PartyType);
   };
-  
+
   // Filtre panelini açıp kapatma fonksiyonu
   const handleFilterToggle = () => {
     setFilterOpen(!filterOpen);
   };
-  
+
   // Finansal durum değişikliği için fonksiyon
   const handleFinancialStatusChange = (event: SelectChangeEvent) => {
     setSelectedFinancialStatus(event.target.value as FinancialStatus);
   };
-  
+
   // Tarih filtreleri için state değişkenleri
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
-  
+
   // Sayfalama için fonksiyonlar
   const handleChangePage = (event: React.ChangeEvent<unknown> | null, newPage: number) => {
     setPage(newPage);
   };
-  
+
   const handleChangeRowsPerPage = (event: SelectChangeEvent<string>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-  
+
   // SMS gönderme dialog'u için state ve fonksiyonlar
   const [smsDialogOpen, setSmsDialogOpen] = useState(false);
   const [smsCustomer, setSmsCustomer] = useState<Customer | null>(null);
   const [smsMessage, setSmsMessage] = useState('');
-  
+
   const handleSmsOpen = (customer: Customer) => {
     setSmsCustomer(customer);
     setSmsMessage(`Sayın ${customer.name}, siparişiniz için teşekkür ederiz! ${customer.id} numaralı siparişiniz işleme alınmıştır.`);
     setSmsDialogOpen(true);
   };
-  
+
   const handleSmsClose = () => {
     setSmsDialogOpen(false);
   };
-  
+
   const handleSmsSend = (data: any) => {
     // Burada SMS gönderme işlemi yapılabilir
     try {
       // API çağrısı burada yapılacak
       // Örnek: await sendSms(smsCustomer.phone, data.message);
-      
+
       // Başarılı bildirim göster
       notifications.showSuccess(`SMS başarıyla gönderildi: ${smsCustomer?.name}`);
       setSmsDialogOpen(false);
@@ -2106,71 +2450,75 @@ const CustomersPage: React.FC = () => {
       console.error('SMS gönderme hatası:', error);
     }
   };
-  
+
   // E-posta gönderme dialog'u için state ve fonksiyonlar
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [emailCustomer, setEmailCustomer] = useState<Customer | null>(null);
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
-  
+
+  // Özel Mail Detay Dialog'u için State'ler
+  const [customerMailDetailOpen, setCustomerMailDetailOpen] = useState(false);
+  const [selectedCustomerMail, setSelectedCustomerMail] = useState<any>(null);
+
   // Mail Dialog için state
   const [mailDialogOpen, setMailDialogOpen] = useState(false);
-  
+
   // Import dialog'u için state ve fonksiyonlar
   const [importDialogOpen, setImportDialogOpen] = useState(false);
-  
+
   const handleImportOpen = () => {
     setImportDialogOpen(true);
   };
-  
+
   const handleImportClose = () => {
     setImportDialogOpen(false);
   };
-  
+
   // Müşteri ekleme/düzenleme Dialog state'leri
   const [customerFormOpen, setCustomerFormOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
-  
+
   // Yeni müşteri ve hızlı ekleme dialog'ları için state'ler
   const [newCustomerDialogOpen, setNewCustomerDialogOpen] = useState(false);
 
-  
+
   // Yeni müşteri dialog'unu açma fonksiyonu
   const handleNewCustomerOpen = () => {
     setNewCustomerDialogOpen(true);
   };
-  
+
   // Yeni müşteri dialog'unu kapatma fonksiyonu
   const handleNewCustomerClose = () => {
     setNewCustomerDialogOpen(false);
   };
 
-  
+
   // Müşteri ekleme/düzenleme Dialog fonksiyonları
   const handleAddCustomer = () => {
     setEditingCustomer(null);
     setCustomerFormOpen(true);
   };
-  
+
   const handleEditCustomer = (customer: Customer) => {
     setEditingCustomer(customer);
     setCustomerFormOpen(true);
     handleMenuClose();
   };
-  
+
   const handleCustomerFormOpen = () => {
     setEditingCustomer(null);
     setCustomerFormOpen(true);
   };
-  
+
   const handleCustomerFormClose = () => {
     setCustomerFormOpen(false);
   };
-  
+
   const handleCustomerFormSubmit = (data: any) => {
     if (editingCustomer) {
       // Müşteri düzenleme
-      const updatedCustomers = customers.map(c => 
+      const updatedCustomers = customers.map(c =>
         c.id === editingCustomer.id ? { ...c, ...data } : c
       );
       setCustomers(updatedCustomers);
@@ -2188,12 +2536,12 @@ const CustomersPage: React.FC = () => {
     }
     setCustomerFormOpen(false);
   };
-  
+
   const handleImportCustomers = (importedCustomers: Customer[]) => {
     // Mevcut müşteri listesine yeni müşterileri ekle
     setCustomers([...customers, ...importedCustomers]);
   };
-  
+
   // Müşteri verilerini düzenle (Excel ve PDF için ortak)
   const prepareCustomerData = () => {
     return customers.map(customer => ({
@@ -2210,16 +2558,16 @@ const CustomersPage: React.FC = () => {
       "Son Giriş": customer.lastLogin || "-"
     }));
   };
-  
+
   // Excel'e veri dışa aktarma fonksiyonu
   const exportToExcel = () => {
     try {
       // Müşteri verilerini düzenle
       const exportData = prepareCustomerData();
-      
+
       // Excel dosyası oluştur
       const worksheet = XLSX.utils.json_to_sheet(exportData);
-      
+
       // Sütun genişliklerini ayarla
       const wscols = [
         { wch: 12 }, // Müşteri ID
@@ -2235,14 +2583,14 @@ const CustomersPage: React.FC = () => {
         { wch: 15 }  // Son Giriş
       ];
       worksheet['!cols'] = wscols;
-      
+
       // Çalışma kitabı oluştur
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Müşteriler");
-      
+
       // Dosyayı indir
       XLSX.writeFile(workbook, "musteri_listesi.xlsx");
-      
+
       // Başarı bildirimi göster - NotificationContext kullanarak
       notifications.showSuccess("Müşteri listesi başarıyla Excel'e aktarıldı!", 'save');
     } catch (error) {
@@ -2250,25 +2598,25 @@ const CustomersPage: React.FC = () => {
       notifications.showError("Excel'e aktarma sırasında bir hata oluştu!");
     }
   };
-  
+
   // Sayfada görünmeyen bir iframe kullanarak yazdırma
   const printCustomerData = () => {
     try {
       // Müşteri verilerini düzenle
       const exportData = prepareCustomerData();
-      
+
       if (exportData.length === 0) {
         notifications.show("Yazdırılacak müşteri verisi bulunamadı!", { severity: 'warning' });
         return;
       }
-      
+
       // Tablo başlıkları ve verileri hazırla
       const headers = Object.keys(exportData[0]);
       const data = exportData.map(item => Object.values(item));
-      
+
       // HTML içeriği oluştur
       const today = new Date().toLocaleDateString('tr-TR');
-      
+
       let htmlContent = `
         <!DOCTYPE html>
         <html>
@@ -2296,18 +2644,18 @@ const CustomersPage: React.FC = () => {
             <thead>
               <tr>
       `;
-      
+
       // Tablo başlıklarını ekle
       headers.forEach(header => {
         htmlContent += `<th>${header}</th>`;
       });
-      
+
       htmlContent += `
               </tr>
             </thead>
             <tbody>
       `;
-      
+
       // Tablo verilerini ekle
       data.forEach(row => {
         htmlContent += '<tr>';
@@ -2316,7 +2664,7 @@ const CustomersPage: React.FC = () => {
         });
         htmlContent += '</tr>';
       });
-      
+
       htmlContent += `
             </tbody>
           </table>
@@ -2325,13 +2673,13 @@ const CustomersPage: React.FC = () => {
         </body>
         </html>
       `;
-      
+
       // Varsa eski iframe'i kaldır
       const oldIframe = document.getElementById('print-iframe');
       if (oldIframe) {
         document.body.removeChild(oldIframe);
       }
-      
+
       // Yeni bir iframe oluştur
       const iframe = document.createElement('iframe');
       iframe.id = 'print-iframe';
@@ -2341,20 +2689,20 @@ const CustomersPage: React.FC = () => {
       iframe.style.width = '0';
       iframe.style.height = '0';
       document.body.appendChild(iframe);
-      
+
       // iframe içeriğini ayarla
       const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
       if (iframeDoc) {
         iframeDoc.open();
         iframeDoc.write(htmlContent);
         iframeDoc.close();
-        
+
         // iframe yüklendiğinde yazdır
         iframe.onload = () => {
           try {
             iframe.contentWindow?.focus();
             iframe.contentWindow?.print();
-            
+
             // Başarı bildirimi göster - NotificationContext kullanarak
             notifications.showSuccess("Müşteri listesi yazdırılıyor...");
           } catch (e) {
@@ -2370,23 +2718,34 @@ const CustomersPage: React.FC = () => {
       notifications.showError("Yazdırma sırasında bir hata oluştu!");
     }
   };
-  
+
+  // Müşteri mail detayı fonksiyonları
+  const handleOpenCustomerMailDetail = (mailData: any) => {
+    setSelectedCustomerMail(mailData);
+    setCustomerMailDetailOpen(true);
+  };
+
+  const handleCloseCustomerMailDetail = () => {
+    setCustomerMailDetailOpen(false);
+    setSelectedCustomerMail(null);
+  };
+
   const handleEmailOpen = (customer: Customer) => {
     setEmailCustomer(customer);
     setEmailSubject(`Sipariş Onayı - ${customer.id}`);
     setEmailBody(`Sayın ${customer.name}, bu e-posta ${customer.id} numaralı son siparişinizi onaylamaktadır. Sipariş detaylarını buradan görüntüleyebilirsiniz: [Sipariş Detayları Linki]`);
     setEmailDialogOpen(true);
   };
-  
+
   const handleEmailClose = () => {
     setEmailDialogOpen(false);
   };
-  
+
   const handleEmailSend = (data: any) => {
     try {
       // Burada gerçek e-posta gönderme API çağrısı yapılacak
       // Örnek: await sendEmail(emailCustomer.email, data.subject, data.body);
-      
+
       // Başarılı bildirim göster
       notifications.showSuccess(`E-posta başarıyla gönderildi: ${emailCustomer?.name}`);
       setEmailDialogOpen(false);
@@ -2396,11 +2755,11 @@ const CustomersPage: React.FC = () => {
       console.error('E-posta gönderme hatası:', error);
     }
   };
-  
+
   // Silme Dialog state'leri
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteCustomer, setDeleteCustomer] = useState<Customer | null>(null);
-  
+
   // Müşteri form alanları
   const customerFormFields: FormField[] = [
     {
@@ -2464,41 +2823,41 @@ const CustomersPage: React.FC = () => {
       ]
     }
   ];
-  
+
   // Tüm filtreleri uygulama fonksiyonu
   const applyFilters = (statusTab: string = activeTab) => {
     let filtered = [...customers];
-    
+
     // Durum filtresi (AKTİF/PASİF/TÜMÜ)
     if (statusTab === 'active') {
       filtered = filtered.filter(customer => customer.status === 'Aktif');
     } else if (statusTab === 'passive') {
       filtered = filtered.filter(customer => customer.status === 'Pasif');
     }
-    
+
     // Arama filtresi
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(customer => 
+      filtered = filtered.filter(customer =>
         customer.name.toLowerCase().includes(searchLower) ||
         customer.email.toLowerCase().includes(searchLower) ||
         customer.phone.toLowerCase().includes(searchLower) ||
         customer.id.toLowerCase().includes(searchLower)
       );
     }
-    
+
     // Konum filtresi
     if (selectedLocation.country !== 'all') {
       filtered = filtered.filter(customer => customer.country === selectedLocation.country);
     }
-    
+
     // Parti filtresi
     if (selectedParty !== 'all') {
-      filtered = filtered.filter(customer => 
+      filtered = filtered.filter(customer =>
         selectedParty === 'seller' ? customer.id.startsWith('S') : !customer.id.startsWith('S')
       );
     }
-    
+
     // Finansal durum filtresi
     if (selectedFinancialStatus !== 'all') {
       if (selectedFinancialStatus === 'balance') {
@@ -2509,7 +2868,7 @@ const CustomersPage: React.FC = () => {
         filtered = filtered.filter(customer => (customer.bakiye || 0) > 0 || (customer.balance || 0) > 0);
       }
     }
-    
+
     // Tarih filtreleri - ID numarasına göre filtreleme yapıyoruz
     // Not: Gerçek bir tarih alanı olmadığı için bu örnek amaçlıdır
     if (startDate || endDate) {
@@ -2522,23 +2881,23 @@ const CustomersPage: React.FC = () => {
         return customerId >= startValue && customerId <= endValue;
       });
     }
-    
+
     setFilteredCustomers(filtered);
   };
-  
+
   // Arama, tab ve diğer filtreler için useEffect
   useEffect(() => {
     applyFilters();
   }, [searchTerm, selectedLocation, selectedParty, selectedFinancialStatus, startDate, endDate]);
-  
+
 
 
   return (
     <Box sx={{ p: 3 }}>
       {/* Ana Header - Resimde gösterilen tasarım */}
-      <Paper 
+      <Paper
         elevation={0}
-        sx={{ 
+        sx={{
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           color: 'white',
           borderRadius: 4,
@@ -2547,7 +2906,7 @@ const CustomersPage: React.FC = () => {
           boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)'
         }}
       >
-        <Box sx={{ 
+        <Box sx={{
           p: { xs: 3, md: 5 },
           display: 'flex',
           alignItems: 'center',
@@ -2555,9 +2914,9 @@ const CustomersPage: React.FC = () => {
           minHeight: 140
         }}>
           <Box>
-            <Typography 
-              variant="h3" 
-              sx={{ 
+            <Typography
+              variant="h3"
+              sx={{
                 fontWeight: 700,
                 fontSize: { xs: '2rem', md: '2.5rem' },
                 textShadow: '0 2px 4px rgba(0,0,0,0.1)',
@@ -2566,9 +2925,9 @@ const CustomersPage: React.FC = () => {
             >
               Müşteri Yönetimi
             </Typography>
-            <Typography 
-              variant="h6" 
-              sx={{ 
+            <Typography
+              variant="h6"
+              sx={{
                 opacity: 0.9,
                 fontSize: { xs: '1rem', md: '1.1rem' },
                 fontWeight: 400
@@ -2577,9 +2936,9 @@ const CustomersPage: React.FC = () => {
               Müşterilerinizi yönetin, yeni müşteriler ekleyin ve raporlarınızı görüntüleyin
             </Typography>
           </Box>
-          
-          <Avatar 
-            sx={{ 
+
+          <Avatar
+            sx={{
               bgcolor: 'rgba(255,255,255,0.2)',
               width: { xs: 60, md: 80 },
               height: { xs: 60, md: 80 },
@@ -2591,11 +2950,11 @@ const CustomersPage: React.FC = () => {
           </Avatar>
         </Box>
       </Paper>
-      
+
       {/* Renkli Kart Menüleri */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={4}>
-          <Card 
+          <Card
             onClick={handleCustomerFormOpen}
             sx={{
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -2623,9 +2982,9 @@ const CustomersPage: React.FC = () => {
           </Card>
         </Grid>
 
-        
+
         <Grid item xs={12} sm={6} md={4}>
-          <Card 
+          <Card
             onClick={handleImportOpen}
             sx={{
               background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
@@ -2652,9 +3011,9 @@ const CustomersPage: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-        
+
         <Grid item xs={12} sm={6} md={4}>
-          <Card 
+          <Card
             onClick={() => setMailDialogOpen(true)}
             sx={{
               background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
@@ -2682,9 +3041,9 @@ const CustomersPage: React.FC = () => {
           </Card>
         </Grid>
       </Grid>
-      
+
       {/* Arama ve Export Butonları */}
-      <Box sx={{ 
+      <Box sx={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -2705,7 +3064,7 @@ const CustomersPage: React.FC = () => {
               </InputAdornment>
             ),
           }}
-          sx={{ 
+          sx={{
             width: '60%',
             '& .MuiOutlinedInput-root': {
               borderRadius: 1,
@@ -2713,10 +3072,10 @@ const CustomersPage: React.FC = () => {
             }
           }}
         />
-        
+
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button 
-            variant="outlined" 
+          <Button
+            variant="outlined"
             size="small"
             startIcon={<ExportIcon />}
             onClick={exportToExcel}
@@ -2724,9 +3083,9 @@ const CustomersPage: React.FC = () => {
           >
             Excel'e Aktar
           </Button>
-          
-          <Button 
-            variant="outlined" 
+
+          <Button
+            variant="outlined"
             size="small"
             startIcon={<PrintIcon />}
             onClick={printCustomerData}
@@ -2736,19 +3095,19 @@ const CustomersPage: React.FC = () => {
           </Button>
         </Box>
       </Box>
-      
+
       {/* Durum Tab Butonları */}
       <Box sx={{ display: 'flex', mt: 2, mb: 2 }}>
-        <Box sx={{ 
-          display: 'flex', 
+        <Box sx={{
+          display: 'flex',
           bgcolor: '#f5f5f5',
           borderRadius: 2,
           overflow: 'hidden',
           border: '1px solid #e0e0e0',
         }}>
-          <Button 
-            variant="text" 
-            sx={{ 
+          <Button
+            variant="text"
+            sx={{
               bgcolor: activeTab === 'all' ? 'primary.main' : 'transparent',
               color: activeTab === 'all' ? 'white' : '#757575',
               fontWeight: 500,
@@ -2764,9 +3123,9 @@ const CustomersPage: React.FC = () => {
           >
             TÜMÜ
           </Button>
-          <Button 
-            variant="text" 
-            sx={{ 
+          <Button
+            variant="text"
+            sx={{
               bgcolor: activeTab === 'active' ? '#4caf50' : 'transparent',
               color: activeTab === 'active' ? 'white' : '#757575',
               fontWeight: 500,
@@ -2782,9 +3141,9 @@ const CustomersPage: React.FC = () => {
           >
             AKTİF
           </Button>
-          <Button 
-            variant="text" 
-            sx={{ 
+          <Button
+            variant="text"
+            sx={{
               bgcolor: activeTab === 'passive' ? '#f44336' : 'transparent',
               color: activeTab === 'passive' ? 'white' : '#757575',
               fontWeight: 500,
@@ -2801,14 +3160,14 @@ const CustomersPage: React.FC = () => {
             PASİF
           </Button>
         </Box>
-        
+
         <Button
           variant="outlined"
           size="small"
           startIcon={<FilterListIcon />}
           onClick={handleFilterToggle}
-          sx={{ 
-            ml: 'auto', 
+          sx={{
+            ml: 'auto',
             borderColor: filterOpen ? 'primary.main' : 'divider',
             color: filterOpen ? 'primary.main' : 'text.secondary',
             bgcolor: filterOpen ? 'rgba(25, 118, 210, 0.04)' : 'transparent',
@@ -2820,20 +3179,20 @@ const CustomersPage: React.FC = () => {
           Gelişmiş Filtre
         </Button>
       </Box>
-      
+
       {/* Gelişmiş Filtre Paneli */}
       <Collapse in={filterOpen}>
-        <Paper sx={{ 
-          mb: 3, 
-          borderRadius: 2, 
+        <Paper sx={{
+          mb: 3,
+          borderRadius: 2,
           overflow: 'hidden',
           boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
           border: '1px solid #e0e0e0'
         }}>
           {/* Filtre Başlığı */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             p: 2,
             bgcolor: 'primary.main',
@@ -2843,27 +3202,27 @@ const CustomersPage: React.FC = () => {
             <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem' }}>
               Gelişmiş Filtreler
             </Typography>
-            <IconButton 
-              onClick={handleFilterToggle} 
+            <IconButton
+              onClick={handleFilterToggle}
               size="small"
-              sx={{ 
+              sx={{
                 color: 'white',
-                '&:hover': { 
-                  bgcolor: 'rgba(255,255,255,0.2)' 
+                '&:hover': {
+                  bgcolor: 'rgba(255,255,255,0.2)'
                 }
               }}
             >
               <CloseIcon fontSize="small" />
             </IconButton>
           </Box>
-          
+
           <Box sx={{ p: 3 }}>
             <Grid container spacing={3}>
               {/* Konum Filtreleri */}
               <Grid item xs={12} md={4}>
-                <Box sx={{ 
-                  bgcolor: 'background.paper', 
-                  p: 2.5, 
+                <Box sx={{
+                  bgcolor: 'background.paper',
+                  p: 2.5,
                   borderRadius: 2,
                   boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
                   border: '1px solid rgba(37, 99, 143, 0.1)',
@@ -2873,11 +3232,11 @@ const CustomersPage: React.FC = () => {
                     boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                   }
                 }}>
-                  <Typography 
-                    variant="subtitle1" 
-                    sx={{ 
-                      mb: 2.5, 
-                      color: '#25638f', 
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      mb: 2.5,
+                      color: '#25638f',
                       fontWeight: 600,
                       display: 'flex',
                       alignItems: 'center',
@@ -2895,7 +3254,7 @@ const CustomersPage: React.FC = () => {
                       value={selectedLocation.country}
                       label="Ülke"
                       onChange={handleCountryChange}
-                      sx={{ 
+                      sx={{
                         borderRadius: 1.5,
                         '& .MuiOutlinedInput-notchedOutline': {
                           borderColor: selectedLocation.country !== 'all' ? '#25638f' : undefined,
@@ -2916,7 +3275,7 @@ const CustomersPage: React.FC = () => {
                       ))}
                     </Select>
                   </FormControl>
-                  
+
                   <FormControl fullWidth size="small" sx={{ mb: 2.5 }}>
                     <InputLabel id="city-label">Şehir</InputLabel>
                     <Select
@@ -2925,7 +3284,7 @@ const CustomersPage: React.FC = () => {
                       label="Şehir"
                       onChange={handleCityChange}
                       disabled={selectedLocation.country === 'all'}
-                      sx={{ 
+                      sx={{
                         borderRadius: 1.5,
                         '& .MuiOutlinedInput-notchedOutline': {
                           borderColor: selectedLocation.city !== 'all' ? '#25638f' : undefined,
@@ -2941,7 +3300,7 @@ const CustomersPage: React.FC = () => {
                       }}
                     >
                       <MenuItem value="all">Tüm Şehirler</MenuItem>
-                      {selectedLocation.country !== 'all' && 
+                      {selectedLocation.country !== 'all' &&
                         locationData
                           .find(country => country.value === selectedLocation.country)?.cities
                           .map((city) => (
@@ -2950,7 +3309,7 @@ const CustomersPage: React.FC = () => {
                       }
                     </Select>
                   </FormControl>
-                  
+
                   <FormControl fullWidth size="small">
                     <InputLabel id="district-label">Bölge</InputLabel>
                     <Select
@@ -2959,7 +3318,7 @@ const CustomersPage: React.FC = () => {
                       label="Bölge"
                       onChange={handleDistrictChange}
                       disabled={selectedLocation.city === 'all'}
-                      sx={{ 
+                      sx={{
                         borderRadius: 1.5,
                         '& .MuiOutlinedInput-notchedOutline': {
                           borderColor: selectedLocation.district !== 'all' ? '#25638f' : undefined,
@@ -2975,223 +3334,223 @@ const CustomersPage: React.FC = () => {
                       }}
                     >
                       <MenuItem value="all">Tüm Bölgeler</MenuItem>
-                      {selectedLocation.city !== 'all' && 
-                      locationData
-                        .find(country => country.value === selectedLocation.country)?.cities
-                        .find(city => city.value === selectedLocation.city)?.districts
-                        .map((district) => (
-                          <MenuItem key={district.value} value={district.value}>{district.label}</MenuItem>
-                        ))
-                    }
-                  </Select>
-                </FormControl>
-              </Box>
-            </Grid>
-            
-            {/* Taraf ve Finansal Durum Filtreleri */}
-            <Grid item xs={12} md={4}>
-              <Box sx={{ 
-                bgcolor: 'background.paper', 
-                p: 2.5, 
-                borderRadius: 2,
-                boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                border: '1px solid rgba(255, 87, 34, 0.1)',
-                height: '100%',
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                }
-              }}>
-                <Typography 
-                  variant="subtitle1" 
-                  sx={{ 
-                    mb: 2.5, 
-                    color: '#ff5722', 
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    borderBottom: '2px solid rgba(255, 87, 34, 0.1)',
-                    pb: 1.5
-                  }}
-                >
-                  <PersonIcon sx={{ mr: 1.5, fontSize: '1.2rem', color: '#ff5722' }} />
-                  Müşteri Bilgileri
-                </Typography>
-                <FormControl fullWidth size="small" sx={{ mb: 2.5 }}>
-                  <InputLabel id="party-label">Taraf</InputLabel>
-                  <Select
-                    labelId="party-label"
-                    value={selectedParty}
-                    label="Taraf"
-                    onChange={handlePartyChange}
-                    sx={{ 
-                      borderRadius: 1.5,
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: selectedParty !== 'all' ? '#ff5722' : undefined,
-                        borderWidth: selectedParty !== 'all' ? 1.5 : 1
-                      },
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#ff5722',
-                        borderWidth: 1.5
-                      },
-                      '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#ff5722'
+                      {selectedLocation.city !== 'all' &&
+                        locationData
+                          .find(country => country.value === selectedLocation.country)?.cities
+                          .find(city => city.value === selectedLocation.city)?.districts
+                          .map((district) => (
+                            <MenuItem key={district.value} value={district.value}>{district.label}</MenuItem>
+                          ))
                       }
+                    </Select>
+                  </FormControl>
+                </Box>
+              </Grid>
+
+              {/* Taraf ve Finansal Durum Filtreleri */}
+              <Grid item xs={12} md={4}>
+                <Box sx={{
+                  bgcolor: 'background.paper',
+                  p: 2.5,
+                  borderRadius: 2,
+                  boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+                  border: '1px solid rgba(255, 87, 34, 0.1)',
+                  height: '100%',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                  }
+                }}>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      mb: 2.5,
+                      color: '#ff5722',
+                      fontWeight: 600,
+                      display: 'flex',
+                      alignItems: 'center',
+                      borderBottom: '2px solid rgba(255, 87, 34, 0.1)',
+                      pb: 1.5
                     }}
                   >
-                    <MenuItem value="all">Tümü</MenuItem>
-                    <MenuItem value="buyer">Alıcı</MenuItem>
-                    <MenuItem value="seller">Satıcı</MenuItem>
-                  </Select>
-                </FormControl>
-                <FormControl fullWidth size="small">
-                  <InputLabel id="financial-label">Finansal Durum</InputLabel>
-                  <Select
-                    labelId="financial-label"
-                    value={selectedFinancialStatus}
-                    label="Finansal Durum"
-                    onChange={handleFinancialStatusChange}
-                    sx={{ 
-                      borderRadius: 1.5,
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: selectedFinancialStatus === 'balance' ? '#757575' :
-                                     selectedFinancialStatus === 'debtor' ? '#f44336' :
-                                     selectedFinancialStatus === 'creditor' ? '#4caf50' : undefined,
-                        borderWidth: selectedFinancialStatus !== 'all' ? 1.5 : 1
-                      },
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: selectedFinancialStatus === 'balance' ? '#757575' :
-                                     selectedFinancialStatus === 'debtor' ? '#f44336' :
-                                     selectedFinancialStatus === 'creditor' ? '#4caf50' : '#757575',
-                        borderWidth: 1.5
-                      },
-                      '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: selectedFinancialStatus === 'balance' ? '#757575' :
-                                    selectedFinancialStatus === 'debtor' ? '#f44336' :
-                                    selectedFinancialStatus === 'creditor' ? '#4caf50' : '#757575'
-                      }
+                    <PersonIcon sx={{ mr: 1.5, fontSize: '1.2rem', color: '#ff5722' }} />
+                    Müşteri Bilgileri
+                  </Typography>
+                  <FormControl fullWidth size="small" sx={{ mb: 2.5 }}>
+                    <InputLabel id="party-label">Taraf</InputLabel>
+                    <Select
+                      labelId="party-label"
+                      value={selectedParty}
+                      label="Taraf"
+                      onChange={handlePartyChange}
+                      sx={{
+                        borderRadius: 1.5,
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: selectedParty !== 'all' ? '#ff5722' : undefined,
+                          borderWidth: selectedParty !== 'all' ? 1.5 : 1
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#ff5722',
+                          borderWidth: 1.5
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#ff5722'
+                        }
+                      }}
+                    >
+                      <MenuItem value="all">Tümü</MenuItem>
+                      <MenuItem value="buyer">Alıcı</MenuItem>
+                      <MenuItem value="seller">Satıcı</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <FormControl fullWidth size="small">
+                    <InputLabel id="financial-label">Finansal Durum</InputLabel>
+                    <Select
+                      labelId="financial-label"
+                      value={selectedFinancialStatus}
+                      label="Finansal Durum"
+                      onChange={handleFinancialStatusChange}
+                      sx={{
+                        borderRadius: 1.5,
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: selectedFinancialStatus === 'balance' ? '#757575' :
+                            selectedFinancialStatus === 'debtor' ? '#f44336' :
+                              selectedFinancialStatus === 'creditor' ? '#4caf50' : undefined,
+                          borderWidth: selectedFinancialStatus !== 'all' ? 1.5 : 1
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: selectedFinancialStatus === 'balance' ? '#757575' :
+                            selectedFinancialStatus === 'debtor' ? '#f44336' :
+                              selectedFinancialStatus === 'creditor' ? '#4caf50' : '#757575',
+                          borderWidth: 1.5
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: selectedFinancialStatus === 'balance' ? '#757575' :
+                            selectedFinancialStatus === 'debtor' ? '#f44336' :
+                              selectedFinancialStatus === 'creditor' ? '#4caf50' : '#757575'
+                        }
+                      }}
+                    >
+                      <MenuItem value="all">Tümü</MenuItem>
+                      <MenuItem value="balance">Bakiyesi Sıfır Olanlar</MenuItem>
+                      <MenuItem value="debtor">Borçlular</MenuItem>
+                      <MenuItem value="creditor">Alacaklılar</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
+              </Grid>
+
+              {/* Tarih Filtreleri */}
+              <Grid item xs={12} md={4}>
+                <Box sx={{
+                  bgcolor: 'background.paper',
+                  p: 2.5,
+                  borderRadius: 2,
+                  boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+                  border: '1px solid rgba(76, 175, 80, 0.1)',
+                  height: '100%',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                  }
+                }}>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      mb: 2.5,
+                      color: '#4caf50',
+                      fontWeight: 600,
+                      display: 'flex',
+                      alignItems: 'center',
+                      borderBottom: '2px solid rgba(76, 175, 80, 0.1)',
+                      pb: 1.5
                     }}
                   >
-                    <MenuItem value="all">Tümü</MenuItem>
-                    <MenuItem value="balance">Bakiyesi Sıfır Olanlar</MenuItem>
-                    <MenuItem value="debtor">Borçlular</MenuItem>
-                    <MenuItem value="creditor">Alacaklılar</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
+                    <DateRangeIcon sx={{ mr: 1.5, fontSize: '1.2rem', color: '#4caf50' }} />
+                    Tarih Filtreleri
+                  </Typography>
+
+                  <TextField
+                    label="Başlangıç Tarihi"
+                    type="date"
+                    size="small"
+                    fullWidth
+                    sx={{ mb: 2.5 }}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                  />
+
+                  <TextField
+                    label="Bitiş Tarihi"
+                    type="date"
+                    size="small"
+                    fullWidth
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                  />
+                </Box>
+              </Grid>
             </Grid>
-            
-            {/* Tarih Filtreleri */}
-            <Grid item xs={12} md={4}>
-              <Box sx={{ 
-                bgcolor: 'background.paper', 
-                p: 2.5, 
-                borderRadius: 2,
-                boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                border: '1px solid rgba(76, 175, 80, 0.1)',
-                height: '100%',
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                }
-              }}>
-                <Typography 
-                  variant="subtitle1" 
-                  sx={{ 
-                    mb: 2.5, 
-                    color: '#4caf50', 
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    borderBottom: '2px solid rgba(76, 175, 80, 0.1)',
-                    pb: 1.5
-                  }}
-                >
-                  <DateRangeIcon sx={{ mr: 1.5, fontSize: '1.2rem', color: '#4caf50' }} />
-                  Tarih Filtreleri
-                </Typography>
-                
-                <TextField
-                  label="Başlangıç Tarihi"
-                  type="date"
-                  size="small"
-                  fullWidth
-                  sx={{ mb: 2.5 }}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                />
-                
-                <TextField
-                  label="Bitiş Tarihi"
-                  type="date"
-                  size="small"
-                  fullWidth
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
-              </Box>
-            </Grid>
-          </Grid>
-            
-          {/* Filtre Butonları */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'flex-end', 
-            mt: 3,
-            pb: 1,
-            px: 2
-          }}>
-            <Button 
-              variant="outlined" 
-              sx={{ 
-                mr: 2, 
-                borderColor: '#757575', 
-                color: '#757575',
-                borderRadius: 2,
-                px: 3,
-                '&:hover': { 
-                  borderColor: '#424242', 
-                  color: '#424242',
-                  backgroundColor: 'rgba(0,0,0,0.04)'
-                }
-              }}
-              onClick={handleFilterToggle}
-            >
-              İptal
-            </Button>
-            <Button 
-              variant="contained" 
-              startIcon={<FilterListIcon />}
-              sx={{ 
-                bgcolor: 'primary.main', 
-                color: 'white',
-                fontWeight: 500,
-                px: 3,
-                borderRadius: 2,
-                boxShadow: '0 2px 8px rgba(37, 99, 143, 0.2)',
-                '&:hover': { 
-                  bgcolor: 'primary.dark',
-                  boxShadow: '0 4px 12px rgba(37, 99, 143, 0.3)'
-                }
-              }}
-              onClick={() => {
-                applyFilters();
-                setFilterOpen(false);
-              }}
-            >
-              Filtrele
-            </Button>
+
+            {/* Filtre Butonları */}
+            <Box sx={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              mt: 3,
+              pb: 1,
+              px: 2
+            }}>
+              <Button
+                variant="outlined"
+                sx={{
+                  mr: 2,
+                  borderColor: '#757575',
+                  color: '#757575',
+                  borderRadius: 2,
+                  px: 3,
+                  '&:hover': {
+                    borderColor: '#424242',
+                    color: '#424242',
+                    backgroundColor: 'rgba(0,0,0,0.04)'
+                  }
+                }}
+                onClick={handleFilterToggle}
+              >
+                İptal
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<FilterListIcon />}
+                sx={{
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                  fontWeight: 500,
+                  px: 3,
+                  borderRadius: 2,
+                  boxShadow: '0 2px 8px rgba(37, 99, 143, 0.2)',
+                  '&:hover': {
+                    bgcolor: 'primary.dark',
+                    boxShadow: '0 4px 12px rgba(37, 99, 143, 0.3)'
+                  }
+                }}
+                onClick={() => {
+                  applyFilters();
+                  setFilterOpen(false);
+                }}
+              >
+                Filtrele
+              </Button>
+            </Box>
           </Box>
-        </Box>
-      </Paper>
-    </Collapse>
-            
+        </Paper>
+      </Collapse>
+
       {/* Müşteri Kartları - Responsive Grid */}
       {(() => {
         let columns = 1;
@@ -3216,6 +3575,7 @@ const CustomersPage: React.FC = () => {
                   <CustomerCard
                     customer={customer}
                     onMenuOpen={handleMenuOpen}
+                    onEditClick={handleEditCustomer}
                   />
                 </Box>
               ))}
@@ -3225,17 +3585,17 @@ const CustomersPage: React.FC = () => {
 
       {/* Gelişmiş Filtre Paneli */}
       <Collapse in={filterOpen}>
-        <Paper sx={{ 
-          mb: 3, 
-          borderRadius: 2, 
+        <Paper sx={{
+          mb: 3,
+          borderRadius: 2,
           overflow: 'hidden',
           boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
           border: '1px solid #e0e0e0'
         }}>
           {/* Filtre Başlığı */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             p: 2,
             bgcolor: 'primary.main',
@@ -3245,27 +3605,27 @@ const CustomersPage: React.FC = () => {
             <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem' }}>
               Gelişmiş Filtreler
             </Typography>
-            <IconButton 
-              onClick={handleFilterToggle} 
+            <IconButton
+              onClick={handleFilterToggle}
               size="small"
-              sx={{ 
+              sx={{
                 color: 'white',
-                '&:hover': { 
-                  bgcolor: 'rgba(255,255,255,0.2)' 
+                '&:hover': {
+                  bgcolor: 'rgba(255,255,255,0.2)'
                 }
               }}
             >
               <CloseIcon fontSize="small" />
             </IconButton>
           </Box>
-          
+
           <Box sx={{ p: 3 }}>
             <Grid container spacing={3}>
               {/* Konum Filtreleri */}
               <Grid item xs={12} md={4}>
-                <Box sx={{ 
-                  bgcolor: 'background.paper', 
-                  p: 2.5, 
+                <Box sx={{
+                  bgcolor: 'background.paper',
+                  p: 2.5,
                   borderRadius: 2,
                   boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
                   border: '1px solid rgba(37, 99, 143, 0.1)',
@@ -3275,11 +3635,11 @@ const CustomersPage: React.FC = () => {
                     boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                   }
                 }}>
-                  <Typography 
-                    variant="subtitle1" 
-                    sx={{ 
-                      mb: 2.5, 
-                      color: '#25638f', 
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      mb: 2.5,
+                      color: '#25638f',
                       fontWeight: 600,
                       display: 'flex',
                       alignItems: 'center',
@@ -3297,7 +3657,7 @@ const CustomersPage: React.FC = () => {
                       value={selectedLocation.country}
                       label="Ülke"
                       onChange={handleCountryChange}
-                      sx={{ 
+                      sx={{
                         borderRadius: 1.5,
                         '& .MuiOutlinedInput-notchedOutline': {
                           borderColor: selectedLocation.country !== 'all' ? '#25638f' : undefined,
@@ -3318,7 +3678,7 @@ const CustomersPage: React.FC = () => {
                       ))}
                     </Select>
                   </FormControl>
-                  
+
                   <FormControl fullWidth size="small" sx={{ mb: 2.5 }}>
                     <InputLabel id="city-label">Şehir</InputLabel>
                     <Select
@@ -3327,7 +3687,7 @@ const CustomersPage: React.FC = () => {
                       label="Şehir"
                       onChange={handleCityChange}
                       disabled={selectedLocation.country === 'all'}
-                      sx={{ 
+                      sx={{
                         borderRadius: 1.5,
                         '& .MuiOutlinedInput-notchedOutline': {
                           borderColor: selectedLocation.city !== 'all' ? '#25638f' : undefined,
@@ -3345,7 +3705,7 @@ const CustomersPage: React.FC = () => {
                       <MenuItem value="all">Tüm Şehirler</MenuItem>
                       {getCitiesForSelectedCountry().map((city: { value: string; label: string }) => (
                         <MenuItem key={city.value} value={city.value}>{city.label}</MenuItem>
-                      ))} 
+                      ))}
                     </Select>
                   </FormControl>
                 </Box>
@@ -3385,7 +3745,7 @@ const CustomersPage: React.FC = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Box>
-      
+
       {/* Müşteri işlemleri menüsü */}
       <Menu
         anchorEl={anchorEl}
@@ -3404,8 +3764,8 @@ const CustomersPage: React.FC = () => {
         }}
       >
         {/* SMS ve E-posta seçenekleri kaldırıldı - Kart üzerindeki butonlar kullanılacak */}
-        <MenuItem 
-          onClick={() => { 
+        <MenuItem
+          onClick={() => {
             if (selectedCustomer) {
               handleEditCustomer(selectedCustomer);
             }
@@ -3423,21 +3783,21 @@ const CustomersPage: React.FC = () => {
           Yükle
         </MenuItem>
         <Divider />
-        <MenuItem 
-          onClick={() => { 
+        <MenuItem
+          onClick={() => {
             if (selectedCustomer) {
               setDeleteCustomer(selectedCustomer);
               setDeleteDialogOpen(true);
             }
-            handleMenuClose(); 
-          }} 
+            handleMenuClose();
+          }}
           sx={{ color: '#ff1744' }}
         >
           <DeleteIcon fontSize="small" sx={{ mr: 2 }} />
           Sil
         </MenuItem>
       </Menu>
-      
+
       {/* SMS Gönderme Dialog'u */}
       <CustomerSmsDialog
         open={smsDialogOpen}
@@ -3445,7 +3805,7 @@ const CustomersPage: React.FC = () => {
         onClose={handleSmsClose}
         onSend={handleSmsSend}
       />
-      
+
       {/* E-posta Gönderme Dialog'u */}
       <CustomerEmailDialog
         open={emailDialogOpen}
@@ -3453,13 +3813,13 @@ const CustomersPage: React.FC = () => {
         onClose={handleEmailClose}
         onSend={handleEmailSend}
       />
-      
+
       {/* Mail Yönetim Dialog'u */}
       <MailDialog
         open={mailDialogOpen}
         onClose={() => setMailDialogOpen(false)}
       />
-      
+
       {/* Silme Onay Dialog'u */}
       <CustomerDeleteDialog
         open={deleteDialogOpen}
@@ -3469,24 +3829,105 @@ const CustomersPage: React.FC = () => {
           if (deleteCustomer) {
             // Gerçek uygulamada API çağrısı yapılır
             // Örnek: await deleteCustomer(deleteCustomer.id);
-            
+
             // Müşteri listesinden sil
             const updatedCustomers = customers.filter(c => c.id !== deleteCustomer.id);
             setCustomers(updatedCustomers);
-            
+
             notifications.showSuccess(`Müşteri başarıyla silindi: ${deleteCustomer.name}`);
             setDeleteDialogOpen(false);
           }
         }}
       />
-      
+
       {/* Müşteri Import Dialog'u */}
       <CustomerImportDialog
         open={importDialogOpen}
         onClose={handleImportClose}
         onImport={handleImportCustomers}
       />
-      
+
+      {/* Müşteri Mail Detayı Dialog'u */}
+      <Dialog
+        open={customerMailDetailOpen}
+        onClose={handleCloseCustomerMailDetail}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: 3, boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }
+        }}
+      >
+        {selectedCustomerMail && (
+          <>
+            <DialogTitle sx={{
+              borderBottom: '1px solid #eee',
+              pb: 2,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              bgcolor: '#f8f9fa'
+            }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <MailIcon sx={{ color: '#1976d2' }} />
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>E-posta Detayı</Typography>
+              </Box>
+              <IconButton onClick={handleCloseCustomerMailDetail} size="small">
+                <CloseIcon />
+              </IconButton>
+            </DialogTitle>
+            <DialogContent sx={{ p: 0 }}>
+              <Box sx={{ p: 3, borderBottom: '1px solid #eee' }}>
+                <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, color: '#333' }}>
+                  {selectedCustomerMail.subject}
+                </Typography>
+
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1.5 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, width: 80, color: '#666' }}>Kimden:</Typography>
+                      <Typography variant="body2">{selectedCustomerMail.from}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, width: 80, color: '#666' }}>Kime:</Typography>
+                      <Typography variant="body2">{selectedCustomerMail.to}</Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5, justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mr: 2, color: '#666' }}>Tarih:</Typography>
+                      <Typography variant="body2">{selectedCustomerMail.date}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mr: 2, color: '#666' }}>Durum:</Typography>
+                      <Chip
+                        label={selectedCustomerMail.status}
+                        size="small"
+                        sx={{
+                          bgcolor: selectedCustomerMail.status === 'Gönderildi' ? '#d1ecf1' : '#f8d7da',
+                          color: selectedCustomerMail.status === 'Gönderildi' ? '#0c5460' : '#721c24',
+                          fontWeight: 500
+                        }}
+                      />
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Box>
+
+              <Box sx={{ p: 3, minHeight: 250, bgcolor: '#fff' }}>
+                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6, color: '#444' }}>
+                  {selectedCustomerMail.content}
+                </Typography>
+              </Box>
+            </DialogContent>
+            <DialogActions sx={{ p: 2, borderTop: '1px solid #eee', bgcolor: '#f8f9fa' }}>
+              <Button onClick={handleCloseCustomerMailDetail} variant="outlined">
+                Kapat
+              </Button>
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
+
       {/* Yeni Müşteri Ekle Popup'u */}
       <Dialog
         open={customerFormOpen}
@@ -3503,10 +3944,10 @@ const CustomersPage: React.FC = () => {
           }
         }}
       >
-        <DialogTitle 
-          sx={{ 
+        <DialogTitle
+          sx={{
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white', 
+            color: 'white',
             fontWeight: 600,
             display: 'flex',
             alignItems: 'center',
@@ -3518,15 +3959,15 @@ const CustomersPage: React.FC = () => {
             <Person sx={{ fontSize: 28 }} />
             {editingCustomer ? 'Müşteri Düzenle' : 'Yeni Müşteri Ekle'}
           </Box>
-          <IconButton 
+          <IconButton
             onClick={handleCustomerFormClose}
             sx={{ color: 'white' }}
           >
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        
-        <CustomerFormContent 
+
+        <CustomerFormContent
           editingCustomer={editingCustomer}
           onSubmit={handleCustomerFormSubmit}
           onClose={handleCustomerFormClose}

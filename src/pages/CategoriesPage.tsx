@@ -25,52 +25,11 @@ import {
     RadioButtonUnchecked
 } from '@mui/icons-material';
 import AddCategoryDialog from '../components/AddCategoryDialog';
+import { Category, useCategories } from '../contexts/CategoryContext';
 
-interface Category {
-  id: string;
-  name: string;
-  productCount: number;
-  isActive: boolean;
-  children?: Category[];
-}
+// Hierarchical categories are now managed by CategoryContext
 
-// Örnek Hiyerarşik Kategori Verisi
-const hierarchicalCategories: Category[] = [
-    {
-      id: 'kadin-giyim',
-      name: 'Kadın Giyim',
-      productCount: 12,
-      isActive: true,
-      children: [
-        {
-          id: 'elbise',
-          name: 'Elbise',
-          productCount: 12,
-          isActive: true,
-        },
-        {
-          id: 'alt-giyim',
-          name: 'Alt Giyim',
-          productCount: 12,
-          isActive: false,
-        },
-      ]
-    },
-    {
-        id: 'erkek-giyim',
-        name: 'Erkek Giyim',
-        productCount: 12,
-        isActive: true,
-    },
-    {
-        id: 'anne-cocuk',
-        name: 'Anne, Çocuk & Oyuncak',
-        productCount: 12,
-        isActive: false,
-    }
-  ];
-
-const CategoryRow: React.FC<{ 
+const CategoryRow: React.FC<{
     category: Category;
     level: number;
     onToggle: (id: string) => void;
@@ -84,10 +43,10 @@ const CategoryRow: React.FC<{
         <TableRow hover>
             <TableCell style={{ paddingLeft: level * 24 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <IconButton 
-                        aria-label="expand row" 
-                        size="small" 
-                        onClick={() => onToggle(category.id)} 
+                    <IconButton
+                        aria-label="expand row"
+                        size="small"
+                        onClick={() => onToggle(category.id)}
                         style={{ visibility: hasChildren ? 'visible' : 'hidden' }}
                     >
                         {isExpanded ? <KeyboardArrowDown /> : <KeyboardArrowRight />}
@@ -97,7 +56,7 @@ const CategoryRow: React.FC<{
                 </Box>
             </TableCell>
             <TableCell align="center">
-                <Link 
+                <Link
                     component="button"
                     variant="body2"
                     onClick={() => navigate(`/products?categoryId=${category.id}`)}
@@ -109,7 +68,7 @@ const CategoryRow: React.FC<{
             <TableCell align="center">
                 {category.isActive ? <CheckCircle color="success" /> : <RadioButtonUnchecked color="disabled" />}
             </TableCell>
-                        <TableCell align="right">
+            <TableCell align="right">
                 <IconButton size="small" title="Alt Kategori Ekle" color="primary" onClick={() => onAddSubCategory(category)}><Add /></IconButton>
                 <IconButton size="small" title="Düzenle" color="secondary"><Edit /></IconButton>
                 <IconButton size="small" title="Sil" color="error"><Delete /></IconButton>
@@ -119,6 +78,7 @@ const CategoryRow: React.FC<{
 };
 
 const CategoriesPage: FC = () => {
+    const { categories, addCategory } = useCategories();
     const [expanded, setExpanded] = useState(new Map<string, boolean>());
     const [dialogOpen, setDialogOpen] = useState(false);
     const [parentCategory, setParentCategory] = useState<Category | null>(null);
@@ -141,10 +101,19 @@ const CategoriesPage: FC = () => {
         setParentCategory(null);
     };
 
-    const handleAddCategory = (names: { lang: string; name: string }[]) => {
-        console.log('Adding category with names:', names);
-        console.log('Parent category:', parentCategory);
-        // Burada API'ye gönderme veya state'i güncelleme işlemleri yapılacak.
+    const handleAddCategory = (categoryData: any) => {
+        // En az bir isim olduğunu varsayarak TR veya ilk ismi kullan
+        const primaryName = categoryData.names.find((n: any) => n.lang === 'tr')?.name || categoryData.names[0].name;
+
+        const newCategory: Category = {
+            id: Date.now().toString(),
+            name: primaryName,
+            productCount: 0,
+            isActive: categoryData.isActive,
+            productClass: categoryData.productClass
+        };
+
+        addCategory(newCategory, parentCategory?.id);
     };
 
     const renderCategories = (categories: Category[], level: number): React.ReactNode[] => {
@@ -153,12 +122,12 @@ const CategoriesPage: FC = () => {
             const hasChildren = category.children && category.children.length > 0;
 
             const row = (
-                <CategoryRow 
-                    key={category.id} 
-                    category={category} 
-                    level={level} 
-                    onToggle={handleToggle} 
-                    isExpanded={isExpanded} 
+                <CategoryRow
+                    key={category.id}
+                    category={category}
+                    level={level}
+                    onToggle={handleToggle}
+                    isExpanded={isExpanded}
                     onAddSubCategory={handleOpenAddDialog}
                 />
             );
@@ -197,11 +166,11 @@ const CategoriesPage: FC = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {renderCategories(hierarchicalCategories, 1)}
+                        {renderCategories(categories, 1)}
                     </TableBody>
                 </Table>
             </TableContainer>
-            <AddCategoryDialog 
+            <AddCategoryDialog
                 open={dialogOpen}
                 onClose={handleCloseDialog}
                 onAddCategory={handleAddCategory}

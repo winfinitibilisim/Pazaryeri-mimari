@@ -22,8 +22,14 @@ import OrderLabelPage from './components/orders/OrderLabelPage'; // Import Label
 import CustomersPage from './pages/CustomersPage';
 import AddCustomerPage from './pages/AddCustomerPage';
 import ProductsPage from './pages/ProductsPage';
+import CreateProductPage from './pages/products/CreateProductPage';
 import CategoriesPage from './pages/CategoriesPage';
 import BrandsPage from './pages/BrandsPage';
+import ProductOptionsPage from './pages/products/ProductOptionsPage';
+import FeaturesPage from './pages/products/FeaturesPage';
+import ProductClassesPage from './pages/products/ProductClassesPage';
+import AvailableTagsPage from './pages/products/AvailableTagsPage';
+import IconsPage from './pages/products/IconsPage';
 import PaymentsPage from './pages/PaymentsPage';
 import ReportsPage from './pages/ReportsPage';
 import SettingsPage from './pages/SettingsPage';
@@ -80,6 +86,18 @@ import SafeDetailPage from './pages/finance/safes/SafeDetailPage';
 import EmployeesPage from './pages/EmployeesPage';
 import EmployeeDetailPage from './pages/EmployeeDetailPage';
 import AccountingPage from './pages/AccountingPage';
+import PromotionsPage from './pages/PromotionsPage';
+import DiscountsPage from './pages/promotions/DiscountsPage';
+import CreateDiscountPage from './pages/promotions/CreateDiscountPage';
+import ABDiscountPage from './pages/promotions/ABDiscountPage';
+import XBuyYPayPage from './pages/promotions/XBuyYPayPage';
+import CouponsPage from './pages/promotions/CouponsPage';
+import CreateCouponPage from './pages/promotions/CreateCouponPage';
+import ReviewsPage from './pages/promotions/ReviewsPage';
+import ShowcasePage from './pages/promotions/ShowcasePage';
+import RecommendedProductsPage from './pages/promotions/RecommendedProductsPage';
+import CreateRecommendedProductPage from './pages/promotions/CreateRecommendedProductPage';
+import WishlistPage from './pages/promotions/WishlistPage';
 // Shipping Management Pages (REMOVED)
 
 // Contexts
@@ -144,6 +162,8 @@ const AppWithLanguage = () => {
             p: 3,
             display: 'flex',
             flexDirection: 'column',
+            minWidth: 0, // Prevent flex item from expanding beyond viewport
+            width: '100%'
           }}
         >
           <Toolbar />
@@ -187,8 +207,14 @@ const AppWithLanguage = () => {
         { path: 'customers', element: <CustomersPage /> },
         { path: 'add-customer', element: <AddCustomerPage /> },
         { path: 'products', element: <ProductsPage /> },
+        { path: 'products/create', element: <CreateProductPage /> },
         { path: 'categories', element: <CategoriesPage /> },
         { path: 'brands', element: <BrandsPage /> },
+        { path: 'product-options', element: <ProductOptionsPage /> },
+        { path: 'features', element: <FeaturesPage /> },
+        { path: 'product-classes', element: <ProductClassesPage /> },
+        { path: 'available-tags', element: <AvailableTagsPage /> },
+        { path: 'icons', element: <IconsPage /> },
         { path: 'payments', element: <PaymentsPage /> },
         { path: 'reports', element: <ReportsPage /> },
         { path: 'settings', element: <SettingsPage /> },
@@ -244,6 +270,18 @@ const AppWithLanguage = () => {
         { path: 'employees', element: <EmployeesPage /> },
         { path: 'employees/:id', element: <EmployeeDetailPage /> },
         { path: 'accounting', element: <AccountingPage /> },
+        { path: 'promotions/*', element: <PromotionsPage /> },
+        { path: 'promotions/discounts', element: <DiscountsPage /> },
+        { path: 'promotions/discounts/create', element: <CreateDiscountPage /> },
+        { path: 'promotions/ab-discount', element: <ABDiscountPage /> },
+        { path: 'promotions/gift', element: <XBuyYPayPage /> },
+        { path: 'promotions/coupons', element: <CouponsPage /> },
+        { path: 'promotions/coupons/create', element: <CreateCouponPage /> },
+        { path: 'promotions/reviews', element: <ReviewsPage /> },
+        { path: 'promotions/showcase', element: <ShowcasePage /> },
+        { path: 'promotions/recommended', element: <RecommendedProductsPage /> },
+        { path: 'promotions/recommended/create', element: <CreateRecommendedProductPage /> },
+        { path: 'promotions/wishlist', element: <WishlistPage /> },
       ],
     },
     { path: '*', element: <Navigate to="/" /> }, // Redirect any unknown paths to dashboard
