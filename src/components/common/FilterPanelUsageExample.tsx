@@ -46,9 +46,9 @@ const FilterPanelUsageExample: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Arama terimi değiştiğinde çağrılacak fonksiyon
-  const handleSearchChange = (value: string) => {
-    setSearchTerm(value);
-    console.log('Arama terimi değişti:', value);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    console.log('Arama terimi değişti:', e.target.value);
   };
 
   // Filtre değerleri değiştiğinde çağrılacak fonksiyon
@@ -81,12 +81,11 @@ const FilterPanelUsageExample: React.FC = () => {
       
       {/* FilterPanel bileşeni */}
       <FilterPanel
-        title="Örnek Filtreler"
         searchPlaceholder="Ara..."
         searchTerm={searchTerm}
         onSearchChange={handleSearchChange}
-        filterFields={exampleFilterConfig}
-        onFilterChange={handleFilterChange}
+        fields={exampleFilterConfig}
+        onAdvancedSearch={handleFilterChange}
         actionButtons={
           <>
             <ExportButton

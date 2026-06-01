@@ -37,6 +37,16 @@ import {
   Payment as PaymentIcon,
 } from '@mui/icons-material';
 import DataTable, { Column } from '../components/common/DataTable';
+import PageHeader from '../components/layout/PageHeader';
+import FilterPanel, { FilterField } from '../components/common/FilterPanel';
+
+const orderFilterFields: FilterField[] = [
+  { id: 'orderNumber', label: 'Sipariş No', type: 'text', placeholder: 'ORD-...' },
+  { id: 'customerName', label: 'Müşteri Adı', type: 'text', placeholder: 'İsim soyisim' },
+  { id: 'storeCode', label: 'Mağaza Kodu', type: 'text', placeholder: 'MST-001' },
+  { id: 'productName', label: 'Ürün Adı', type: 'text', placeholder: 'Örn: Kulaklık' },
+  { id: 'storeName', label: 'Mağaza Adı', type: 'text', placeholder: 'Örn: Winfiniti' },
+];
 
 
 // Mock Data Types
@@ -149,8 +159,8 @@ const OrdersPage: React.FC = () => {
   const [currentTab, setCurrentTab] = useState('All');
 
   // Filter State
-  const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState<Record<string, any>>({
     orderNumber: '',
     customerName: '',
     storeCode: '',
@@ -158,21 +168,8 @@ const OrdersPage: React.FC = () => {
     storeName: ''
   });
 
-  const handleFilterChange = (field: string, value: string) => {
-    setFilters(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const clearFilters = () => {
-    setFilters({
-      orderNumber: '',
-      customerName: '',
-      storeCode: '',
-      productName: '',
-      storeName: ''
-    });
+  const handleAdvancedSearch = (newFilters: Record<string, any>) => {
+    setFilters(newFilters);
   };
 
   // Stats Data
@@ -188,14 +185,21 @@ const OrdersPage: React.FC = () => {
     // Tab Filter
     const matchesTab = currentTab === 'All' || order.status === currentTab;
 
-    // Advanced Filters
-    const matchesOrderNo = order.orderNumber.toLowerCase().includes(filters.orderNumber.toLowerCase());
-    const matchesCustomer = order.customer.name.toLowerCase().includes(filters.customerName.toLowerCase());
-    const matchesStoreCode = order.storeCode.toLowerCase().includes(filters.storeCode.toLowerCase());
-    const matchesProduct = order.product.name.toLowerCase().includes(filters.productName.toLowerCase());
-    const matchesStoreName = order.storeName.toLowerCase().includes(filters.storeName.toLowerCase());
+    // Search Term Filter
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch = 
+      order.orderNumber.toLowerCase().includes(searchLower) ||
+      order.customer.name.toLowerCase().includes(searchLower) ||
+      order.product.name.toLowerCase().includes(searchLower);
 
-    return matchesTab && matchesOrderNo && matchesCustomer && matchesStoreCode && matchesProduct && matchesStoreName;
+    // Advanced Filters
+    const matchesOrderNo = !filters.orderNumber ? true : order.orderNumber.toLowerCase().includes(filters.orderNumber.toLowerCase());
+    const matchesCustomer = !filters.customerName ? true : order.customer.name.toLowerCase().includes(filters.customerName.toLowerCase());
+    const matchesStoreCode = !filters.storeCode ? true : order.storeCode.toLowerCase().includes(filters.storeCode.toLowerCase());
+    const matchesProduct = !filters.productName ? true : order.product.name.toLowerCase().includes(filters.productName.toLowerCase());
+    const matchesStoreName = !filters.storeName ? true : order.storeName.toLowerCase().includes(filters.storeName.toLowerCase());
+
+    return matchesTab && matchesSearch && matchesOrderNo && matchesCustomer && matchesStoreCode && matchesProduct && matchesStoreName;
   });
 
   // Column Definitions
@@ -313,116 +317,56 @@ const OrdersPage: React.FC = () => {
   ];
 
   return (
-    <Box sx={{ p: 0 }}>
-      {/* Header & Actions */}
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={4}>
-        <Typography variant="h5" fontWeight="600" color="#1a1a1a">
-          Sipariş Yönetimi
-        </Typography>
-        <Stack direction="row" spacing={2}>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            size="small"
-            disableElevation
-            onClick={() => navigate('/orders/create')}
-            sx={{ bgcolor: 'success.main', '&:hover': { bgcolor: 'success.dark' } }}
-          >
-            Sipariş Ekle
-          </Button>
-          <Button variant="outlined" startIcon={<ExportIcon />} size="small">
-            Dışa Aktar
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<FilterIcon />}
-            size="small"
-            onClick={() => setShowFilters(!showFilters)}
-            color={showFilters ? 'primary' : 'inherit'}
-          >
-            Filtrele
-          </Button>
-        </Stack>
-      </Stack>
-
-      {/* Filters Section */}
-      <Collapse in={showFilters}>
-        <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #e0e0e0', borderRadius: 2, bgcolor: '#f8f9fa' }}>
-          <Grid container spacing={2} alignItems="flex-end">
-            <Grid item xs={12} sm={6} md={2}>
-              <TextField
-                fullWidth
-                size="small"
-                label="Sipariş No"
-                variant="outlined"
-                value={filters.orderNumber}
-                onChange={(e) => handleFilterChange('orderNumber', e.target.value)}
-                placeholder="ORD-..."
-                sx={{ bgcolor: 'white' }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={2}>
-              <TextField
-                fullWidth
-                size="small"
-                label="Müşteri Adı"
-                variant="outlined"
-                value={filters.customerName}
-                onChange={(e) => handleFilterChange('customerName', e.target.value)}
-                placeholder="İsim soyisim"
-                sx={{ bgcolor: 'white' }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={2}>
-              <TextField
-                fullWidth
-                size="small"
-                label="Mağaza Kodu"
-                variant="outlined"
-                value={filters.storeCode}
-                onChange={(e) => handleFilterChange('storeCode', e.target.value)}
-                placeholder="MST-001"
-                sx={{ bgcolor: 'white' }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={2}>
-              <TextField
-                fullWidth
-                size="small"
-                label="Ürün Adı"
-                variant="outlined"
-                value={filters.productName}
-                onChange={(e) => handleFilterChange('productName', e.target.value)}
-                placeholder="Ürün ismi"
-                sx={{ bgcolor: 'white' }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={2}>
-              <TextField
-                fullWidth
-                size="small"
-                label="Mağaza Adı"
-                variant="outlined"
-                value={filters.storeName}
-                onChange={(e) => handleFilterChange('storeName', e.target.value)}
-                placeholder="Mağaza adı"
-                sx={{ bgcolor: 'white' }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={2}>
-              <Button
-                fullWidth
-                variant="outlined"
-                color="error"
-                onClick={clearFilters}
-                startIcon={<CloseIcon />}
-              >
-                Temizle
-              </Button>
-            </Grid>
-          </Grid>
-        </Paper>
-      </Collapse>
+    <Box sx={{ p: 0, width: '100%' }}>
+      <PageHeader
+        title="Sipariş Yönetimi"
+        actionButton={
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => navigate('/orders/create')}
+              sx={{
+                bgcolor: '#fff',
+                color: '#3949ab',
+                '&:hover': { bgcolor: '#f5f5f5' },
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: 'none'
+              }}
+            >
+              Sipariş Ekle
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<ExportIcon />}
+              size="small"
+              sx={{
+                bgcolor: '#fff',
+                color: '#3949ab',
+                borderColor: '#fff',
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: 'none',
+                '&:hover': { bgcolor: '#f5f5f5', borderColor: '#f5f5f5' }
+              }}
+            >
+              Dışa Aktar
+            </Button>
+          </Box>
+        }
+      />
+      
+      <FilterPanel
+        searchTerm={searchTerm}
+        onSearchChange={(e) => setSearchTerm(e.target.value)}
+        searchPlaceholder="Sipariş, Müşteri veya Ürün Ara..."
+        fields={orderFilterFields}
+        onAdvancedSearch={handleAdvancedSearch}
+        initialValues={filters}
+      />
 
       {/* İstatistik Kartları */}
       <Grid container spacing={3} sx={{ mb: 4 }}>

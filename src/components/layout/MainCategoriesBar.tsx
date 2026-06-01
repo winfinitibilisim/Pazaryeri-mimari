@@ -42,13 +42,13 @@ const mainCategories = [
   {
     title: 'Süper Xml Aktar',
     icon: <SuperXmlIcon sx={{ fontSize: 56, color: '#4CAF50' }} />,
-    path: '/xml-export', // Needs a route or placeholder
+    path: '/xml-transfer/dashboard',
     menuKey: 'xml'
   },
   {
     title: 'ERP / CRM',
     icon: <ErpCrmIcon sx={{ fontSize: 56, color: '#FF5722' }} />,
-    path: '/erp-crm', // Needs a route or placeholder
+    path: '/erp-crm/dashboard',
     menuKey: 'erp'
   }
 ];

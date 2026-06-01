@@ -56,6 +56,11 @@ export const productFilterConfig: FilterField[] = [
     type: 'text'
   },
   {
+    id: 'store',
+    label: 'Mağaza Adı',
+    type: 'text'
+  },
+  {
     id: 'category',
     label: 'Kategori',
     type: 'select',

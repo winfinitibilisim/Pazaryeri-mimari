@@ -26,6 +26,8 @@ import {
 } from '@mui/icons-material';
 import AddCategoryDialog from '../components/AddCategoryDialog';
 import { Category, useCategories } from '../contexts/CategoryContext';
+import PageHeader from '../components/layout/PageHeader';
+import FilterPanel from '../components/common/FilterPanel';
 
 // Hierarchical categories are now managed by CategoryContext
 
@@ -82,6 +84,7 @@ const CategoriesPage: FC = () => {
     const [expanded, setExpanded] = useState(new Map<string, boolean>());
     const [dialogOpen, setDialogOpen] = useState(false);
     const [parentCategory, setParentCategory] = useState<Category | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const handleToggle = (id: string) => {
         setExpanded(prev => {
@@ -141,20 +144,36 @@ const CategoriesPage: FC = () => {
     };
 
     return (
-        <Paper sx={{ p: 2 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h5" gutterBottom component="div">
-                    Kategoriler
-                </Typography>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<Add />}
-                    onClick={() => handleOpenAddDialog(null)}
-                >
-                    Yeni Kategori Ekle
-                </Button>
-            </Box>
+        <Box sx={{ width: '100%' }}>
+            <PageHeader
+                title="Kategoriler"
+                actionButton={
+                    <Button
+                        variant="contained"
+                        startIcon={<Add />}
+                        onClick={() => handleOpenAddDialog(null)}
+                        sx={{
+                            bgcolor: '#fff',
+                            color: '#3949ab',
+                            '&:hover': { bgcolor: '#f5f5f5' },
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            boxShadow: 'none'
+                        }}
+                    >
+                        Yeni Kategori Ekle
+                    </Button>
+                }
+            />
+            
+            <FilterPanel
+                searchTerm={searchTerm}
+                onSearchChange={(e) => setSearchTerm(e.target.value)}
+                searchPlaceholder="Kategori Ara..."
+            />
+            
+            <Paper sx={{ p: 2, borderTopLeftRadius: 8, borderTopRightRadius: 8, borderBottomLeftRadius: 8, borderBottomRightRadius: 8, mt: -1 }}>
             <TableContainer component={Paper} elevation={3}>
                 <Table aria-label="hierarchical table">
                     <TableHead>
@@ -176,7 +195,8 @@ const CategoriesPage: FC = () => {
                 onAddCategory={handleAddCategory}
                 parentCategoryName={parentCategory?.name}
             />
-        </Paper>
+            </Paper>
+        </Box>
     );
 };
 

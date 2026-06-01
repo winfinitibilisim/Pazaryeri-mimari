@@ -26,36 +26,92 @@ interface CategoryContextType {
 
 const initialCategories: Category[] = [
     {
-        id: 'giyim',
-        name: 'Giyim',
-        productCount: 15,
+        id: 'aksesuar',
+        name: 'Aksesuar',
+        productCount: 45,
         isActive: true,
-        productClass: 'Genel Şablon',
         children: [
-            { id: 'tisort', name: 'Tişört', productCount: 5, isActive: true, productClass: 'Tişört Şablonu' },
-            { id: 'pantolon', name: 'Pantolon', productCount: 10, isActive: true, productClass: 'Genel Şablon' }
+            { id: 'saat', name: 'Saat', productCount: 15, isActive: true },
+            { id: 'gozluk', name: 'Gözlük', productCount: 10, isActive: true },
+            { id: 'taki', name: 'Takı & Mücevher', productCount: 20, isActive: true },
         ]
     },
     {
-        id: 'elektronik-bilgisayar',
-        name: 'Elektronik - Bilgisayar',
-        productCount: 8,
+        id: 'anne-bebek',
+        name: 'Anne & Bebek & Çocuk',
+        productCount: 30,
         isActive: true,
-        productClass: 'Bilgisayar Şablonu'
+        children: [
+            { id: 'bebek-bezi', name: 'Bebek Bezi', productCount: 5, isActive: true },
+            { id: 'oyuncak', name: 'Oyuncak', productCount: 25, isActive: true },
+        ]
+    },
+    {
+        id: 'giyim',
+        name: 'Giyim',
+        productCount: 150,
+        isActive: true,
+        children: [
+            { id: 'erkek-giyim', name: 'Erkek', productCount: 70, isActive: true },
+            { id: 'kadin-giyim', name: 'Kadın', productCount: 80, isActive: true }
+        ]
     },
     {
         id: 'ayakkabi',
         name: 'Ayakkabı',
-        productCount: 12,
+        productCount: 120,
         isActive: true,
-        productClass: 'Ayakkabı Şablonu'
+        productClass: 'Ayakkabı Şablonu',
+        children: [
+            { id: 'spor-ayakkabi', name: 'Spor Ayakkabı', productCount: 50, isActive: true, productClass: 'Ayakkabı Şablonu' },
+            { id: 'klasik-ayakkabi', name: 'Klasik Ayakkabı', productCount: 30, isActive: true, productClass: 'Ayakkabı Şablonu' },
+            { id: 'bot', name: 'Bot & Çizme', productCount: 40, isActive: true, productClass: 'Ayakkabı Şablonu' }
+        ]
     },
     {
-        id: 'spor-outdoor',
-        name: 'Spor & Outdoor',
-        productCount: 3,
+        id: 'bahce',
+        name: 'Bahçe & Elektrikli El Aletleri',
+        productCount: 20,
         isActive: true,
-        productClass: 'Genel Şablon'
+        children: [
+            { id: 'matkap', name: 'Matkap', productCount: 5, isActive: true },
+            { id: 'bahce-mobilyasi', name: 'Bahçe Mobilyası', productCount: 15, isActive: true }
+        ]
+    },
+    {
+        id: 'banyo-yapi',
+        name: 'Banyo Yapı & Hırdavat',
+        productCount: 15,
+        isActive: true
+    },
+    {
+        id: 'ek-hizmetler',
+        name: 'Ek Hizmetler',
+        productCount: 5,
+        isActive: true
+    },
+    {
+        id: 'elektronik',
+        name: 'Elektronik',
+        productCount: 85,
+        isActive: true,
+        productClass: 'Bilgisayar Şablonu',
+        children: [
+            { id: 'bilgisayar', name: 'Bilgisayar', productCount: 35, isActive: true, productClass: 'Bilgisayar Şablonu' },
+            { id: 'telefon', name: 'Cep Telefonu', productCount: 40, isActive: true, productClass: 'Bilgisayar Şablonu' },
+            { id: 'televizyon', name: 'Televizyon', productCount: 10, isActive: true }
+        ]
+    },
+    {
+        id: 'ev-mobilya',
+        name: 'Ev & Mobilya',
+        productCount: 65,
+        isActive: true,
+        children: [
+            { id: 'oturma-odasi', name: 'Oturma Odası', productCount: 20, isActive: true },
+            { id: 'yatak-odasi', name: 'Yatak Odası', productCount: 15, isActive: true },
+            { id: 'mutfak', name: 'Mutfak Gereçleri', productCount: 30, isActive: true }
+        ]
     }
 ];
 

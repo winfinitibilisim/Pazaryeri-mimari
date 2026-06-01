@@ -35,6 +35,8 @@ import {
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import tr from 'date-fns/locale/tr';
+import PageHeader from '../../components/layout/PageHeader';
+import FilterPanel from '../../components/common/FilterPanel';
 
 // Data types
 interface OverdueReceivable {
@@ -130,73 +132,67 @@ const OverdueReceivablesPage: React.FC = () => {
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
       <Paper sx={{ p: 3, m: 2, borderRadius: 2, boxShadow: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h5" gutterBottom component="div">
-            {t('overdueReceivablesPage.title')}
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button variant="outlined" startIcon={<ExcelIcon />}>
-              {t('overdueReceivablesPage.exportExcel')}
-            </Button>
-            <Button variant="outlined" startIcon={<PdfIcon />}>
-              {t('overdueReceivablesPage.exportPdf')}
-            </Button>
-          </Box>
-        </Box>
+        <PageHeader
+          title={t('overdueReceivablesPage.title')}
+          actionButton={
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              <Button
+                variant="outlined"
+                startIcon={<ExcelIcon />}
+                sx={{
+                  bgcolor: '#fff',
+                  color: '#3949ab',
+                  borderColor: '#fff',
+                  '&:hover': { bgcolor: '#f5f5f5', borderColor: '#f5f5f5' },
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  boxShadow: 'none'
+                }}
+              >
+                {t('overdueReceivablesPage.exportExcel')}
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<PdfIcon />}
+                sx={{
+                  bgcolor: '#fff',
+                  color: '#3949ab',
+                  borderColor: '#fff',
+                  '&:hover': { bgcolor: '#f5f5f5', borderColor: '#f5f5f5' },
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  boxShadow: 'none'
+                }}
+              >
+                {t('overdueReceivablesPage.exportPdf')}
+              </Button>
+            </Box>
+          }
+        />
 
-        <Accordion expanded={filtersOpen} onChange={() => setFiltersOpen(!filtersOpen)} sx={{ mb: 2, border: '1px solid #e0e0e0', boxShadow: 'none' }}>
-          <AccordionSummary expandIcon={<FilterListIcon />} aria-controls="filters-content" id="filters-header">
-            <Typography>{t('filters', 'Filtreler')}</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Grid container spacing={2} sx={{ flexDirection: 'column' }}>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  placeholder={t('overdueReceivablesPage.searchPlaceholder')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" gutterBottom>
-                  {t('overdueReceivablesPage.dueDateRange')}
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <DatePicker
-                      label={t('overdueReceivablesPage.startDate')}
-                      value={dateRange.start}
-                      onChange={(newValue) => setDateRange({ ...dateRange, start: newValue })}
-                      renderInput={(params) => <TextField {...params} fullWidth />}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <DatePicker
-                      label={t('overdueReceivablesPage.endDate')}
-                      value={dateRange.end}
-                      onChange={(newValue) => setDateRange({ ...dateRange, end: newValue })}
-                      renderInput={(params) => <TextField {...params} fullWidth />}
-                    />
-                  </Grid>
-                </Grid>
-              </Grid>
-              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button variant="outlined" onClick={clearFilters}>
-                  {t('overdueReceivablesPage.clearFilters')}
-                </Button>
-              </Grid>
-            </Grid>
-          </AccordionDetails>
-        </Accordion>
+        <FilterPanel
+          searchTerm={searchQuery}
+          onSearchChange={(e) => setSearchQuery(e.target.value)}
+          searchPlaceholder={t('overdueReceivablesPage.searchPlaceholder')}
+          fields={[
+            {
+              id: 'startDate',
+              label: t('overdueReceivablesPage.startDate'),
+              type: 'date'
+            },
+            {
+              id: 'endDate',
+              label: t('overdueReceivablesPage.endDate'),
+              type: 'date'
+            }
+          ]}
+          onAdvancedSearch={(values: any) => {
+            if (values.startDate) setDateRange((prev) => ({ ...prev, start: values.startDate }));
+            if (values.endDate) setDateRange((prev) => ({ ...prev, end: values.endDate }));
+          }}
+        />
 
         <TableContainer component={Paper} sx={{ borderRadius: 2, border: '1px solid #e0e0e0' }}>
           <Table sx={{ minWidth: 650 }} aria-label="overdue receivables table">

@@ -180,7 +180,10 @@ const ProductCategorySelectionModal: React.FC<ProductCategorySelectionModalProps
                                     <Box key={mainCategory.id}>
                                         <ListItemButton
                                             selected={selectedMainCategory === mainCategory.id}
-                                            onClick={() => handleMainCategorySelect(mainCategory.id)}
+                                            onClick={() => {
+                                                handleMainCategorySelect(mainCategory.id);
+                                                handleSubCategorySelect(mainCategory.name);
+                                            }}
                                             sx={{
                                                 borderRadius: 1,
                                                 mb: 0.5,
@@ -206,9 +209,19 @@ const ProductCategorySelectionModal: React.FC<ProductCategorySelectionModalProps
                                                 }}
                                             />
                                             {mainCategory.children && (
-                                                expandedCategories.includes(mainCategory.id) ?
-                                                    <ExpandLessIcon fontSize="small" /> :
-                                                    <ExpandMoreIcon fontSize="small" />
+                                                <IconButton 
+                                                    size="small" 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleMainCategorySelect(mainCategory.id);
+                                                        handleToggleExpand(mainCategory.id);
+                                                    }}
+                                                    sx={{ p: 0.5, color: selectedMainCategory === mainCategory.id ? 'white' : 'inherit' }}
+                                                >
+                                                    {expandedCategories.includes(mainCategory.id) ?
+                                                        <ExpandLessIcon fontSize="small" /> :
+                                                        <ExpandMoreIcon fontSize="small" />}
+                                                </IconButton>
                                             )}
                                         </ListItemButton>
 
@@ -219,11 +232,7 @@ const ProductCategorySelectionModal: React.FC<ProductCategorySelectionModalProps
                                                         <Box key={subCategory.id}>
                                                             <ListItemButton
                                                                 onClick={() => {
-                                                                    if (subCategory.children) {
-                                                                        handleToggleExpand(subCategory.id);
-                                                                    } else {
-                                                                        handleSubCategorySelect(subCategory.name);
-                                                                    }
+                                                                    handleSubCategorySelect(subCategory.name);
                                                                 }}
                                                                 sx={{
                                                                     borderRadius: 1,
@@ -239,9 +248,18 @@ const ProductCategorySelectionModal: React.FC<ProductCategorySelectionModalProps
                                                                     primaryTypographyProps={{ fontSize: '0.85rem' }}
                                                                 />
                                                                 {subCategory.children && (
-                                                                    expandedCategories.includes(subCategory.id) ?
-                                                                        <ExpandLessIcon fontSize="small" /> :
-                                                                        <ExpandMoreIcon fontSize="small" />
+                                                                    <IconButton 
+                                                                        size="small" 
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            handleToggleExpand(subCategory.id);
+                                                                        }}
+                                                                        sx={{ p: 0.5 }}
+                                                                    >
+                                                                        {expandedCategories.includes(subCategory.id) ?
+                                                                            <ExpandLessIcon fontSize="small" /> :
+                                                                            <ExpandMoreIcon fontSize="small" />}
+                                                                    </IconButton>
                                                                 )}
                                                             </ListItemButton>
 

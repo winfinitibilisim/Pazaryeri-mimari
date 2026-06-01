@@ -34,94 +34,22 @@ import {
     LocalOffer as TagIcon
 } from '@mui/icons-material';
 import { useCategories } from '../../contexts/CategoryContext';
+import { useProductFeatures } from '../../contexts/ProductFeatureContext';
+import { useProductOptions } from '../../contexts/ProductOptionContext';
+import { useProductClasses, ProductClass, ReferenceItem } from '../../contexts/ProductClassContext';
 import ProductCategorySelectionModal from '../../components/common/ProductCategorySelectionModal';
-
-// --- Typings ---
-interface ReferenceItem {
-    id: string;
-    name: string;
-}
-
-interface ProductClass {
-    id: string;
-    name: string;
-    options: ReferenceItem[];  // Varyantlar (Renk, Beden vb.)
-    features: ReferenceItem[]; // Özellikler (RAM, Kumaş Tipi vb.)
-    categories: ReferenceItem[]; // Hangi kategorilerde bu şablon çıkacak?
-    isActive: boolean;
-}
-
-// --- Mock Referenced Data (Önceki sayfalardan geliyor gibi düşünün) ---
-const availableOptions: ReferenceItem[] = [
-    { id: 'opt1', name: 'Renk' },
-    { id: 'opt2', name: 'Beden' },
-    { id: 'opt3', name: 'Ayakkabı Numarası' },
-    { id: 'opt4', name: 'Malzeme' }
-];
-
-const availableFeatures: ReferenceItem[] = [
-    { id: 'feat1', name: 'RAM Kapasitesi' },
-    { id: 'feat2', name: 'Dahili Hafıza' },
-    { id: 'feat3', name: 'Ekran Boyutu' },
-    { id: 'feat4', name: 'Enerji Sınıfı' },
-    { id: 'feat5', name: 'Kumaş Tipi' },
-    { id: 'feat6', name: 'Garanti Süresi' }
-];
-
-// --- Mock Data ---
-const initialClasses: ProductClass[] = [
-    {
-        id: 'pc1',
-        name: 'Giyim - Üst Giyim (Tişört, Gömlek)',
-        isActive: true,
-        options: [
-            { id: 'opt1', name: 'Renk' },
-            { id: 'opt2', name: 'Beden' }
-        ],
-        features: [
-            { id: 'feat5', name: 'Kumaş Tipi' }
-        ],
-        categories: [
-            { id: 'giyim', name: 'Giyim' }
-        ]
-    },
-    {
-        id: 'pc2',
-        name: 'Elektronik - Bilgisayar',
-        isActive: true,
-        options: [
-            { id: 'opt1', name: 'Renk' }
-        ],
-        features: [
-            { id: 'feat1', name: 'RAM Kapasitesi' },
-            { id: 'feat2', name: 'Dahili Hafıza' },
-            { id: 'feat3', name: 'Ekran Boyutu' },
-            { id: 'feat6', name: 'Garanti Süresi' }
-        ],
-        categories: [
-            { id: 'elektronik-bilgisayar', name: 'Elektronik - Bilgisayar' }
-        ]
-    },
-    {
-        id: 'pc3',
-        name: 'Ayakkabı',
-        isActive: true,
-        options: [
-            { id: 'opt1', name: 'Renk' },
-            { id: 'opt3', name: 'Ayakkabı Numarası' },
-            { id: 'opt4', name: 'Malzeme' }
-        ],
-        features: [
-            { id: 'feat6', name: 'Garanti Süresi' }
-        ],
-        categories: [
-            { id: 'ayakkabi', name: 'Ayakkabı' }
-        ]
-    }
-];
+import PageHeader from '../../components/layout/PageHeader';
+import FilterPanel from '../../components/common/FilterPanel';
 
 const ProductClassesPage: React.FC = () => {
-    const [classes, setClasses] = useState<ProductClass[]>(initialClasses);
+    const { features } = useProductFeatures();
+    const { options } = useProductOptions();
+    const { classes, setClasses } = useProductClasses();
+    
+    // Map Context data for Autocomplete
+    const availableFeatures: ReferenceItem[] = features.filter(f => f.isActive).map(f => ({ id: f.id, name: f.name }));
+    const availableOptions: ReferenceItem[] = options.filter(o => o.isActive).map(o => ({ id: o.id, name: o.name }));
+
     const [searchTerm, setSearchTerm] = useState('');
 
     // Modal States
@@ -210,31 +138,33 @@ const ProductClassesPage: React.FC = () => {
     return (
         <Box sx={{ width: '100%' }}>
             {/* Header & Actions */}
-            <Paper sx={{ p: 2, mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-                <TextField
-                    placeholder="Ürün Sınıfı Ara... (Örn: Giyim)"
-                    variant="outlined"
-                    size="small"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    sx={{ minWidth: { xs: '100%', sm: '300px' } }}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <SearchIcon color="action" />
-                            </InputAdornment>
-                        ),
-                    }}
-                />
-                <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => handleOpenModal()}
-                    sx={{ bgcolor: '#2a6496', '&:hover': { bgcolor: '#1e4c70' } }}
-                >
-                    Yeni Ürün Sınıfı
-                </Button>
-            </Paper>
+            {/* Header & Actions */}
+            <PageHeader
+                title="Ürün Sınıfları"
+                actionButton={
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => handleOpenModal()}
+                        sx={{
+                            bgcolor: '#fff',
+                            color: '#3949ab',
+                            '&:hover': { bgcolor: '#f5f5f5' },
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            boxShadow: 'none'
+                        }}
+                    >
+                        Yeni Ürün Sınıfı
+                    </Button>
+                }
+            />
+            <FilterPanel
+                searchTerm={searchTerm}
+                onSearchChange={(e) => setSearchTerm(e.target.value)}
+                searchPlaceholder="Ürün Sınıfı Ara... (Örn: Giyim)"
+            />
 
             {/* Main Table */}
             <TableContainer component={Paper}>
@@ -364,6 +294,7 @@ const ProductClassesPage: React.FC = () => {
                                 value={formData.name || ''}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                 variant="outlined"
+                                disabled={!!editingClass}
                                 required
                             />
                         </Grid>

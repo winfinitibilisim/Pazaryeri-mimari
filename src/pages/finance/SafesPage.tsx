@@ -38,6 +38,8 @@ import SafesList from './safes/SafesList';
 import AddSafeModal from './safes/AddSafeModal';
 import AddBankModal from './safes/AddBankModal';
 import ConfirmationDialog from '../../components/common/ConfirmationDialog';
+import PageHeader from '../../components/layout/PageHeader';
+import FilterPanel from '../../components/common/FilterPanel';
 
 const statusOptions = ['active', 'inactive'];
 
@@ -149,72 +151,46 @@ const SafesPage: React.FC = () => {
 
   return (
     <Box sx={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
-      {/* Modern Header with Gradient */}
-      <Box sx={{
-        background: 'linear-gradient(135deg, #25638f 0%, #1e4a6f 100%)',
-        color: 'white',
-        p: 4,
-        mb: 3
-      }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-            <Box sx={{
-              p: 2,
-              borderRadius: 3,
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              backdropFilter: 'blur(10px)'
-            }}>
-              <WalletIcon sx={{ fontSize: 40 }} />
-            </Box>
-            <Box>
-              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-                Kasalar
-              </Typography>
-              <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                Nakit ve banka hesaplarınızı yönetin
-              </Typography>
-            </Box>
-          </Box>
-          <ButtonGroup variant="contained">
-            <Button 
-              startIcon={<AddIcon />} 
+      <PageHeader
+        title="Kasalar"
+        actionButton={
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
               onClick={() => setIsModalOpen(true)}
               sx={{
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                color: 'white',
-                borderRadius: '8px 0 0 8px',
-                px: 3,
-                py: 1.5,
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.3)'
-                }
+                bgcolor: '#fff',
+                color: '#3949ab',
+                '&:hover': { bgcolor: '#f5f5f5' },
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: 'none'
               }}
             >
               Yeni Kasa
             </Button>
-            <Button 
-              startIcon={<AccountBalanceIcon />} 
+            <Button
+              variant="outlined"
+              startIcon={<AccountBalanceIcon />}
               onClick={() => setIsBankModalOpen(true)}
               sx={{
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                color: 'white',
-                borderRadius: '0 8px 8px 0',
-                px: 3,
-                py: 1.5,
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.3)'
-                }
+                bgcolor: '#fff',
+                color: '#3949ab',
+                borderColor: '#fff',
+                '&:hover': { bgcolor: '#f5f5f5', borderColor: '#f5f5f5' },
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: 'none'
               }}
             >
               Yeni Banka
             </Button>
-          </ButtonGroup>
-        </Box>
-      </Box>
+          </Box>
+        }
+      />
 
       <Box sx={{ px: 4, pb: 4 }}>
         {/* Quick Stats Cards */}
@@ -276,124 +252,29 @@ const SafesPage: React.FC = () => {
         </Grid>
 
         {/* Filters */}
-        <Accordion 
-          expanded={filtersOpen} 
-          onChange={() => setFiltersOpen(!filtersOpen)}
-          sx={{ 
-            mb: 3,
-            borderRadius: 2,
-            '&:before': { display: 'none' },
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+        <FilterPanel
+          searchTerm={searchTerm}
+          onSearchChange={(e) => setSearchTerm(e.target.value)}
+          searchPlaceholder="Kasa adı veya kodu ile ara..."
+          fields={[
+            {
+              id: 'status',
+              label: 'Durum',
+              type: 'select',
+              options: statusOptions.map(s => ({ value: s, label: s === 'active' ? 'Aktif' : 'Pasif' }))
+            },
+            {
+              id: 'currency',
+              label: 'Para Birimi',
+              type: 'select',
+              options: uniqueCurrencies.map(c => ({ value: c, label: c }))
+            }
+          ]}
+          onAdvancedSearch={(values: any) => {
+            if (values.status) setStatusFilters([values.status]);
+            if (values.currency) setCurrencyFilters([values.currency]);
           }}
-        >
-          <AccordionSummary 
-            expandIcon={<FilterListIcon />}
-            sx={{
-              backgroundColor: '#f8fafc',
-              '&:hover': { backgroundColor: '#f1f5f9' }
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <FilterListIcon sx={{ color: '#25638f' }} />
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Filtreler
-              </Typography>
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails sx={{ p: 3 }}>
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={4}>
-                <TextField
-                  fullWidth
-                  placeholder="Kasa adı veya kodu ile ara..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon sx={{ color: '#25638f' }} />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                      backgroundColor: '#f8fafc',
-                      '&:hover': { backgroundColor: '#f1f5f9' },
-                      '&.Mui-focused': { backgroundColor: 'white' }
-                    }
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <FormControl fullWidth>
-                  <InputLabel>Durum</InputLabel>
-                  <Select
-                    multiple
-                    value={statusFilters}
-                    onChange={handleFilterChange(setStatusFilters)}
-                    input={<OutlinedInput label="Durum" />}
-                    renderValue={(selected) => selected.map(s => s === 'active' ? 'Aktif' : 'Pasif').join(', ')}
-                    sx={{
-                      borderRadius: 2,
-                      backgroundColor: '#f8fafc',
-                      '&:hover': { backgroundColor: '#f1f5f9' },
-                      '&.Mui-focused': { backgroundColor: 'white' }
-                    }}
-                  >
-                    {statusOptions.map((status) => (
-                      <MenuItem key={status} value={status}>
-                        <ListItemText primary={status === 'active' ? 'Aktif' : 'Pasif'} />
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={3}>
-                <FormControl fullWidth>
-                  <InputLabel>Para Birimi</InputLabel>
-                  <Select
-                    multiple
-                    value={currencyFilters}
-                    onChange={handleFilterChange(setCurrencyFilters)}
-                    input={<OutlinedInput label="Para Birimi" />}
-                    renderValue={(selected) => selected.join(', ')}
-                    sx={{
-                      borderRadius: 2,
-                      backgroundColor: '#f8fafc',
-                      '&:hover': { backgroundColor: '#f1f5f9' },
-                      '&.Mui-focused': { backgroundColor: 'white' }
-                    }}
-                  >
-                    {uniqueCurrencies.map((currency) => (
-                      <MenuItem key={currency} value={currency}>
-                        <ListItemText primary={currency} />
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={2}>
-                <Button 
-                  variant="outlined" 
-                  onClick={clearFilters}
-                  fullWidth
-                  sx={{
-                    height: '56px',
-                    borderColor: '#e2e8f0',
-                    color: '#64748b',
-                    '&:hover': {
-                      borderColor: '#cbd5e1',
-                      backgroundColor: '#f8fafc'
-                    }
-                  }}
-                >
-                  Temizle
-                </Button>
-              </Grid>
-            </Grid>
-          </AccordionDetails>
-        </Accordion>
+        />
 
         {/* Main Content */}
         <Paper sx={{ 

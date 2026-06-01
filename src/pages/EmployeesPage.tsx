@@ -26,6 +26,8 @@ import {
 import { Add as AddIcon, Visibility as VisibilityIcon, FilterList as FilterListIcon, Search as SearchIcon } from '@mui/icons-material';
 import AddEmployeeModal from '../components/modals/AddEmployeeModal';
 import { useNavigate } from 'react-router-dom';
+import PageHeader from '../components/layout/PageHeader';
+import FilterPanel from '../components/common/FilterPanel';
 import { useTranslation } from 'react-i18next';
 
 interface Employee {
@@ -81,166 +83,53 @@ const EmployeesPage: React.FC = () => {
     <Box sx={{ p: 3, minHeight: '100vh', backgroundColor: '#f8fafc' }}>
       <AddEmployeeModal open={isModalOpen} onClose={handleCloseModal} />
 
-      {/* Header Section */}
-      <Box sx={{ 
-        mb: 4, 
-        background: 'linear-gradient(135deg, #25638f 0%, #1e4a6f 100%)',
-        borderRadius: 3,
-        p: 4,
-        color: 'white',
-        boxShadow: '0 10px 30px rgba(37, 99, 143, 0.3)'
-      }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box>
-            <Typography variant="h3" component="h1" sx={{ fontWeight: 'bold', mb: 1 }}>
-              {t('employees.title', 'Çalışanlar')}
-            </Typography>
-            <Typography variant="h6" sx={{ opacity: 0.9 }}>
-              Ekip üyelerinizi yönetin ve takip edin
-            </Typography>
-          </Box>
-          <Button 
-            variant="contained" 
-            startIcon={<AddIcon />} 
-            onClick={handleOpenModal}
-            sx={{
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              color: 'white',
-              fontWeight: 'bold',
-              px: 3,
-              py: 1.5,
-              borderRadius: 2,
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)'
-              },
-              transition: 'all 0.3s ease'
-            }}
-          >
-            {t('common.addNew', 'Yeni Ekle')}
-          </Button>
-        </Box>
+      <Box sx={{ width: '100%', mb: 4 }}>
+        <PageHeader
+          title={t('employees.title', 'Çalışanlar')}
+          actionButton={
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleOpenModal}
+              sx={{
+                bgcolor: '#fff',
+                color: '#3949ab',
+                '&:hover': { bgcolor: '#f5f5f5' },
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: 'none'
+              }}
+            >
+              {t('common.addNew', 'Yeni Ekle')}
+            </Button>
+          }
+        />
       </Box>
 
-      {/* Filters Section */}
-      <Paper sx={{ 
-        mb: 3, 
-        borderRadius: 3, 
-        overflow: 'hidden',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-        border: '1px solid rgba(0, 0, 0, 0.05)'
-      }}>
-        <Accordion 
-          expanded={filtersOpen} 
-          onChange={() => setFiltersOpen(!filtersOpen)}
-          sx={{ 
-            boxShadow: 'none',
-            '&:before': { display: 'none' },
-            '& .MuiAccordionSummary-root': {
-              backgroundColor: '#fafbfc',
-              borderBottom: filtersOpen ? '1px solid rgba(0, 0, 0, 0.08)' : 'none',
-              minHeight: 64,
-              '&:hover': {
-                backgroundColor: '#f1f3f4'
-              }
-            }
-          }}
-        >
-          <AccordionSummary 
-            expandIcon={<FilterListIcon sx={{ color: '#25638f' }} />}
-            sx={{ '& .MuiAccordionSummary-content': { alignItems: 'center' } }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <FilterListIcon sx={{ color: '#25638f' }} />
-              <Typography variant="h6" sx={{ fontWeight: 600, color: '#2d3748' }}>
-                {t('common.filters', 'Filtreler')}
-              </Typography>
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails sx={{ p: 3, backgroundColor: 'white' }}>
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  placeholder={t('employees.searchPlaceholder', 'Çalışan ara...')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                      backgroundColor: '#f8fafc',
-                      '&:hover': {
-                        backgroundColor: '#f1f5f9'
-                      },
-                      '&.Mui-focused': {
-                        backgroundColor: 'white'
-                      }
-                    }
-                  }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon sx={{ color: '#25638f' }} />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <FormControl fullWidth>
-                  <InputLabel>{t('employees.departmentHeader', 'Departman')}</InputLabel>
-                  <Select
-                    value={departmentFilter}
-                    label={t('employees.departmentHeader', 'Departman')}
-                    onChange={(e) => setDepartmentFilter(e.target.value)}
-                    sx={{
-                      borderRadius: 2,
-                      backgroundColor: '#f8fafc',
-                      '&:hover': {
-                        backgroundColor: '#f1f5f9'
-                      },
-                      '&.Mui-focused': {
-                        backgroundColor: 'white'
-                      }
-                    }}
-                  >
-                    {uniqueDepartments.map(dep => (
-                      <MenuItem key={dep} value={dep}>
-                        {dep === 'all' ? t('common.all', 'Tümü') : dep}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={2} sx={{ display: 'flex', alignItems: 'center' }}>
-                <Button 
-                  variant="outlined" 
-                  onClick={handleClearFilters}
-                  fullWidth
-                  sx={{
-                    borderRadius: 2,
-                    borderColor: '#e2e8f0',
-                    color: '#64748b',
-                    '&:hover': {
-                      borderColor: '#cbd5e1',
-                      backgroundColor: '#f8fafc'
-                    }
-                  }}
-                >
-                  {t('common.clearFilters', 'Temizle')}
-                </Button>
-              </Grid>
-            </Grid>
-          </AccordionDetails>
-        </Accordion>
-      </Paper>
+      <FilterPanel
+        searchTerm={searchQuery}
+        onSearchChange={(e) => setSearchQuery(e.target.value)}
+        searchPlaceholder={t('employees.searchPlaceholder', 'Çalışan ara...')}
+        fields={[
+          {
+            id: 'department',
+            label: t('employees.departmentHeader', 'Departman'),
+            type: 'select',
+            options: uniqueDepartments.map(dept => ({
+              value: dept,
+              label: dept === 'all' ? t('common.all', 'Tümü') : dept
+            }))
+          }
+        ]}
+        onAdvancedSearch={(values: any) => {
+          if (values.department !== undefined) setDepartmentFilter(values.department);
+        }}
+      />
 
       {/* Employees Table */}
-      <Paper sx={{ 
-        borderRadius: 3, 
+      <Paper sx={{
+        borderRadius: 3,
         overflow: 'hidden',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
         border: '1px solid rgba(0, 0, 0, 0.05)'

@@ -30,6 +30,8 @@ import {
     Store as StoreIcon
 } from '@mui/icons-material';
 import DataTable, { Column } from '../../components/common/DataTable';
+import PageHeader from '../../components/layout/PageHeader';
+import FilterPanel from '../../components/common/FilterPanel';
 
 // Mock Data Types
 interface Review {
@@ -290,83 +292,24 @@ const ReviewsPage: React.FC = () => {
     return (
         <Box sx={{ p: 0 }}>
             {/* Header & Actions */}
-            <Stack direction="row" justifyContent="space-between" alignItems="center" mb={4}>
-                <Box>
-                    <Typography variant="h5" fontWeight="600" color="#1a1a1a">
-                        Pazaryeri Değerlendirmeleri
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        Müşterilerin ürünlere ve satıcılara yaptığı değerlendirmeleri yönetin.
-                    </Typography>
-                </Box>
-                <Stack direction="row" spacing={2}>
-                    <Button
-                        variant="outlined"
-                        startIcon={<FilterIcon />}
-                        size="small"
-                        onClick={() => setShowFilters(!showFilters)}
-                        color={showFilters ? 'primary' : 'inherit'}
-                    >
-                        Detaylı Filtrele
-                    </Button>
-                </Stack>
-            </Stack>
+            <Box sx={{ width: '100%', mb: 2 }}>
+                <PageHeader title="Pazaryeri Değerlendirmeleri" />
+            </Box>
 
             {/* Filters Section */}
-            <Collapse in={showFilters}>
-                <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #e0e0e0', borderRadius: 2, bgcolor: '#f8f9fa' }}>
-                    <Grid container spacing={2} alignItems="flex-end">
-                        <Grid item xs={12} sm={3}>
-                            <TextField
-                                fullWidth
-                                size="small"
-                                label="Mağaza Adı"
-                                variant="outlined"
-                                value={filters.storeName}
-                                onChange={(e) => handleFilterChange('storeName', e.target.value)}
-                                placeholder="Örn: X Butik"
-                                sx={{ bgcolor: 'white' }}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={3}>
-                            <TextField
-                                fullWidth
-                                size="small"
-                                label="Müşteri Adı"
-                                variant="outlined"
-                                value={filters.customerName}
-                                onChange={(e) => handleFilterChange('customerName', e.target.value)}
-                                placeholder="İsim soyisim arayın..."
-                                sx={{ bgcolor: 'white' }}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
-                            <TextField
-                                fullWidth
-                                size="small"
-                                label="Marka / Ürün Adı"
-                                variant="outlined"
-                                value={filters.productName}
-                                onChange={(e) => handleFilterChange('productName', e.target.value)}
-                                placeholder="Ürün ismi arayın..."
-                                sx={{ bgcolor: 'white' }}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={2}>
-                            <Button
-                                fullWidth
-                                variant="outlined"
-                                color="error"
-                                onClick={clearFilters}
-                                startIcon={<CloseIcon />}
-                                sx={{ height: 40 }}
-                            >
-                                Temizle
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </Paper>
-            </Collapse>
+            <FilterPanel
+                searchTerm={filters.productName}
+                onSearchChange={(e) => handleFilterChange('productName', e.target.value)}
+                searchPlaceholder="Ürün ismi arayın..."
+                fields={[
+                    { id: 'storeName', label: 'Mağaza Adı (Örn: X Butik)', type: 'text' },
+                    { id: 'customerName', label: 'Müşteri Adı', type: 'text' }
+                ]}
+                onAdvancedSearch={(values: any) => {
+                    if (values.storeName !== undefined) handleFilterChange('storeName', values.storeName);
+                    if (values.customerName !== undefined) handleFilterChange('customerName', values.customerName);
+                }}
+            />
 
             {/* İstatistik Kartları */}
             <Grid container spacing={3} sx={{ mb: 4 }}>

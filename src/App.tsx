@@ -6,9 +6,9 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 import Header from './components/layout/Header';
-import Sidebar from './components/layout/Sidebar';
 import Footer from './components/layout/Footer';
 import MainCategoriesBar from './components/layout/MainCategoriesBar';
+import SubNavigation from './components/layout/SubNavigation';
 import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Login from './pages/Login';
@@ -32,6 +32,24 @@ import AvailableTagsPage from './pages/products/AvailableTagsPage';
 import IconsPage from './pages/products/IconsPage';
 import PaymentsPage from './pages/PaymentsPage';
 import ReportsPage from './pages/ReportsPage';
+import SellerReportPage from './pages/reports/SellerReportPage';
+import RepresentativeReportPage from './pages/reports/RepresentativeReportPage';
+import FinancialReportPage from './pages/reports/FinancialReportPage';
+import OperationalReportPage from './pages/reports/OperationalReportPage';
+import VisualizedReportPage from './pages/reports/VisualizedReportPage';
+
+import SuperXmlDashboardPage from './pages/xml/SuperXmlDashboardPage';
+import XmlImportPage from './pages/xml/XmlImportPage';
+import XmlExportPage from './pages/xml/XmlExportPage';
+import XmlMappingsPage from './pages/xml/XmlMappingsPage';
+import XmlLogsPage from './pages/xml/XmlLogsPage';
+
+import ErpCrmDashboardPage from './pages/erp-crm/ErpCrmDashboardPage';
+import ErpIntegrationsPage from './pages/erp-crm/ErpIntegrationsPage';
+import CrmIntegrationsPage from './pages/erp-crm/CrmIntegrationsPage';
+import AccountingAutomationsPage from './pages/erp-crm/AccountingAutomationsPage';
+import CommunicationLogsPage from './pages/erp-crm/CommunicationLogsPage';
+
 import SettingsPage from './pages/SettingsPage';
 import SecurityPage from './pages/SecurityPage';
 import MuiJoyExamplePage from './pages/MuiJoyExamplePage';
@@ -125,7 +143,6 @@ function App() {
 }
 
 const AppWithLanguage = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem('isAuthenticated') === 'true');
 
 
@@ -143,7 +160,6 @@ const AppWithLanguage = () => {
     return () => window.removeEventListener('popstate', handleNavigation);
   }, [isAuthenticated]);
 
-  const handleSidebarToggle = () => setSidebarOpen(!sidebarOpen);
   const handleLogin = () => {
     setIsAuthenticated(true);
     localStorage.setItem('isAuthenticated', 'true');
@@ -152,9 +168,8 @@ const AppWithLanguage = () => {
   const AppLayout = () => {
     const [activeMenu, setActiveMenu] = useState('default');
     return (
-      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-        <Header open={sidebarOpen} onToggle={handleSidebarToggle} />
-        <Sidebar open={sidebarOpen} onToggle={handleSidebarToggle} activeMenu={activeMenu} />
+      <Box sx={{ display: 'flex', minHeight: '100vh', flexDirection: 'column' }}>
+        <Header />
         <Box
           component="main"
           sx={{
@@ -168,6 +183,7 @@ const AppWithLanguage = () => {
         >
           <Toolbar />
           <MainCategoriesBar setActiveMenu={setActiveMenu} />
+          <SubNavigation activeMenu={activeMenu} />
           <Box sx={{ flexGrow: 1, overflowY: 'auto', mt: 2 }}>
             <Outlet />
           </Box>
@@ -217,6 +233,23 @@ const AppWithLanguage = () => {
         { path: 'icons', element: <IconsPage /> },
         { path: 'payments', element: <PaymentsPage /> },
         { path: 'reports', element: <ReportsPage /> },
+        { path: 'reports/seller', element: <SellerReportPage /> },
+        { path: 'reports/representative', element: <RepresentativeReportPage /> },
+        { path: 'reports/financial', element: <FinancialReportPage /> },
+        { path: 'reports/operational', element: <OperationalReportPage /> },
+        { path: 'reports/visualized', element: <VisualizedReportPage /> },
+        { path: 'xml-transfer/dashboard', element: <SuperXmlDashboardPage /> },
+        { path: 'xml-transfer/import', element: <XmlImportPage /> },
+        { path: 'xml-transfer/export', element: <XmlExportPage /> },
+        { path: 'xml-transfer/mappings', element: <XmlMappingsPage /> },
+        { path: 'xml-transfer/logs', element: <XmlLogsPage /> },
+        
+        { path: 'erp-crm/dashboard', element: <ErpCrmDashboardPage /> },
+        { path: 'erp-crm/erp-integrations', element: <ErpIntegrationsPage /> },
+        { path: 'erp-crm/crm-integrations', element: <CrmIntegrationsPage /> },
+        { path: 'erp-crm/accounting-automations', element: <AccountingAutomationsPage /> },
+        { path: 'erp-crm/communication-logs', element: <CommunicationLogsPage /> },
+
         { path: 'settings', element: <SettingsPage /> },
         { path: 'security', element: <SecurityPage /> },
         { path: 'mui-joy-example', element: <MuiJoyExamplePage /> },

@@ -2,75 +2,66 @@ import React from 'react';
 import { Box, Typography, Paper, Grid, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import {
-  Storefront as StorefrontIcon,
-  People as PeopleIcon,
-  MonetizationOn as MonetizationOnIcon,
-  LocalShipping as LocalShippingIcon,
-  PieChart as PieChartIcon,
+  CloudUpload as CloudUploadIcon,
+  CloudDownload as CloudDownloadIcon,
+  Transform as TransformIcon,
+  List as ListIcon
 } from '@mui/icons-material';
 
 const NAVY = '#1A237E';
 const ORANGE = '#FF9800';
 const RED = '#F44336';
 
-const ReportsPage: React.FC = () => {
+const SuperXmlDashboardPage: React.FC = () => {
   const navigate = useNavigate();
 
-  const reportModules = [
+  const modules = [
     {
-      title: 'Satıcı Mağaza Raporları',
-      description: 'Satış performansı (günlük, haftalık, aylık), Ürün bazlı satış, Stok durumu, İade oranları.',
-      icon: <StorefrontIcon sx={{ fontSize: 48, color: ORANGE }} />,
-      route: '/reports/seller',
-      color: 'rgba(255, 152, 0, 0.1)', // Light orange background for icon
-      btnBg: ORANGE
-    },
-    {
-      title: 'Bağımsız Temsilci Raporları',
-      description: 'Temsilci bazlı satış raporu, Komisyon kazancı, Aktif/pasif listesi, Müşteri geri bildirimleri.',
-      icon: <PeopleIcon sx={{ fontSize: 48, color: NAVY }} />,
-      route: '/reports/representative',
-      color: 'rgba(26, 35, 126, 0.1)', // Light navy background for icon
+      title: 'XML İçe Aktar (Import)',
+      description: 'Satıcı stok, fiyat ve ürün güncellemelerini dışarıdan içeri alın.',
+      icon: <CloudUploadIcon sx={{ fontSize: 48, color: NAVY }} />,
+      route: '/xml-transfer/import',
+      color: 'rgba(26, 35, 126, 0.1)',
       btnBg: NAVY
     },
     {
-      title: 'Finansal Raporlar',
-      description: 'Toplam gelir gider raporu, Komisyon dağılımı, İade maliyetleri, Vergi ve kesinti, Ödeme geçmişi.',
-      icon: <MonetizationOnIcon sx={{ fontSize: 48, color: RED }} />,
-      route: '/reports/financial',
-      color: 'rgba(244, 67, 54, 0.1)', // Light red background for icon
-      btnBg: RED
-    },
-    {
-      title: 'Operasyonel Raporlar',
-      description: 'Sipariş durumu, Kargo süreleri, İade çözüm işlemleri, Müşteri hizmetleri.',
-      icon: <LocalShippingIcon sx={{ fontSize: 48, color: ORANGE }} />,
-      route: '/reports/operational',
+      title: 'XML Dışa Aktar (Export)',
+      description: 'Ürünlerinizi Google Merchant, Facebook vb. mecralar için XML feed olarak gönderin.',
+      icon: <CloudDownloadIcon sx={{ fontSize: 48, color: ORANGE }} />,
+      route: '/xml-transfer/export',
       color: 'rgba(255, 152, 0, 0.1)',
       btnBg: ORANGE
     },
     {
-      title: 'Görselleştirilmiş Raporlar',
-      description: 'Satış trendleri grafikleri, Isı haritası, Performans karşılaştırmaları, Akış diyagramları.',
-      icon: <PieChartIcon sx={{ fontSize: 48, color: NAVY }} />,
-      route: '/reports/visualized',
+      title: 'Eşleştirme ve Şablonlar',
+      description: 'Gelen/Giden XML etiketlerini sistem değişkenleriyle yapılandırın.',
+      icon: <TransformIcon sx={{ fontSize: 48, color: NAVY }} />,
+      route: '/xml-transfer/mappings',
       color: 'rgba(26, 35, 126, 0.1)',
       btnBg: NAVY
+    },
+    {
+      title: 'Geçmiş & Loglar',
+      description: 'Gerçekleşen XML senkronizasyonlarının başarı/hata kayıtlarını inceleyin.',
+      icon: <ListIcon sx={{ fontSize: 48, color: RED }} />,
+      route: '/xml-transfer/logs',
+      color: 'rgba(244, 67, 54, 0.1)',
+      btnBg: RED
     }
   ];
 
   return (
     <Box>
       <Typography variant="h5" fontWeight="600" color={NAVY} sx={{ mb: 1 }}>
-        Gelişmiş Raporlama Merkezi
+        Süper XML Aktar Merkezi
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Aşağıdaki modüllerden birini seçerek detaylı tablolara ve analizlere ulaşabilirsiniz. (Kurumsal Renkler: Turuncu, Lacivert, Kırmızı)
+        Pazaryeri entegrasyonlarınız için kapsamlı XML içe/dışa aktarım ve eşleştirme merkezi.
       </Typography>
 
       <Grid container spacing={3}>
-        {reportModules.map((module, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
+        {modules.map((module, index) => (
+          <Grid item xs={12} sm={6} md={3} key={index}>
             <Paper 
               elevation={0} 
               sx={{ 
@@ -118,7 +109,7 @@ const ReportsPage: React.FC = () => {
                   onClick={() => navigate(module.route)}
                   sx={{ borderRadius: 2, textTransform: 'none', backgroundColor: module.btnBg, '&:hover': { backgroundColor: module.btnBg, opacity: 0.9 } }}
                 >
-                  Raporu Görüntüle
+                  Yönetime Git
                 </Button>
               </Box>
             </Paper>
@@ -129,4 +120,4 @@ const ReportsPage: React.FC = () => {
   );
 };
 
-export default ReportsPage;
+export default SuperXmlDashboardPage;

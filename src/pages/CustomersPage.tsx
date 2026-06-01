@@ -43,7 +43,8 @@ import {
   DialogActions,
   Chip,
   Divider,
-  Avatar
+  Avatar,
+  Stack
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -102,9 +103,11 @@ import CustomerImportDialog from '../components/customers/CustomerImportDialog';
 import CustomPagination from '../components/common/CustomPagination';
 import DataTable, { Column } from '../components/common/DataTable';
 import { useLanguage } from '../contexts/LanguageContext';
+import FilterPanel from '../components/common/FilterPanel';
 import { Customer } from '../types/Customer';
 import ExportButton from '../components/common/ExportButton';
 import PrintButton from '../components/common/PrintButton';
+import PageHeader from '../components/layout/PageHeader';
 import colors from '../theme/colors';
 import * as XLSX from 'xlsx';
 import { notifySuccess, notifyError, notifyWarning } from '../utils/notification';
@@ -2894,210 +2897,119 @@ const CustomersPage: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      {/* Ana Header - Resimde gösterilen tasarım */}
-      <Paper
-        elevation={0}
-        sx={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white',
-          borderRadius: 4,
-          overflow: 'hidden',
-          mb: 4,
-          boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)'
-        }}
-      >
-        <Box sx={{
-          p: { xs: 3, md: 5 },
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          minHeight: 140
-        }}>
-          <Box>
-            <Typography
-              variant="h3"
-              sx={{
-                fontWeight: 700,
-                fontSize: { xs: '2rem', md: '2.5rem' },
-                textShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                mb: 1
-              }}
-            >
-              Müşteri Yönetimi
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                opacity: 0.9,
-                fontSize: { xs: '1rem', md: '1.1rem' },
-                fontWeight: 400
-              }}
-            >
-              Müşterilerinizi yönetin, yeni müşteriler ekleyin ve raporlarınızı görüntüleyin
-            </Typography>
-          </Box>
-
-          <Avatar
-            sx={{
-              bgcolor: 'rgba(255,255,255,0.2)',
-              width: { xs: 60, md: 80 },
-              height: { xs: 60, md: 80 },
-              backdropFilter: 'blur(10px)',
-              border: '2px solid rgba(255,255,255,0.3)'
-            }}
-          >
-            <PersonIcon sx={{ fontSize: { xs: 30, md: 40 }, color: 'white' }} />
-          </Avatar>
-        </Box>
-      </Paper>
-
-      {/* Renkli Kart Menüleri */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={4}>
-          <Card
-            onClick={handleCustomerFormOpen}
-            sx={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              borderRadius: 3,
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                transform: 'translateY(-8px)',
-                boxShadow: '0 12px 40px rgba(102, 126, 234, 0.4)'
-              }
-            }}
-          >
-            <CardContent sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-              <PersonAddIcon sx={{ fontSize: 32, color: 'white' }} />
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5, color: 'white' }}>
-                  Yeni Müşteri
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.9, color: 'white' }}>
-                  Müşteri ekle
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-
-        <Grid item xs={12} sm={6} md={4}>
-          <Card
-            onClick={handleImportOpen}
-            sx={{
-              background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-              color: 'white',
-              borderRadius: 3,
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                transform: 'translateY(-8px)',
-                boxShadow: '0 12px 40px rgba(79, 172, 254, 0.4)'
-              }
-            }}
-          >
-            <CardContent sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-              <CloudUploadIcon sx={{ fontSize: 32, color: 'white' }} />
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5, color: 'white' }}>
-                  İçe Aktar
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.9, color: 'white' }}>
-                  Excel'den aktar
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} sm={6} md={4}>
-          <Card
-            onClick={() => setMailDialogOpen(true)}
-            sx={{
-              background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-              color: 'white',
-              borderRadius: 3,
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                transform: 'translateY(-8px)',
-                boxShadow: '0 12px 40px rgba(250, 112, 154, 0.4)'
-              }
-            }}
-          >
-            <CardContent sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-              <EmailIcon sx={{ fontSize: 32, color: 'white' }} />
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5, color: 'white' }}>
-                  Mail Gönder
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.9, color: 'white' }}>
-                  Toplu mail
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      {/* Arama ve Export Butonları */}
-      <Box sx={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        p: 2,
-        bgcolor: '#f9f9f9',
-        borderBottom: '1px solid #e0e0e0'
-      }}>
-        <TextField
-          placeholder="Filtre ara..."
-          variant="outlined"
-          size="small"
-          value={searchTerm}
-          onChange={handleSearchChange}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon fontSize="small" />
-              </InputAdornment>
-            ),
-          }}
-          sx={{
-            width: '60%',
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 1,
-              bgcolor: '#fff'
-            }
-          }}
+      {/* Ana Header - Yeni Tasarıma Uygun PageHeader */}
+      <Box sx={{ width: '100%', mb: 4 }}>
+        <PageHeader
+          title="Müşteri Yönetimi"
+          actionButton={
+            <Stack direction="row" spacing={2} flexWrap="wrap">
+              <Button
+                variant="outlined"
+                startIcon={<PrintIcon />}
+                onClick={printCustomerData}
+                sx={{
+                  borderColor: 'rgba(255, 255, 255, 0.5)',
+                  color: '#fff',
+                  '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255, 255, 255, 0.1)' },
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                }}
+              >
+                PDF'e Aktar
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<ExportIcon />}
+                onClick={exportToExcel}
+                sx={{
+                  borderColor: 'rgba(255, 255, 255, 0.5)',
+                  color: '#fff',
+                  '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255, 255, 255, 0.1)' },
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                }}
+              >
+                Excel'e Aktar
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<EmailIcon />}
+                onClick={() => setMailDialogOpen(true)}
+                sx={{
+                  bgcolor: 'rgba(255, 255, 255, 0.2)',
+                  color: '#fff',
+                  '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.3)' },
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  boxShadow: 'none'
+                }}
+              >
+                Mail Gönder
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<CloudUploadIcon />}
+                onClick={handleImportOpen}
+                sx={{
+                  bgcolor: 'rgba(255, 255, 255, 0.2)',
+                  color: '#fff',
+                  '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.3)' },
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  boxShadow: 'none'
+                }}
+              >
+                İçe Aktar
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<PersonAddIcon />}
+                onClick={handleCustomerFormOpen}
+                sx={{
+                  bgcolor: '#fff',
+                  color: '#3949ab',
+                  '&:hover': { bgcolor: '#f5f5f5' },
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  boxShadow: 'none'
+                }}
+              >
+                Yeni Müşteri
+              </Button>
+            </Stack>
+          }
         />
-
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<ExportIcon />}
-            onClick={exportToExcel}
-            sx={{ color: '#1e5172', borderColor: '#1e5172' }}
-          >
-            Excel'e Aktar
-          </Button>
-
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<PrintIcon />}
-            onClick={printCustomerData}
-            sx={{ color: '#d32f2f', borderColor: '#d32f2f' }}
-          >
-            PDF'e Aktar
-          </Button>
-        </Box>
       </Box>
-
+      {/* Arama ve Filtre Kartı */}
+      <FilterPanel
+        searchTerm={searchTerm}
+        onSearchChange={handleSearchChange}
+        searchPlaceholder="Müşteri adı, telefonu veya e-posta ile ara..."
+        fields={[
+          { id: 'country', label: 'Ülke', type: 'text', placeholder: 'Örn: Türkiye' },
+          { id: 'city', label: 'Şehir', type: 'text', placeholder: 'Örn: İstanbul' },
+          { id: 'party', label: 'Taraf (Alıcı/Satıcı)', type: 'select', options: [{ value: 'all', label: 'Tümü' }, { value: 'buyer', label: 'Alıcı' }, { value: 'seller', label: 'Satıcı' }] },
+          { id: 'financialStatus', label: 'Finansal Durum', type: 'select', options: [{ value: 'all', label: 'Tümü' }, { value: 'balance', label: 'Bakiyesi Sıfır' }, { value: 'debtor', label: 'Borçlular' }, { value: 'creditor', label: 'Alacaklılar' }] },
+          { id: 'startDate', label: 'Başlangıç Tarihi', type: 'date' },
+          { id: 'endDate', label: 'Bitiş Tarihi', type: 'date' }
+        ]}
+        onAdvancedSearch={(values: any) => {
+          if (values.country !== undefined) handleCountryChange({ target: { value: values.country } } as any);
+          if (values.city !== undefined) handleCityChange({ target: { value: values.city } } as any);
+          if (values.party !== undefined) handlePartyChange({ target: { value: values.party } } as any);
+          if (values.financialStatus !== undefined) handleFinancialStatusChange({ target: { value: values.financialStatus } } as any);
+          if (values.startDate !== undefined) setStartDate(values.startDate);
+          if (values.endDate !== undefined) setEndDate(values.endDate);
+        }}
+      />
+      
       {/* Durum Tab Butonları */}
-      <Box sx={{ display: 'flex', mt: 2, mb: 2 }}>
+      <Box sx={{ display: 'flex', mb: 3 }}>
         <Box sx={{
           display: 'flex',
           bgcolor: '#f5f5f5',
@@ -3115,9 +3027,7 @@ const CustomersPage: React.FC = () => {
               py: 0.8,
               minWidth: 80,
               borderRadius: 0,
-              '&:hover': {
-                bgcolor: activeTab === 'all' ? 'primary.dark' : 'rgba(0,0,0,0.04)'
-              }
+              '&:hover': { bgcolor: activeTab === 'all' ? 'primary.dark' : 'rgba(0,0,0,0.04)' }
             }}
             onClick={() => handleTabChange('all')}
           >
@@ -3133,9 +3043,7 @@ const CustomersPage: React.FC = () => {
               py: 0.8,
               minWidth: 80,
               borderRadius: 0,
-              '&:hover': {
-                bgcolor: activeTab === 'active' ? '#388e3c' : 'rgba(0,0,0,0.04)'
-              }
+              '&:hover': { bgcolor: activeTab === 'active' ? '#388e3c' : 'rgba(0,0,0,0.04)' }
             }}
             onClick={() => handleTabChange('active')}
           >
@@ -3151,405 +3059,14 @@ const CustomersPage: React.FC = () => {
               py: 0.8,
               minWidth: 80,
               borderRadius: 0,
-              '&:hover': {
-                bgcolor: activeTab === 'passive' ? '#d32f2f' : 'rgba(0,0,0,0.04)'
-              }
+              '&:hover': { bgcolor: activeTab === 'passive' ? '#d32f2f' : 'rgba(0,0,0,0.04)' }
             }}
             onClick={() => handleTabChange('passive')}
           >
             PASİF
           </Button>
         </Box>
-
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<FilterListIcon />}
-          onClick={handleFilterToggle}
-          sx={{
-            ml: 'auto',
-            borderColor: filterOpen ? 'primary.main' : 'divider',
-            color: filterOpen ? 'primary.main' : 'text.secondary',
-            bgcolor: filterOpen ? 'rgba(25, 118, 210, 0.04)' : 'transparent',
-            '&:hover': {
-              bgcolor: 'rgba(25, 118, 210, 0.08)'
-            }
-          }}
-        >
-          Gelişmiş Filtre
-        </Button>
       </Box>
-
-      {/* Gelişmiş Filtre Paneli */}
-      <Collapse in={filterOpen}>
-        <Paper sx={{
-          mb: 3,
-          borderRadius: 2,
-          overflow: 'hidden',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-          border: '1px solid #e0e0e0'
-        }}>
-          {/* Filtre Başlığı */}
-          <Box sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            p: 2,
-            bgcolor: 'primary.main',
-            background: 'linear-gradient(45deg, #25638f 30%, #3a7ca5 90%)',
-            color: 'white'
-          }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem' }}>
-              Gelişmiş Filtreler
-            </Typography>
-            <IconButton
-              onClick={handleFilterToggle}
-              size="small"
-              sx={{
-                color: 'white',
-                '&:hover': {
-                  bgcolor: 'rgba(255,255,255,0.2)'
-                }
-              }}
-            >
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </Box>
-
-          <Box sx={{ p: 3 }}>
-            <Grid container spacing={3}>
-              {/* Konum Filtreleri */}
-              <Grid item xs={12} md={4}>
-                <Box sx={{
-                  bgcolor: 'background.paper',
-                  p: 2.5,
-                  borderRadius: 2,
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                  border: '1px solid rgba(37, 99, 143, 0.1)',
-                  height: '100%',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                  }
-                }}>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      mb: 2.5,
-                      color: '#25638f',
-                      fontWeight: 600,
-                      display: 'flex',
-                      alignItems: 'center',
-                      borderBottom: '2px solid rgba(37, 99, 143, 0.1)',
-                      pb: 1.5
-                    }}
-                  >
-                    <LocationOnIcon sx={{ mr: 1.5, fontSize: '1.2rem', color: '#25638f' }} />
-                    Konum Bilgileri
-                  </Typography>
-                  <FormControl fullWidth size="small" sx={{ mb: 2.5 }}>
-                    <InputLabel id="country-label">Ülke</InputLabel>
-                    <Select
-                      labelId="country-label"
-                      value={selectedLocation.country}
-                      label="Ülke"
-                      onChange={handleCountryChange}
-                      sx={{
-                        borderRadius: 1.5,
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: selectedLocation.country !== 'all' ? '#25638f' : undefined,
-                          borderWidth: selectedLocation.country !== 'all' ? 1.5 : 1
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#25638f',
-                          borderWidth: 1.5
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#25638f'
-                        }
-                      }}
-                    >
-                      <MenuItem value="all">Tüm Ülkeler</MenuItem>
-                      {locationData.map((country) => (
-                        <MenuItem key={country.value} value={country.value}>{country.label}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-
-                  <FormControl fullWidth size="small" sx={{ mb: 2.5 }}>
-                    <InputLabel id="city-label">Şehir</InputLabel>
-                    <Select
-                      labelId="city-label"
-                      value={selectedLocation.city}
-                      label="Şehir"
-                      onChange={handleCityChange}
-                      disabled={selectedLocation.country === 'all'}
-                      sx={{
-                        borderRadius: 1.5,
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: selectedLocation.city !== 'all' ? '#25638f' : undefined,
-                          borderWidth: selectedLocation.city !== 'all' ? 1.5 : 1
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#25638f',
-                          borderWidth: 1.5
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#25638f'
-                        }
-                      }}
-                    >
-                      <MenuItem value="all">Tüm Şehirler</MenuItem>
-                      {selectedLocation.country !== 'all' &&
-                        locationData
-                          .find(country => country.value === selectedLocation.country)?.cities
-                          .map((city) => (
-                            <MenuItem key={city.value} value={city.value}>{city.label}</MenuItem>
-                          ))
-                      }
-                    </Select>
-                  </FormControl>
-
-                  <FormControl fullWidth size="small">
-                    <InputLabel id="district-label">Bölge</InputLabel>
-                    <Select
-                      labelId="district-label"
-                      value={selectedLocation.district}
-                      label="Bölge"
-                      onChange={handleDistrictChange}
-                      disabled={selectedLocation.city === 'all'}
-                      sx={{
-                        borderRadius: 1.5,
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: selectedLocation.district !== 'all' ? '#25638f' : undefined,
-                          borderWidth: selectedLocation.district !== 'all' ? 1.5 : 1
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#25638f',
-                          borderWidth: 1.5
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#25638f'
-                        }
-                      }}
-                    >
-                      <MenuItem value="all">Tüm Bölgeler</MenuItem>
-                      {selectedLocation.city !== 'all' &&
-                        locationData
-                          .find(country => country.value === selectedLocation.country)?.cities
-                          .find(city => city.value === selectedLocation.city)?.districts
-                          .map((district) => (
-                            <MenuItem key={district.value} value={district.value}>{district.label}</MenuItem>
-                          ))
-                      }
-                    </Select>
-                  </FormControl>
-                </Box>
-              </Grid>
-
-              {/* Taraf ve Finansal Durum Filtreleri */}
-              <Grid item xs={12} md={4}>
-                <Box sx={{
-                  bgcolor: 'background.paper',
-                  p: 2.5,
-                  borderRadius: 2,
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                  border: '1px solid rgba(255, 87, 34, 0.1)',
-                  height: '100%',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                  }
-                }}>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      mb: 2.5,
-                      color: '#ff5722',
-                      fontWeight: 600,
-                      display: 'flex',
-                      alignItems: 'center',
-                      borderBottom: '2px solid rgba(255, 87, 34, 0.1)',
-                      pb: 1.5
-                    }}
-                  >
-                    <PersonIcon sx={{ mr: 1.5, fontSize: '1.2rem', color: '#ff5722' }} />
-                    Müşteri Bilgileri
-                  </Typography>
-                  <FormControl fullWidth size="small" sx={{ mb: 2.5 }}>
-                    <InputLabel id="party-label">Taraf</InputLabel>
-                    <Select
-                      labelId="party-label"
-                      value={selectedParty}
-                      label="Taraf"
-                      onChange={handlePartyChange}
-                      sx={{
-                        borderRadius: 1.5,
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: selectedParty !== 'all' ? '#ff5722' : undefined,
-                          borderWidth: selectedParty !== 'all' ? 1.5 : 1
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#ff5722',
-                          borderWidth: 1.5
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#ff5722'
-                        }
-                      }}
-                    >
-                      <MenuItem value="all">Tümü</MenuItem>
-                      <MenuItem value="buyer">Alıcı</MenuItem>
-                      <MenuItem value="seller">Satıcı</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <FormControl fullWidth size="small">
-                    <InputLabel id="financial-label">Finansal Durum</InputLabel>
-                    <Select
-                      labelId="financial-label"
-                      value={selectedFinancialStatus}
-                      label="Finansal Durum"
-                      onChange={handleFinancialStatusChange}
-                      sx={{
-                        borderRadius: 1.5,
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: selectedFinancialStatus === 'balance' ? '#757575' :
-                            selectedFinancialStatus === 'debtor' ? '#f44336' :
-                              selectedFinancialStatus === 'creditor' ? '#4caf50' : undefined,
-                          borderWidth: selectedFinancialStatus !== 'all' ? 1.5 : 1
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: selectedFinancialStatus === 'balance' ? '#757575' :
-                            selectedFinancialStatus === 'debtor' ? '#f44336' :
-                              selectedFinancialStatus === 'creditor' ? '#4caf50' : '#757575',
-                          borderWidth: 1.5
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: selectedFinancialStatus === 'balance' ? '#757575' :
-                            selectedFinancialStatus === 'debtor' ? '#f44336' :
-                              selectedFinancialStatus === 'creditor' ? '#4caf50' : '#757575'
-                        }
-                      }}
-                    >
-                      <MenuItem value="all">Tümü</MenuItem>
-                      <MenuItem value="balance">Bakiyesi Sıfır Olanlar</MenuItem>
-                      <MenuItem value="debtor">Borçlular</MenuItem>
-                      <MenuItem value="creditor">Alacaklılar</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
-              </Grid>
-
-              {/* Tarih Filtreleri */}
-              <Grid item xs={12} md={4}>
-                <Box sx={{
-                  bgcolor: 'background.paper',
-                  p: 2.5,
-                  borderRadius: 2,
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                  border: '1px solid rgba(76, 175, 80, 0.1)',
-                  height: '100%',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                  }
-                }}>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      mb: 2.5,
-                      color: '#4caf50',
-                      fontWeight: 600,
-                      display: 'flex',
-                      alignItems: 'center',
-                      borderBottom: '2px solid rgba(76, 175, 80, 0.1)',
-                      pb: 1.5
-                    }}
-                  >
-                    <DateRangeIcon sx={{ mr: 1.5, fontSize: '1.2rem', color: '#4caf50' }} />
-                    Tarih Filtreleri
-                  </Typography>
-
-                  <TextField
-                    label="Başlangıç Tarihi"
-                    type="date"
-                    size="small"
-                    fullWidth
-                    sx={{ mb: 2.5 }}
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                  />
-
-                  <TextField
-                    label="Bitiş Tarihi"
-                    type="date"
-                    size="small"
-                    fullWidth
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                  />
-                </Box>
-              </Grid>
-            </Grid>
-
-            {/* Filtre Butonları */}
-            <Box sx={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              mt: 3,
-              pb: 1,
-              px: 2
-            }}>
-              <Button
-                variant="outlined"
-                sx={{
-                  mr: 2,
-                  borderColor: '#757575',
-                  color: '#757575',
-                  borderRadius: 2,
-                  px: 3,
-                  '&:hover': {
-                    borderColor: '#424242',
-                    color: '#424242',
-                    backgroundColor: 'rgba(0,0,0,0.04)'
-                  }
-                }}
-                onClick={handleFilterToggle}
-              >
-                İptal
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<FilterListIcon />}
-                sx={{
-                  bgcolor: 'primary.main',
-                  color: 'white',
-                  fontWeight: 500,
-                  px: 3,
-                  borderRadius: 2,
-                  boxShadow: '0 2px 8px rgba(37, 99, 143, 0.2)',
-                  '&:hover': {
-                    bgcolor: 'primary.dark',
-                    boxShadow: '0 4px 12px rgba(37, 99, 143, 0.3)'
-                  }
-                }}
-                onClick={() => {
-                  applyFilters();
-                  setFilterOpen(false);
-                }}
-              >
-                Filtrele
-              </Button>
-            </Box>
-          </Box>
-        </Paper>
-      </Collapse>
 
       {/* Müşteri Kartları - Responsive Grid */}
       {(() => {

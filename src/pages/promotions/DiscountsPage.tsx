@@ -18,6 +18,8 @@ import {
     Close as CloseIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import PageHeader from '../../components/layout/PageHeader';
+import FilterPanel from '../../components/common/FilterPanel';
 
 // Mock Data Types
 interface Discount {
@@ -187,42 +189,28 @@ const DiscountsPage: React.FC = () => {
     return (
         <Box sx={{ p: { xs: 2, md: 3 }, bgcolor: '#f4f6f8', minHeight: 'calc(100vh - 64px)' }}>
             {/* Üst Kısım: Başlık ve Ekle Butonu */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4, flexWrap: 'wrap', gap: 2 }}>
-                <Box>
-                    <Typography variant="h4" sx={{ fontWeight: 700, color: '#102a43' }}>
-                        Pazaryeri İndirim Yönetimi
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: '#627d98', mt: 0.5 }}>
-                        Platform geneli ve satıcı bazlı tüm indirim kampanyalarını buradan yönetebilirsiniz.
-                    </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                    <Button
-                        variant="outlined"
-                        startIcon={<FilterListIcon />}
-                        onClick={() => setShowFilters(!showFilters)}
-                        color={showFilters ? 'primary' : 'inherit'}
-                        sx={{ bgcolor: 'white' }}
-                    >
-                        Detaylı Filtrele
-                    </Button>
+            <Box sx={{ width: '100%' }}>
+            <PageHeader
+                title="Pazaryeri İndirim Yönetimi"
+                actionButton={
                     <Button
                         variant="contained"
                         startIcon={<AddIcon />}
                         onClick={() => navigate('/promotions/discounts/create')}
                         sx={{
-                            background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
-                            color: 'white',
-                            px: 3,
+                            bgcolor: '#fff',
+                            color: '#3949ab',
+                            '&:hover': { bgcolor: '#f5f5f5' },
                             borderRadius: 2,
                             textTransform: 'none',
                             fontWeight: 600,
-                            boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
+                            boxShadow: 'none'
                         }}
                     >
                         Yeni Kampanya Ekle
                     </Button>
-                </Box>
+                }
+            />
             </Box>
 
             {/* İstatistik Kartları */}
@@ -256,58 +244,21 @@ const DiscountsPage: React.FC = () => {
             </Grid>
 
             {/* Arama ve Filtre Kartı */}
-            <Collapse in={showFilters}>
-                <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #e0e0e0', borderRadius: 2, bgcolor: '#f8f9fa' }}>
-                    <Grid container spacing={2} alignItems="center">
-                        <Grid item xs={12} sm={5}>
-                            <TextField
-                                fullWidth
-                                size="small"
-                                placeholder="Kampanya adı veya kodu ile ara..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                sx={{ bgcolor: 'white' }}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <SearchIcon sx={{ color: '#9fb3c8' }} />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={5}>
-                            <TextField
-                                fullWidth
-                                size="small"
-                                placeholder="Mağaza Adı ara..."
-                                value={storeFilter}
-                                onChange={(e) => setStoreFilter(e.target.value)}
-                                sx={{ bgcolor: 'white' }}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <StoreIcon sx={{ color: '#9fb3c8' }} />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={2}>
-                            <Button
-                                fullWidth
-                                variant="outlined"
-                                color="error"
-                                onClick={clearFilters}
-                                startIcon={<CloseIcon />}
-                                sx={{ height: 40 }}
-                            >
-                                Temizle
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </Paper>
-            </Collapse>
+            <FilterPanel
+                searchTerm={searchTerm}
+                onSearchChange={(e) => setSearchTerm(e.target.value)}
+                searchPlaceholder="Kampanya adı veya kodu ile ara..."
+                fields={[
+                    {
+                        id: 'store',
+                        label: 'Mağaza Adı',
+                        type: 'text'
+                    }
+                ]}
+                onAdvancedSearch={(values: any) => {
+                    if (values.store !== undefined) setStoreFilter(values.store);
+                }}
+            />
 
             {/* Tablo Kartı */}
             <Card sx={{ borderRadius: 2, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', overflow: 'hidden' }}>

@@ -1,25 +1,19 @@
 import React, { useState } from 'react';
 import { Box, Toolbar } from '@mui/material';
 import Header from './Header';
-import Sidebar from './Sidebar';
 import MainCategoriesBar from './MainCategoriesBar';
+import SubNavigation from './SubNavigation';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState('default');
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
-      <Header open={sidebarOpen} onToggle={toggleSidebar} />
-      <Sidebar open={sidebarOpen} onToggle={toggleSidebar} activeMenu={activeMenu} />
+    <Box sx={{ display: 'flex', height: '100vh', flexDirection: 'column' }}>
+      <Header />
       <Box
         component="main"
         sx={{
@@ -32,6 +26,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       >
         <Toolbar /> {/* Spacing for fixed header */}
         <MainCategoriesBar setActiveMenu={setActiveMenu} />
+        <SubNavigation activeMenu={activeMenu} />
         {children}
       </Box>
     </Box>

@@ -34,6 +34,9 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import tr from 'date-fns/locale/tr';
 import { useNavigate } from 'react-router-dom';
 
+import PageHeader from '../../components/layout/PageHeader';
+import FilterPanel from '../../components/common/FilterPanel';
+
 // Örnek Fatura Verileri
 const invoices = [
   {
@@ -198,130 +201,71 @@ const SalesInvoicesListPage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: { xs: 2, md: 3 } }}>
+    <Box sx={{ width: '100%' }}>
       {/* Başlık ve Butonlar */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#2c3e50' }}>
-          Satış Faturaları
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          <Button 
-            variant="outlined"
-            startIcon={<FileDownload />} 
-            onClick={exportToExcel}
-            sx={{ 
-              borderRadius: '20px', 
-              px: 3,
-              borderColor: '#25638f',
-              color: '#25638f',
-              '&:hover': {
-                borderColor: '#1e4f73',
-                backgroundColor: 'rgba(37, 99, 143, 0.1)'
-              }
-            }}
-          >
-            Excel İndir
-          </Button>
-          <Button 
-            variant="contained" 
-            color="primary" 
-            startIcon={<Add />} 
-            onClick={() => setCreateInvoiceDialogOpen(true)}
-            sx={{ 
-              borderRadius: '20px', 
-              px: 3,
-              backgroundColor: '#25638f',
-              '&:hover': {
-                backgroundColor: '#1e4f73'
-              }
-            }}
-          >
-            Yeni Satış Faturası
-          </Button>
-        </Box>
-      </Box>
+      <PageHeader
+        title="Satış Faturaları"
+        actionButton={
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => setCreateInvoiceDialogOpen(true)}
+              sx={{
+                bgcolor: '#fff',
+                color: '#3949ab',
+                '&:hover': { bgcolor: '#f5f5f5' },
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: 'none'
+              }}
+            >
+              Yeni Satış Faturası
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<FileDownload />}
+              onClick={exportToExcel}
+              sx={{
+                bgcolor: '#fff',
+                color: '#3949ab',
+                borderColor: '#fff',
+                '&:hover': { bgcolor: '#f5f5f5', borderColor: '#f5f5f5' },
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: 'none'
+              }}
+            >
+              Excel İndir
+            </Button>
+          </Box>
+        }
+      />
 
-      {/* Filtreler */}
-      <Accordion sx={{ mb: 3, borderRadius: '12px', '&:before': { display: 'none' } }}>
-        <AccordionSummary 
-          expandIcon={<FilterList />}
-          sx={{ 
-            backgroundColor: '#f8f9fa',
-            borderRadius: '12px',
-            '&.Mui-expanded': {
-              borderBottomLeftRadius: 0,
-              borderBottomRightRadius: 0
-            }
-          }}
-        >
-          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#495057' }}>
-            🔍 Gelişmiş Arama ve Filtreler
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails sx={{ backgroundColor: '#ffffff', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' }}>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Müşteri veya Fatura No Ara"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Search color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '12px'
-                  }
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <FormControl fullWidth>
-                <InputLabel>Ödeme Durumu</InputLabel>
-                <Select
-                  value={statusFilter}
-                  label="Ödeme Durumu"
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  sx={{
-                    borderRadius: '12px'
-                  }}
-                >
-                  <MenuItem value="">Tümü</MenuItem>
-                  <MenuItem value="Ödendi">✅ Ödendi</MenuItem>
-                  <MenuItem value="Ödenmedi">❌ Ödenmedi</MenuItem>
-                  <MenuItem value="Kısmi Ödendi">⚠️ Kısmi Ödendi</MenuItem>
-                  <MenuItem value="Beklemede">⏳ Beklemede</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
-                <DatePicker
-                  label="Tarih Filtresi"
-                  value={dateFilter}
-                  onChange={(newValue) => setDateFilter(newValue)}
-                  renderInput={(params) => (
-                    <TextField 
-                      {...params} 
-                      fullWidth 
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: '12px'
-                        }
-                      }}
-                    />
-                  )}
-                />
-              </LocalizationProvider>
-            </Grid>
-          </Grid>
-        </AccordionDetails>
-      </Accordion>
+      <FilterPanel
+        searchTerm={searchTerm}
+        onSearchChange={(e) => setSearchTerm(e.target.value)}
+        searchPlaceholder="Müşteri veya Fatura No Ara..."
+        fields={[
+          {
+            id: 'status',
+            label: 'Ödeme Durumu',
+            type: 'select',
+            options: [
+              { value: '', label: 'Tümü' },
+              { value: 'Ödendi', label: '✅ Ödendi' },
+              { value: 'Ödenmedi', label: '❌ Ödenmedi' },
+              { value: 'Kısmi Ödendi', label: '⚠️ Kısmi Ödendi' },
+              { value: 'Beklemede', label: '⏳ Beklemede' }
+            ]
+          }
+        ]}
+        onAdvancedSearch={(values: any) => {
+          if(values.status !== undefined) setStatusFilter(values.status);
+        }}
+      />
 
       {/* Fatura Tablosu */}
       <Paper sx={{ borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>

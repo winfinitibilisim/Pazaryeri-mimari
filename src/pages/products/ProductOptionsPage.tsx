@@ -34,11 +34,12 @@ import {
     ColorLens as ColorLensIcon,
     ViewList as ViewListIcon,
     RadioButtonChecked as RadioButtonCheckedIcon,
-    TextFields as TextFieldsIcon,
-    Category as CategoryIcon
+    TextFields as TextFieldsIcon
 } from '@mui/icons-material';
-import { useCategories } from '../../contexts/CategoryContext';
-import ProductCategorySelectionModal from '../../components/common/ProductCategorySelectionModal';
+
+import { useProductOptions } from '../../contexts/ProductOptionContext';
+import PageHeader from '../../components/layout/PageHeader';
+import FilterPanel from '../../components/common/FilterPanel';
 
 // --- Typings ---
 export interface ReferenceItem {
@@ -58,100 +59,13 @@ export interface ProductOption {
     name: string;
     displayType: DisplayType;
     values: OptionValue[];
-    categories: ReferenceItem[];
     isActive: boolean;
+    isRequired?: boolean;
+    hasSizeChart?: boolean;
 }
 
-// Mock Data
-export const initialOptions: ProductOption[] = [
-    {
-        id: '1',
-        name: 'Renk',
-        displayType: 'color',
-        isActive: true,
-        categories: [{ id: 'giyim', name: 'Giyim' }],
-        values: [
-            { id: 'v1', name: 'Kırmızı', colorCode: '#FF0000' },
-            { id: 'v2', name: 'Mavi', colorCode: '#0000FF' },
-            { id: 'v3', name: 'Siyah', colorCode: '#000000' },
-            { id: 'v4', name: 'Beyaz', colorCode: '#FFFFFF' }
-        ]
-    },
-    {
-        id: '2',
-        name: 'Beden',
-        displayType: 'dropdown',
-        isActive: true,
-        categories: [{ id: 'giyim', name: 'Giyim' }],
-        values: [
-            { id: 'v5', name: 'S' },
-            { id: 'v6', name: 'M' },
-            { id: 'v7', name: 'L' },
-            { id: 'v8', name: 'XL' },
-            { id: 'v9', name: 'XXL' }
-        ]
-    },
-    {
-        id: '3',
-        name: 'Ayakkabı Numarası',
-        displayType: 'radio',
-        isActive: true,
-        categories: [{ id: 'ayakkabi', name: 'Ayakkabı' }],
-        values: [
-            { id: 'v10', name: '36' },
-            { id: 'v11', name: '37' },
-            { id: 'v12', name: '38' },
-            { id: 'v13', name: '39' },
-            { id: 'v14', name: '40' },
-            { id: 'v15', name: '41' },
-            { id: 'v16', name: '42' },
-            { id: 'v17', name: '43' },
-            { id: 'v18', name: '44' }
-        ]
-    },
-    {
-        id: '4',
-        name: 'RAM Kapasitesi',
-        displayType: 'radio',
-        isActive: true,
-        categories: [{ id: 'bilgisayar', name: 'Bilgisayar' }],
-        values: [
-            { id: 'v1', name: '4 GB' },
-            { id: 'v2', name: '8 GB' },
-            { id: 'v3', name: '16 GB' },
-            { id: 'v4', name: '32 GB' }
-        ]
-    },
-    {
-        id: '5',
-        name: 'Ekran Boyutu',
-        displayType: 'radio',
-        isActive: true,
-        categories: [{ id: 'bilgisayar', name: 'Bilgisayar' }],
-        values: [
-            { id: 'v10', name: '13 inç' },
-            { id: 'v11', name: '14 inç' },
-            { id: 'v12', name: '15.6 inç' },
-            { id: 'v13', name: '17 inç' }
-        ]
-    },
-    {
-        id: '6',
-        name: 'Malzeme',
-        displayType: 'text',
-        isActive: false,
-        categories: [],
-        values: [
-            { id: 'v19', name: 'Pamuk' },
-            { id: 'v20', name: 'Polyester' },
-            { id: 'v21', name: 'Deri' },
-            { id: 'v22', name: 'Keten' }
-        ]
-    }
-];
-
 const ProductOptionsPage: React.FC = () => {
-    const [options, setOptions] = useState<ProductOption[]>(initialOptions);
+    const { options, setOptions } = useProductOptions();
     const [searchTerm, setSearchTerm] = useState('');
 
     // Modal States
@@ -159,16 +73,14 @@ const ProductOptionsPage: React.FC = () => {
     const [editingOption, setEditingOption] = useState<ProductOption | null>(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
-    // Context Data
-    const { getFlatCategoryNames } = useCategories();
-
     // Form States
     const [formData, setFormData] = useState<Partial<ProductOption>>({
         name: '',
         displayType: 'dropdown',
         isActive: true,
-        values: [],
-        categories: []
+        isRequired: false,
+        hasSizeChart: false,
+        values: []
     });
     const [newValueInput, setNewValueInput] = useState('');
     const [newColorCodeInput, setNewColorCodeInput] = useState('#000000');
@@ -181,10 +93,10 @@ const ProductOptionsPage: React.FC = () => {
     const handleOpenModal = (option?: ProductOption) => {
         if (option) {
             setEditingOption(option);
-            setFormData({ ...option, categories: option.categories || [] });
+            setFormData({ ...option });
         } else {
             setEditingOption(null);
-            setFormData({ name: '', displayType: 'dropdown', isActive: true, values: [], categories: [] });
+            setFormData({ name: '', displayType: 'dropdown', isActive: true, isRequired: false, hasSizeChart: false, values: [] });
         }
         setNewValueInput('');
         setNewColorCodeInput('#000000');
@@ -207,8 +119,8 @@ const ProductOptionsPage: React.FC = () => {
                 name: formData.name || '',
                 displayType: formData.displayType || 'dropdown',
                 isActive: formData.isActive || false,
-                values: formData.values || [],
-                categories: formData.categories || []
+                isRequired: formData.isRequired || false,
+                values: formData.values || []
             };
             setOptions(prev => [...prev, newOption]);
         }
@@ -289,31 +201,32 @@ const ProductOptionsPage: React.FC = () => {
     return (
         <Box sx={{ width: '100%' }}>
             {/* Header & Actions */}
-            <Paper sx={{ p: 2, mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-                <TextField
-                    placeholder="Seçenek Ara..."
-                    variant="outlined"
-                    size="small"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    sx={{ minWidth: { xs: '100%', sm: '300px' } }}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <SearchIcon color="action" />
-                            </InputAdornment>
-                        ),
-                    }}
-                />
-                <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => handleOpenModal()}
-                    sx={{ bgcolor: '#2a6496', '&:hover': { bgcolor: '#1e4c70' } }}
-                >
-                    Yeni Seçenek Ekle
-                </Button>
-            </Paper>
+            <PageHeader
+                title="Ürün Seçenekleri"
+                actionButton={
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => handleOpenModal()}
+                        sx={{
+                            bgcolor: '#fff',
+                            color: '#3949ab',
+                            '&:hover': { bgcolor: '#f5f5f5' },
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            boxShadow: 'none'
+                        }}
+                    >
+                        Yeni Seçenek Ekle
+                    </Button>
+                }
+            />
+            <FilterPanel
+                searchTerm={searchTerm}
+                onSearchChange={(e) => setSearchTerm(e.target.value)}
+                searchPlaceholder="Seçenek Ara..."
+            />
 
             {/* Main Table */}
             <TableContainer component={Paper}>
@@ -321,7 +234,7 @@ const ProductOptionsPage: React.FC = () => {
                     <TableHead sx={{ bgcolor: '#f5f5f5' }}>
                         <TableRow>
                             <TableCell sx={{ fontWeight: 600 }}>Seçenek Adı</TableCell>
-                            <TableCell sx={{ fontWeight: 600 }}>Bağlı Kategoriler</TableCell>
+                            <TableCell sx={{ fontWeight: 600 }}>Zorunlu</TableCell>
                             <TableCell sx={{ fontWeight: 600 }}>Görünüm Tipi</TableCell>
                             <TableCell sx={{ fontWeight: 600 }}>Değerler</TableCell>
                             <TableCell align="center" sx={{ fontWeight: 600 }}>Durum</TableCell>
@@ -336,15 +249,9 @@ const ProductOptionsPage: React.FC = () => {
                                         <Typography variant="body1" fontWeight={500}>{option.name}</Typography>
                                     </TableCell>
                                     <TableCell>
-                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, maxWidth: '200px' }}>
-                                            {option.categories && option.categories.length > 0 ? (
-                                                option.categories.map((cat, idx) => (
-                                                    <Chip key={idx} label={cat.name} size="small" color="primary" variant="outlined" />
-                                                ))
-                                            ) : (
-                                                <Typography variant="caption" color="text.secondary">Tümü</Typography>
-                                            )}
-                                        </Box>
+                                        <Typography variant="body2" color={option.isRequired ? 'error' : 'text.secondary'}>
+                                            {option.isRequired ? 'Evet' : 'Hayır'}
+                                        </Typography>
                                     </TableCell>
                                     <TableCell>
                                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -414,7 +321,7 @@ const ProductOptionsPage: React.FC = () => {
                 </DialogTitle>
                 <DialogContent dividers>
                     <Grid container spacing={2}>
-                        <Grid item xs={12} sm={8}>
+                        <Grid item xs={12} sm={6}>
                             <TextField
                                 label="Seçenek Adı (örn: Renk, Beden)"
                                 fullWidth
@@ -424,7 +331,7 @@ const ProductOptionsPage: React.FC = () => {
                                 required
                             />
                         </Grid>
-                        <Grid item xs={12} sm={4}>
+                        <Grid item xs={12} sm={6} sx={{ display: 'flex', gap: 2 }}>
                             <FormControlLabel
                                 control={
                                     <Switch
@@ -434,6 +341,17 @@ const ProductOptionsPage: React.FC = () => {
                                     />
                                 }
                                 label="Aktif"
+                                sx={{ mt: 1 }}
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={formData.isRequired || false}
+                                        onChange={(e) => setFormData({ ...formData, isRequired: e.target.checked })}
+                                        color="primary"
+                                    />
+                                }
+                                label="Zorunlu"
                                 sx={{ mt: 1 }}
                             />
                         </Grid>
@@ -451,45 +369,6 @@ const ProductOptionsPage: React.FC = () => {
                                     <MenuItem value="text">Sadece Metin (Text Tag)</MenuItem>
                                 </Select>
                             </FormControl>
-                        </Grid>
-
-                        {/* Bağlı Kategoriler Alanı */}
-                        <Grid item xs={12}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, mt: 2 }}>
-                                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                                    Bağlı Kategoriler
-                                </Typography>
-                                <Button
-                                    size="small"
-                                    startIcon={<CategoryIcon />}
-                                    variant="outlined"
-                                    onClick={() => setIsCategoryModalOpen(true)}
-                                >
-                                    Kategorileri Düzenle
-                                </Button>
-                            </Box>
-                            <Paper variant="outlined" sx={{ p: 2, minHeight: '60px', bgcolor: '#fafafa', display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                                {formData.categories && formData.categories.length > 0 ? (
-                                    formData.categories.map(cat => (
-                                        <Chip
-                                            key={cat.id}
-                                            label={cat.name}
-                                            onDelete={() => {
-                                                setFormData(prev => ({
-                                                    ...prev,
-                                                    categories: prev.categories?.filter(c => c.id !== cat.id) || []
-                                                }));
-                                            }}
-                                            color="primary"
-                                            variant="outlined"
-                                        />
-                                    ))
-                                ) : (
-                                    <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                                        Bu seçenek henüz hiçbir kategoriye bağlanmamış. Tüm kategorilerde geçerli veya pasif durumda olabilir.
-                                    </Typography>
-                                )}
-                            </Paper>
                         </Grid>
 
                         {/* Değer Ekleme Alanı */}
@@ -547,13 +426,27 @@ const ProductOptionsPage: React.FC = () => {
                         </Grid>
                     </Grid>
                 </DialogContent>
-                <DialogActions sx={{ px: 3, py: 2 }}>
-                    <Button onClick={handleCloseModal} color="inherit">
-                        İptal
-                    </Button>
-                    <Button onClick={handleSaveOption} variant="contained" color="primary" disabled={!formData.name}>
-                        {editingOption ? 'Güncelle' : 'Kaydet'}
-                    </Button>
+                <DialogActions sx={{ justifyContent: 'space-between', px: 3, pb: 2 }}>
+                    <Box sx={{ border: '1px solid #ff9800', borderRadius: 1, px: 2, py: 0.5, display: 'flex', alignItems: 'center' }}>
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={formData.hasSizeChart || false}
+                                    onChange={(e) => setFormData({ ...formData, hasSizeChart: e.target.checked })}
+                                    color="warning"
+                                    size="small"
+                                />
+                            }
+                            label={<Typography variant="caption" fontWeight="bold">Tablo ekle</Typography>}
+                            sx={{ m: 0 }}
+                        />
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Button onClick={handleCloseModal} sx={{ color: 'text.secondary' }}>İptal</Button>
+                        <Button onClick={handleSaveOption} variant="contained" sx={{ bgcolor: '#2a6496', '&:hover': { bgcolor: '#1e4c70' } }}>
+                            {editingOption ? 'Güncelle' : 'Kaydet'}
+                        </Button>
+                    </Box>
                 </DialogActions>
             </Dialog>
 
@@ -569,17 +462,6 @@ const ProductOptionsPage: React.FC = () => {
                 </DialogActions>
             </Dialog>
 
-            <ProductCategorySelectionModal
-                open={isCategoryModalOpen}
-                onClose={() => setIsCategoryModalOpen(false)}
-                onSelect={(selectedNames: string[]) => {
-                    const newCategories: ReferenceItem[] = selectedNames.map((name: string) => ({
-                        id: name.toLowerCase().replace(/\s+/g, '-'),
-                        name: name
-                    }));
-                    setFormData({ ...formData, categories: newCategories });
-                }}
-            />
         </Box>
     );
 };

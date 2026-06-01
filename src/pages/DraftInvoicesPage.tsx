@@ -37,6 +37,9 @@ import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import tr from 'date-fns/locale/tr';
 
+import PageHeader from '../components/layout/PageHeader';
+import FilterPanel from '../components/common/FilterPanel';
+
 // Data types
 interface Invoice {
   id: string;
@@ -115,76 +118,48 @@ const DraftInvoicesPage: React.FC = () => {
 
   return (
     <Paper sx={{ p: 3, m: 2, borderRadius: 2, boxShadow: 3 }}>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        flexWrap="wrap"
-        mb={2}
-      >
-        <Typography variant="h4" gutterBottom>
-          {t('draftInvoicesPage.title')}
-        </Typography>
-        <Box>
+      <PageHeader
+        title={t('draftInvoicesPage.title')}
+        actionButton={
           <Button
             variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}>
-              {t('draftInvoicesPage.addDraft')}
-            </Button>
-          </Box>
-        </Box>
+            startIcon={<AddIcon />}
+            sx={{
+              bgcolor: '#fff',
+              color: '#3949ab',
+              '&:hover': { bgcolor: '#f5f5f5' },
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 600,
+              boxShadow: 'none'
+            }}
+          >
+            {t('draftInvoicesPage.addDraft')}
+          </Button>
+        }
+      />
 
-        <Accordion expanded={filtersOpen} onChange={() => setFiltersOpen(!filtersOpen)} sx={{ mb: 2 }}>
-          <AccordionSummary expandIcon={<FilterList />}>
-            <Typography>{t('filter')}</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Grid container spacing={3} direction="column">
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  placeholder={t('draftInvoicesPage.searchPlaceholder')}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Search />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
-                  <DatePicker
-                    label={t('startDate')}
-                    value={startDate}
-                    onChange={(newValue) => setStartDate(newValue)}
-                    renderInput={(params) => <TextField {...params} fullWidth />}
-                  />
-                </LocalizationProvider>
-              </Grid>
-              <Grid item xs={12}>
-                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
-                  <DatePicker
-                    label={t('endDate')}
-                    value={endDate}
-                    onChange={(newValue) => setEndDate(newValue)}
-                    renderInput={(params) => <TextField {...params} fullWidth />}
-                  />
-                </LocalizationProvider>
-              </Grid>
-              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button variant="outlined" onClick={handleClearFilters}>
-                  {t('clearFilters')}
-                </Button>
-              </Grid>
-            </Grid>
-          </AccordionDetails>
-        </Accordion>
+      <FilterPanel
+        searchTerm={searchTerm}
+        onSearchChange={(e) => setSearchTerm(e.target.value)}
+        searchPlaceholder={t('draftInvoicesPage.searchPlaceholder')}
+        fields={[
+          {
+            id: 'startDate',
+            label: t('startDate'),
+            type: 'date'
+          },
+          {
+            id: 'endDate',
+            label: t('endDate'),
+            type: 'date'
+          }
+        ]}
+        onAdvancedSearch={(values: any) => {
+          if (values.startDate !== undefined) setStartDate(values.startDate);
+          if (values.endDate !== undefined) setEndDate(values.endDate);
+        }}
+      />
 
         <TableContainer component={Paper} sx={{ borderRadius: 2, border: '1px solid #e0e0e0' }}>
           <Table>

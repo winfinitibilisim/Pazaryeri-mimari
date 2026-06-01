@@ -42,6 +42,9 @@ import GlobalIcon from '@mui/icons-material/Public';
 import StarIcon from '@mui/icons-material/Star';
 import HelpIcon from '@mui/icons-material/HelpOutline';
 
+import PageHeader from '../../components/layout/PageHeader';
+import FilterPanel from '../../components/common/FilterPanel';
+
 // --- Icon Mapping System ---
 type IconTypeKey = 'nature' | 'shipping' | 'verified' | 'security' | 'favorite' | 'trophy' | 'thumbup' | 'bolt' | 'recycling' | 'global' | 'star';
 
@@ -176,31 +179,33 @@ const IconsPage: React.FC = () => {
     return (
         <Box sx={{ width: '100%' }}>
             {/* Header & Actions */}
-            <Paper sx={{ p: 2, mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-                <TextField
-                    placeholder="İkonalarda Ara... (Örn: Organik)"
-                    variant="outlined"
-                    size="small"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    sx={{ minWidth: { xs: '100%', sm: '300px' } }}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <SearchIcon color="action" />
-                            </InputAdornment>
-                        ),
-                    }}
-                />
-                <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => handleOpenModal()}
-                    sx={{ bgcolor: '#2a6496', '&:hover': { bgcolor: '#1e4c70' } }}
-                >
-                    Yeni Özellik İkonu Ekle
-                </Button>
-            </Paper>
+            {/* Header & Actions */}
+            <PageHeader
+                title="İkonlar"
+                actionButton={
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => handleOpenModal()}
+                        sx={{
+                            bgcolor: '#fff',
+                            color: '#3949ab',
+                            '&:hover': { bgcolor: '#f5f5f5' },
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            boxShadow: 'none'
+                        }}
+                    >
+                        Yeni Özellik İkonu Ekle
+                    </Button>
+                }
+            />
+            <FilterPanel
+                searchTerm={searchTerm}
+                onSearchChange={(e) => setSearchTerm(e.target.value)}
+                searchPlaceholder="İkonlarda Ara... (Örn: Organik)"
+            />
 
             {/* Main Table */}
             <TableContainer component={Paper}>

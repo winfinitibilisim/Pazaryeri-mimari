@@ -1,7 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCategories } from '../../contexts/CategoryContext';
-import { initialOptions, ProductOption } from './ProductOptionsPage';
+import { useProductOptions, ProductOption } from '../../contexts/ProductOptionContext';
+import { useProductClasses } from '../../contexts/ProductClassContext';
+import { useProductFeatures, ProductFeature } from '../../contexts/ProductFeatureContext';
 import {
     Box,
     Typography,
@@ -36,7 +38,17 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    Badge
+    Badge,
+    Accordion,
+    AccordionSummary,
+    AccordionDetails,
+    List,
+    ListItem,
+    ListItemButton,
+    ListItemText,
+    Collapse,
+    Tooltip,
+    Popover
 } from '@mui/material';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -69,7 +81,13 @@ import {
     CloudUploadOutlined as CloudUploadOutlinedIcon,
     CropFree as CropFreeIcon,
     Layers as LayersIcon,
-    InsertPhoto as InsertPhotoIcon
+    InsertPhoto as InsertPhotoIcon,
+    Add as AddIcon,
+    AutoAwesome as AutoAwesomeIcon,
+    Code as HtmlIcon,
+    ExpandMore as ExpandMoreIcon,
+    KeyboardArrowRight as KeyboardArrowRightIcon,
+    KeyboardArrowDown as KeyboardArrowDownIcon
 } from '@mui/icons-material';
 
 interface VariantRow {
@@ -83,25 +101,46 @@ interface VariantRow {
     price: string;
     stock: string;
     images: string[];
+    partyLot?: string;
     selected?: boolean;
 }
 
+const quillModules = {
+    toolbar: [
+        [{ 'header': [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+        [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+        ['link', 'image', 'video'], // Video support
+        ['clean']
+    ]
+};
+
+const quillFormats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike', 'blockquote',
+    'list', 'bullet', 'indent',
+    'link', 'image', 'video'
+];
+
 const CreateProductPage: React.FC = () => {
     const navigate = useNavigate();
+    const { options } = useProductOptions();
+    const { classes: productClassesList } = useProductClasses();
     const [activeTab, setActiveTab] = useState(0);
 
     // Basic Details
     const [productName, setProductName] = useState('');
     const [sku, setSku] = useState('');
     const [barcode, setBarcode] = useState('');
-    const [description, setDescription] = useState('');
+    const [descriptions, setDescriptions] = useState<{ id: string, content: string }[]>([{ id: `desc-${Date.now()}`, content: '' }]);
 
     // Pricing & Stock
     const [purchasePrice, setPurchasePrice] = useState('');
     const [salePrice, setSalePrice] = useState('');
     const [currency, setCurrency] = useState('TRY');
     const [stock, setStock] = useState('');
-    const [taxRate, setTaxRate] = useState('18');
+    const [taxRate, setTaxRate] = useState('20');
+    const [otvRate, setOtvRate] = useState('0');
 
     // Classification
     const [category, setCategory] = useState('');
@@ -151,84 +190,176 @@ const CreateProductPage: React.FC = () => {
     const [images, setImages] = useState<string[]>([]);
     const [isDragActive, setIsDragActive] = useState(false);
     const [mainImageIndex, setMainImageIndex] = useState<number>(0);
+    const [packageFrontImage, setPackageFrontImage] = useState<string | null>(null);
+    const [packageBackImage, setPackageBackImage] = useState<string | null>(null);
 
     // Variants State
     const [variants, setVariants] = useState<VariantRow[]>([]);
+    const [isLegalInfoModalOpen, setIsLegalInfoModalOpen] = useState(false);
+    
+    // Size Chart Modal State
+    const [isSizeChartModalOpen, setIsSizeChartModalOpen] = useState(false);
+    const [sizeChartData, setSizeChartData] = useState<any[]>([{ id: `sc-${Date.now()}`, name: '', us: '', uk: '', eu: '', waist: '', hip: '', neck: '', chest: '' }]);
+    const [sizeChartImage, setSizeChartImage] = useState<string | null>(null);
+
     const [bulkPrice, setBulkPrice] = useState('');
     const [bulkStock, setBulkStock] = useState('');
+
+    const { categories: categoryRoots } = useCategories();
+    const brands = ['winfini', 'Nike', 'Apple', 'Samsung', 'Adidas', 'Sony'];
+
+    // Seçili kategoriye göre kullanılabilir seçenekleri state'te güncelleriz
+    const [availableSizes, setAvailableSizes] = useState<string[]>([]);
+    const [availableColors, setAvailableColors] = useState<string[]>([]);
+    const [matchedOptions, setMatchedOptions] = useState<ProductOption[]>([]);
+    const { features: allFeatures } = useProductFeatures();
+    const [matchedFeatures, setMatchedFeatures] = useState<ProductFeature[]>([]);
+    const [selectedDynamicFeatures, setSelectedDynamicFeatures] = useState<Record<string, string | string[]>>({});
+
+    React.useEffect(() => {
+        if (category) {
+            // Sınıfı belirle
+            let currentClassObj = productClassesList.find(c => c.name === productClass);
+            if (!currentClassObj) {
+                const matchingClasses = productClassesList.filter(c => c.categories.some(cat => cat.name === category));
+                if (matchingClasses.length > 0) {
+                    currentClassObj = matchingClasses[0];
+                    setProductClass(currentClassObj.name);
+                } else {
+                    setProductClass('');
+                }
+            }
+
+            let matched: ProductOption[] = [];
+            let matchedFeats: ProductFeature[] = [];
+
+            if (currentClassObj) {
+                // Sadece Sınıfta tanımlı olan zorunlu seçenekleri listele
+                matched = options.filter(opt => currentClassObj!.options.some(co => co.id === opt.id));
+                matchedFeats = allFeatures.filter(feat => currentClassObj!.features.some(cf => cf.id === feat.id));
+            }
+
+            // Ve kullanıcının istediği gibi "renk" seçeneğini her zaman dahil edelim
+            const renkOption = options.find(o => o.name.toLowerCase().includes('renk'));
+            if (renkOption && !matched.some(m => m.id === renkOption.id)) {
+                matched.push(renkOption);
+            }
+
+            // Özellikler için de kategori eşleşmesini sınıflar üzerinden birleştir
+            const catClasses = productClassesList.filter(c => c.categories.some(cat => category.toLowerCase().includes(cat.name.toLowerCase()) || cat.name.toLowerCase().includes(category.toLowerCase())));
+            catClasses.forEach(c => {
+                const cFeats = allFeatures.filter(feat => c.features.some(cf => cf.id === feat.id));
+                cFeats.forEach(feat => {
+                    if (!matchedFeats.some(mf => mf.id === feat.id)) {
+                        matchedFeats.push(feat);
+                    }
+                });
+            });
+            
+            setMatchedOptions(matched);
+            setMatchedFeatures(matchedFeats);
+            setSelectedDynamicFeatures({});
+
+            const colorOption = matched.find(o => o.name.toLowerCase().includes('renk'));
+            const sizeOption = matched.find(o => o.name.toLowerCase().includes('beden'));
+
+            const newSizes = sizeOption ? sizeOption.values.map(v => v.name) : [];
+            const newColors = colorOption ? colorOption.values.map(v => v.name) : [];
+
+            setAvailableSizes(newSizes);
+            setAvailableColors(newColors);
+
+            // Eğer kategori değiştiyse ve eski seçili değerler yeni available listede yoksa temizle
+            setSelectedSizes(prev => prev.filter(p => newSizes.includes(p)));
+            setSelectedColors(prev => prev.filter(p => newColors.includes(p)));
+        } else {
+            setMatchedOptions([]);
+            setMatchedFeatures([]);
+            setAvailableSizes([]);
+            setAvailableColors([]);
+        }
+    }, [category, productClass, productClassesList, options, allFeatures]);
+
+    // Accordion State
+    const [categoryExpanded, setCategoryExpanded] = useState<string | false>(false);
+    const handleCategoryAccordionChange = (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+        setCategoryExpanded(isExpanded ? panel : false);
+    };
+    const [categoryAnchorEl, setCategoryAnchorEl] = useState<null | HTMLElement>(null);
 
     React.useEffect(() => {
         let newVariants: VariantRow[] = [];
 
-        if (productClass === 'Tişört Şablonu') {
-            const hasOptions = availableColors.length > 0 || availableSizes.length > 0;
-            const hasSelection = selectedColors.length > 0 || selectedSizes.length > 0;
+        const hasOptions = availableColors.length > 0 || availableSizes.length > 0 || availableNumbers.length > 0 || availableRams.length > 0 || availableScreenSize.length > 0;
+        const hasSelection = selectedColors.length > 0 || selectedSizes.length > 0 || selectedNumbers.length > 0 || selectedRam.length > 0 || selectedScreenSize.length > 0;
 
-            if (hasOptions && !hasSelection) {
-                setVariants([]);
-                return;
-            }
-
-            const colors = selectedColors.length > 0 ? selectedColors : [undefined];
-            const sizes = selectedSizes.length > 0 ? selectedSizes : [undefined];
-
-            colors.forEach(c => {
-                sizes.forEach(s => {
-                    newVariants.push({
-                        id: `${c || 'TekRenk'}-${s || 'TekBeden'}`,
-                        color: c,
-                        size: s,
-                        barcode: '', sku: '', price: '', stock: '', images: [], selected: false
-                    });
-                });
-            });
-        } else if (productClass === 'Bilgisayar Şablonu') {
-            const hasOptions = availableRams.length > 0 || availableScreenSize.length > 0;
-            const hasSelection = selectedRam.length > 0 || selectedScreenSize.length > 0;
-
-            if (hasOptions && !hasSelection) {
-                setVariants([]);
-                return;
-            }
-
-            const rams = selectedRam.length > 0 ? selectedRam : [undefined];
-            const screenSizes = selectedScreenSize.length > 0 ? selectedScreenSize : [undefined];
-
-            rams.forEach(r => {
-                screenSizes.forEach(s => {
-                    newVariants.push({
-                        id: `RAM${r || 'Tek'}-EKRAN${s || 'Tek'}`,
-                        ram: r,
-                        screenSize: s,
-                        barcode: '', sku: '', price: '', stock: '', images: [], selected: false
-                    });
-                });
-            });
-        } else if (productClass === 'Ayakkabı Şablonu') {
-            const hasOptions = availableNumbers.length > 0;
-            const hasSelection = selectedNumbers.length > 0;
-
-            if (hasOptions && !hasSelection) {
-                setVariants([]);
-                return;
-            }
-
-            const numbers = selectedNumbers.length > 0 ? selectedNumbers : [undefined];
-
-            numbers.forEach(n => {
-                newVariants.push({
-                    id: `No${n || 'Tek'}`,
-                    size: n,
-                    barcode: '', sku: '', price: '', stock: '', images: [], selected: false
-                });
-            });
+        if (hasOptions && !hasSelection && matchedOptions.length > 0) {
+            setVariants([]);
+            return;
         }
+
+        const colors = selectedColors.length > 0 ? selectedColors : [undefined];
+        const sizes = selectedSizes.length > 0 ? selectedSizes : [undefined];
+        const numbers = selectedNumbers.length > 0 ? selectedNumbers : [undefined];
+        const rams = selectedRam.length > 0 ? selectedRam : [undefined];
+        const screenSizes = selectedScreenSize.length > 0 ? selectedScreenSize : [undefined];
+
+        // DYNAMIC VARIANT GENERATION BASED ON SELECTED OPTIONS
+        const activeOptions = matchedOptions.filter(opt => {
+            if (opt.name.toLowerCase().includes('renk') && selectedColors.length > 0) return true;
+            if (opt.name.toLowerCase().includes('beden') && selectedSizes.length > 0) return true;
+            if ((opt.name.toLowerCase().includes('numara') || opt.name.toLowerCase().includes('ayakkabı')) && selectedNumbers.length > 0) return true;
+            if (opt.name.toLowerCase().includes('ram') && selectedRam.length > 0) return true;
+            if (opt.name.toLowerCase().includes('ekran') && selectedScreenSize.length > 0) return true;
+            return false;
+        });
+
+        if (activeOptions.length === 0 && matchedOptions.length > 0) {
+            setVariants([]);
+            return;
+        }
+
+        // Generate combinations
+        colors.forEach(c => {
+            sizes.forEach(s => {
+                numbers.forEach(n => {
+                    rams.forEach(r => {
+                        screenSizes.forEach(ss => {
+                            // Only include if the option is part of the class, or if it was explicitly selected
+                            const includeColor = c !== undefined;
+                            const includeSize = s !== undefined;
+                            const includeNum = n !== undefined;
+                            const includeRam = r !== undefined;
+                            const includeScreen = ss !== undefined;
+
+                            if (!includeColor && !includeSize && !includeNum && !includeRam && !includeScreen) return;
+
+                            const parts = [];
+                            if (includeColor) parts.push(c);
+                            if (includeSize) parts.push(s);
+                            if (includeNum) parts.push(`No${n}`);
+                            if (includeRam) parts.push(r);
+                            if (includeScreen) parts.push(ss);
+
+                            newVariants.push({
+                                id: parts.join('-') || 'TekVaryant',
+                                color: c,
+                                size: s || n, // Combine size and number for simplicity in UI if only one is used
+                                ram: r,
+                                screenSize: ss,
+                                barcode: '', sku: '', price: '', stock: '', images: [], selected: false
+                            });
+                        });
+                    });
+                });
+            });
+        });
 
         setVariants(prev => newVariants.map(nv => {
             const existing = prev.find(p => p.id === nv.id);
             return existing ? { ...existing, selected: false } : nv;
         }));
-    }, [selectedColors, selectedSizes, selectedNumbers, selectedRam, selectedScreenSize, productClass]);
+    }, [selectedColors, selectedSizes, selectedNumbers, selectedRam, selectedScreenSize, matchedOptions]);
 
     const handleVariantChange = (id: string, field: keyof VariantRow, value: any) => {
         setVariants(prev => prev.map(v => v.id === id ? { ...v, [field]: value } : v));
@@ -338,91 +469,31 @@ const CreateProductPage: React.FC = () => {
         }
     };
 
-    const { getFlatCategoryNames, getCategoryToClassesMap } = useCategories();
-    const categories = getFlatCategoryNames();
-    const brands = ['winfini', 'Nike', 'Apple', 'Samsung', 'Adidas', 'Sony'];
-    const products = ['Elbise', 'Tişört', 'Ayakkabı', 'Telefon', 'Bilgisayar'];
 
-    // Seçili kategoriye göre kullanılabilir seçenekleri state'te güncelleriz
-    const [availableSizes, setAvailableSizes] = useState<string[]>([]);
-    const [availableColors, setAvailableColors] = useState<string[]>([]);
 
-    React.useEffect(() => {
-        if (category) {
-            // ProductOptionsPage içerisindeki yapılandırılmış gerçek veri setini kullanıyoruz
-            const matchedOptions = initialOptions.filter(opt =>
-                opt.categories.some(c => category.toLowerCase().includes(c.name.toLowerCase()) || c.name.toLowerCase().includes(category.toLowerCase()))
-            );
-
-            const colorOption = matchedOptions.find(o => o.name.toLowerCase().includes('renk'));
-            const sizeOption = matchedOptions.find(o => o.name.toLowerCase().includes('beden') || o.name.toLowerCase().includes('numara'));
-
-            const newSizes = sizeOption ? sizeOption.values.map(v => v.name) : [];
-            const newColors = colorOption ? colorOption.values.map(v => v.name) : [];
-
-            setAvailableSizes(newSizes);
-            setAvailableColors(newColors);
-
-            // Eğer kategori değiştiyse ve eski seçili değerler yeni available listede yoksa temizle
-            setSelectedSizes(prev => prev.filter(p => newSizes.includes(p)));
-            setSelectedColors(prev => prev.filter(p => newColors.includes(p)));
-        } else {
-            setAvailableSizes([]);
-            setAvailableColors([]);
-        }
-    }, [category]);
-
-    const classes = ['Tişört Şablonu', 'Bilgisayar Şablonu', 'Ayakkabı Şablonu', 'Genel Şablon'];
-
-    const categoryToClassesMap = getCategoryToClassesMap();
-
-    // Calculate available classes based on selected category, fallback to all if no category selected
-    const availableClasses = category ? (categoryToClassesMap[category] || []) : classes;
+    const availableClasses = category 
+        ? productClassesList.filter(c => c.categories.some(cat => cat.name === category)).map(c => c.name) 
+        : productClassesList.map(c => c.name);
 
     const availableTags = ['YENİ', 'Çok Satan', 'Tükendi', 'Fırsat', 'Ücretsiz Kargo'];
     const availableIcons = ['2 Yıl Garanti', 'Hızlı Kargo', 'Yerli Üretim', 'Organik', 'Vegan'];
 
-    const availableNumbers = ['36', '37', '38', '39', '40', '41', '42', '43', '44'];
+    const availableNumbers = options.find(o => o.name.toLowerCase().includes('numara') || o.name.toLowerCase().includes('ayakkabı'))?.values.map(v => v.name) || ['36', '37', '38', '39', '40', '41', '42', '43', '44'];
 
-    const availableProcessors = ['Intel Core i5', 'Intel Core i7', 'AMD Ryzen 5', 'AMD Ryzen 7', 'Apple M1', 'Apple M2'];
-    const availableRams = ['8 GB', '16 GB', '32 GB', '64 GB'];
-    const availableOs = ['Windows 11', 'FreeDOS', 'macOS'];
-
-    const availableEmmc = ['Yok', '32 GB', '64 GB', '128 GB', '256 GB', '512 GB', '1 TB'];
-    const availableGpuMemoryType = ['Yok', 'DDR3', 'DDR4', 'GDDR5', 'GDDR6', 'GDDR7'];
-    const availableScreenPanel = ['IPS', 'OLED', 'AMOLED', 'TN', 'VA'];
-    const availableProcessorGen = ['10. Nesil', '11. Nesil', '12. Nesil', '13. Nesil', '14. Nesil', 'Apple M1', 'Apple M2', 'Apple M3'];
-    const availableMaxSpeed = ['2.0 GHz', '2.5 GHz', '3.0 GHz', '3.5 GHz', '4.0 GHz', '4.5+ GHz'];
-    const availableMemorySpeed = ['2133 MHz', '2400 MHz', '2666 MHz', '3200 MHz', '4800 MHz', '5600+ MHz'];
-    const availableBluetooth = ['Yok', 'Var (4.2)', 'Var (5.0)', 'Var (5.1)', 'Var (5.2)', 'Var (5.3)'];
-    const availableWeight = ['1 kg altı', '1 - 1.5 kg', '1.5 - 2 kg', '2 - 2.5 kg', '2.5 kg ve üzeri'];
-    const availableTouch = ['Var', 'Yok'];
-    const availableScreenSize = ['13 inç', '13.3 inç', '14 inç', '15.6 inç', '16.1 inç', '16.3 inç', '17.3 inç'];
-    const availableGpu = ['Dahili', 'NVIDIA GeForce RTX 3050', 'NVIDIA GeForce RTX 4060', 'AMD Radeon RX 6600', 'Apple M3 GPU'];
-    const availableGpuMemory = ['Paylaşımlı', '2 GB', '4 GB', '6 GB', '8 GB', '12 GB', '16 GB'];
-
-    const availableFabrics = ['%100 Pamuk', 'Polyester', 'Keten', 'Elastan'];
-    const availableCollars = ['Bisiklet Yaka', 'V Yaka', 'Polo Yaka', 'Hakim Yaka'];
-
-    const availableMaterials = ['Hakiki Deri', 'Suni Deri', 'Süet', 'Tekstil', 'Poliüretan'];
-    const availableHeels = ['Düz', 'Kısa Topuklu', 'Yüksek Topuklu', 'Dolgu Topuk'];
+    const availableRams = options.find(o => o.name.toLowerCase().includes('ram'))?.values.map(v => v.name) || ['4 GB', '8 GB', '16 GB', '32 GB'];
+    const availableScreenSize = options.find(o => o.name.toLowerCase().includes('ekran'))?.values.map(v => v.name) || ['13 inç', '14 inç', '15.6 inç', '17 inç'];
 
     const tabs = [
         { label: 'Temel ürün bilgileri' }, // 0
         { label: 'Ürün özellikleri' },     // 1
         { label: 'Ürün açıklaması' },      // 2
-        { label: 'Ürün Görselleri' },      // 3
-        { label: 'Ürün Seçenekleri' },     // 4
-        { label: 'Promosyonlar' },         // 5
-        { label: 'Vitrine Ekle' },         // 6
-        { label: 'Benzer Ürünler' },       // 7
-        { label: 'Tedarikçi Bilgileri' }   // 8
+        { label: '4 Ürün Denetim Bilgileri' } // 3
     ];
 
     const handleSave = () => {
         // In a real app, you would collect this state, validate, and call an API
         console.log('Saving product:', {
-            productName, sku, barcode, description, purchasePrice, salePrice, stock, category, brand, productClass, selectedProductOption, selectedProductFeature,
+            productName, sku, barcode, descriptions, purchasePrice, salePrice, stock, category, brand, productClass, selectedProductOption, selectedProductFeature,
             selectedProcessor, selectedRam, selectedOs, selectedFabric, selectedCollar, selectedMaterial, selectedHeel
         });
         // Redirect back to products list after save
@@ -490,14 +561,24 @@ const CreateProductPage: React.FC = () => {
                                     />
                                 </Grid>
                                 <Grid item xs={12} md={6}>
-                                    <FormControl fullWidth variant="outlined" size="small">
-                                        <InputLabel>KDV *</InputLabel>
-                                        <Select value={taxRate} label="KDV *" onChange={(e) => setTaxRate(e.target.value)}>
-                                            <MenuItem value="1">%1</MenuItem>
-                                            <MenuItem value="10">%10</MenuItem>
-                                            <MenuItem value="20">%20</MenuItem>
-                                        </Select>
-                                    </FormControl>
+                                    <Box sx={{ display: 'flex', gap: 2 }}>
+                                        <FormControl fullWidth variant="outlined" size="small">
+                                            <InputLabel>KDV *</InputLabel>
+                                            <Select value={taxRate} label="KDV *" onChange={(e) => setTaxRate(e.target.value)}>
+                                                <MenuItem value="1">%1</MenuItem>
+                                                <MenuItem value="10">%10</MenuItem>
+                                                <MenuItem value="20">%20</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                        <FormControl fullWidth variant="outlined" size="small">
+                                            <InputLabel>ÖTV</InputLabel>
+                                            <Select value={otvRate} label="ÖTV" onChange={(e) => setOtvRate(e.target.value)}>
+                                                <MenuItem value="0">%0</MenuItem>
+                                                <MenuItem value="10">%10</MenuItem>
+                                                <MenuItem value="20">%20</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </Box>
                                 </Grid>
 
                                 {/* Satır 2 */}
@@ -511,22 +592,104 @@ const CreateProductPage: React.FC = () => {
                                     </FormControl>
                                 </Grid>
                                 <Grid item xs={12} md={6}>
-                                    <FormControl fullWidth variant="outlined" size="small">
+                                    <FormControl fullWidth size="small">
                                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                                             <InputLabel shrink sx={{ position: 'relative', transform: 'none' }}>Kategori *</InputLabel>
                                             <Typography variant="caption" color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, cursor: 'pointer' }}>
                                                 <InfoIcon fontSize="small" /> Seçilen kategori
                                             </Typography>
                                         </Box>
-                                        <Select value={category} displayEmpty onChange={(e) => {
-                                            const selectedCat = e.target.value;
-                                            setCategory(selectedCat);
-                                            const available = selectedCat ? (categoryToClassesMap[selectedCat] || []) : [];
-                                            setProductClass(available.length > 0 ? available[0] : '');
-                                        }}>
-                                            <MenuItem value="" disabled><em>Kategori Seçin</em></MenuItem>
-                                            {categories.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
-                                        </Select>
+                                        <Box 
+                                            onClick={(e) => setCategoryAnchorEl(e.currentTarget)}
+                                            sx={{ 
+                                                border: '1px solid #c4cdd5', 
+                                                borderRadius: 1, 
+                                                p: '8.5px 14px', 
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                bgcolor: 'white',
+                                                minHeight: '40px',
+                                                '&:hover': { borderColor: 'primary.main' }
+                                            }}
+                                        >
+                                            <Typography variant="body2" color={category ? 'text.primary' : 'text.secondary'}>
+                                                {category || 'Lütfen Kategori Seçiniz'}
+                                            </Typography>
+                                            {category ? (
+                                                <IconButton size="small" sx={{ p: 0, '&:hover': { color: 'error.main' } }} onClick={(e) => { e.stopPropagation(); setCategory(''); setProductClass(''); }}>
+                                                    <CloseIcon fontSize="small" />
+                                                </IconButton>
+                                            ) : (
+                                                <KeyboardArrowDownIcon fontSize="small" color="action" />
+                                            )}
+                                        </Box>
+                                        <Popover
+                                            open={Boolean(categoryAnchorEl)}
+                                            anchorEl={categoryAnchorEl}
+                                            onClose={() => setCategoryAnchorEl(null)}
+                                            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                                            transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                                            sx={{ '& .MuiPopover-paper': { width: categoryAnchorEl?.clientWidth, mt: 0.5, border: '1px solid #1976d2', boxShadow: 3, borderRadius: 1 } }}
+                                        >
+                                            <Box sx={{ p: 0, maxHeight: 400, overflow: 'auto', minWidth: 300 }}>
+                                                {categoryRoots.map((catObj) => {
+                                                    const catLabel = catObj.name;
+                                                    const isExpanded = categoryExpanded === catLabel;
+                                                    const hasChildren = catObj.children && catObj.children.length > 0;
+                                                    return (
+                                                        <Accordion 
+                                                            key={catObj.id}
+                                                            expanded={isExpanded} 
+                                                            onChange={hasChildren ? handleCategoryAccordionChange(catLabel) : undefined}
+                                                            disableGutters
+                                                            elevation={0}
+                                                            sx={{
+                                                                '&:before': { display: 'none' },
+                                                                borderBottom: '1px solid #f0f0f0',
+                                                                '&:last-child': { borderBottom: 0 }
+                                                            }}
+                                                        >
+                                                            <AccordionSummary
+                                                                expandIcon={hasChildren ? (isExpanded ? null : <KeyboardArrowRightIcon fontSize="small"/>) : null}
+                                                                sx={{ minHeight: 40, '& .MuiAccordionSummary-content': { my: 1 } }}
+                                                                onClick={() => {
+                                                                    if (!hasChildren) {
+                                                                        setCategory(catLabel);
+                                                                        setProductClass(catObj.productClass || '');
+                                                                        setCategoryAnchorEl(null);
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <Typography variant="body2" fontWeight={isExpanded ? 'bold' : 'normal'}>
+                                                                    {isExpanded && hasChildren ? <KeyboardArrowDownIcon fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }}/> : null}
+                                                                    {catLabel}
+                                                                </Typography>
+                                                            </AccordionSummary>
+                                                            {hasChildren && (
+                                                                <AccordionDetails sx={{ p: 0 }}>
+                                                                    <List disablePadding>
+                                                                        {catObj.children!.map((subCat) => (
+                                                                            <ListItemButton 
+                                                                                key={subCat.id} 
+                                                                                sx={{ pl: 4, py: 0.5, bgcolor: category === subCat.name ? '#f0f7ff' : 'transparent' }}
+                                                                                onClick={() => { setCategory(subCat.name); setProductClass(subCat.productClass || catObj.productClass || ''); setCategoryAnchorEl(null); }}
+                                                                            >
+                                                                                <ListItemText 
+                                                                                    primary={subCat.name} 
+                                                                                    primaryTypographyProps={{ variant: 'body2', color: category === subCat.name ? 'primary' : 'text.primary', fontWeight: category === subCat.name ? 'bold' : 'normal' }} 
+                                                                                />
+                                                                            </ListItemButton>
+                                                                        ))}
+                                                                    </List>
+                                                                </AccordionDetails>
+                                                            )}
+                                                        </Accordion>
+                                                    );
+                                                })}
+                                            </Box>
+                                        </Popover>
                                     </FormControl>
                                 </Grid>
 
@@ -578,31 +741,34 @@ const CreateProductPage: React.FC = () => {
                                     </Box>
                                 </Grid>
 
-                                {/* Satır 5 & 6: Kırmızı Alan (Tam Genişlik) */}
-                                <Grid item xs={12}>
-                                    <Autocomplete
-                                        multiple
-                                        size="small"
-                                        options={availableSizes}
-                                        value={selectedSizes}
-                                        disabled={availableSizes.length === 0}
-                                        onChange={(_, newValue) => setSelectedSizes(newValue.filter((v, i, a) => a.indexOf(v) === i))}
-                                        renderInput={(params) => <TextField {...params} variant="outlined" label="Beden *" placeholder={availableSizes.length > 0 ? "Beden Seçin" : "Bu kategoride beden seçeneği yok"} />}
-                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" color="primary" sx={{ bgcolor: '#eef2ff' }} />)}
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <Autocomplete
-                                        multiple
-                                        size="small"
-                                        options={availableColors}
-                                        value={selectedColors}
-                                        disabled={availableColors.length === 0}
-                                        onChange={(_, newValue) => setSelectedColors(newValue.filter((v, i, a) => a.indexOf(v) === i))}
-                                        renderInput={(params) => <TextField {...params} variant="outlined" label="Renk *" placeholder={availableColors.length > 0 ? "Renk Seçin" : "Bu kategoride renk seçeneği yok"} />}
-                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" color="primary" sx={{ bgcolor: '#eef2ff' }} />)}
-                                    />
-                                </Grid>
+                                {/* Satır 5 & 6: Dinamik Seçenekler (Varyantlar) */}
+                                {matchedOptions.map((opt) => (
+                                    <Grid item xs={12} md={6} key={opt.id}>
+                                        <Autocomplete
+                                            multiple
+                                            size="small"
+                                            options={opt.values.map(v => v.name)}
+                                            value={
+                                                opt.name.toLowerCase().includes('renk') ? selectedColors :
+                                                opt.name.toLowerCase().includes('beden') ? selectedSizes :
+                                                (opt.name.toLowerCase().includes('numara') || opt.name.toLowerCase().includes('ayakkabı')) ? selectedNumbers :
+                                                opt.name.toLowerCase().includes('ram') ? selectedRam :
+                                                opt.name.toLowerCase().includes('ekran') ? selectedScreenSize :
+                                                []
+                                            }
+                                            onChange={(_, newValue) => {
+                                                const uniqueVals = newValue.filter((v, i, a) => a.indexOf(v) === i);
+                                                if (opt.name.toLowerCase().includes('renk')) setSelectedColors(uniqueVals);
+                                                else if (opt.name.toLowerCase().includes('beden')) setSelectedSizes(uniqueVals);
+                                                else if (opt.name.toLowerCase().includes('numara') || opt.name.toLowerCase().includes('ayakkabı')) setSelectedNumbers(uniqueVals);
+                                                else if (opt.name.toLowerCase().includes('ram')) setSelectedRam(uniqueVals);
+                                                else if (opt.name.toLowerCase().includes('ekran')) setSelectedScreenSize(uniqueVals);
+                                            }}
+                                            renderInput={(params) => <TextField {...params} variant="outlined" label={`${opt.name} *`} placeholder={`${opt.name} Seçin`} />}
+                                            renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" color="primary" sx={{ bgcolor: '#eef2ff' }} />)}
+                                        />
+                                    </Grid>
+                                ))}
                             </Grid>
                         </Box>
 
@@ -658,6 +824,13 @@ const CreateProductPage: React.FC = () => {
                                                 </Button>
                                             </Box>
                                         </Box>
+                                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                                            {matchedOptions.some(opt => opt.hasSizeChart) && (
+                                                <Button variant="contained" size="small" onClick={() => setIsSizeChartModalOpen(true)} sx={{ bgcolor: '#ff9800', '&:hover': { bgcolor: '#f57c00' }, textTransform: 'none', borderRadius: 2 }}>
+                                                    Beden Tablosu Ekle
+                                                </Button>
+                                            )}
+                                        </Box>
 
                                         {/* Tablo */}
                                         <TableContainer sx={{ border: '1px solid #eee', borderRadius: 2 }}>
@@ -673,6 +846,14 @@ const CreateProductPage: React.FC = () => {
                                                         {selectedNumbers.length > 0 && <TableCell><strong>Numara</strong></TableCell>}
                                                         {selectedRam.length > 0 && <TableCell><strong>RAM Kapasitesi</strong></TableCell>}
                                                         {selectedScreenSize.length > 0 && <TableCell><strong>Ekran Boyutu</strong></TableCell>}
+                                                        <TableCell>
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                                <strong>Parti/Lot</strong>
+                                                                <Tooltip title="Ürünün parti, lot veya Son Kullanma Tarihi (SKT) bilgisini buraya girebilirsiniz." placement="top">
+                                                                    <InfoIcon sx={{ fontSize: 16, color: '#9e9e9e', cursor: 'pointer' }} />
+                                                                </Tooltip>
+                                                            </Box>
+                                                        </TableCell>
                                                         <TableCell><strong>Barkod(EAN) *</strong></TableCell>
                                                         <TableCell><strong>Satıcı stok kodu *</strong></TableCell>
                                                         <TableCell><strong>Fiyat</strong></TableCell>
@@ -738,16 +919,19 @@ const CreateProductPage: React.FC = () => {
                                                                 )}
 
                                                                 <TableCell>
-                                                                    <TextField size="small" placeholder="Barkod girin" value={v.barcode} onChange={(e) => handleVariantChange(v.id, 'barcode', e.target.value)} sx={{ minWidth: 120, bgcolor: '#f5f5f5', '& fieldset': { border: 'none' } }} />
+                                                                    <TextField size="small" placeholder="Parti/Lot girin" value={v.partyLot || ''} onChange={(e) => handleVariantChange(v.id, 'partyLot', e.target.value)} sx={{ minWidth: 120, bgcolor: '#ffffff', '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e0e0e0' } }} />
                                                                 </TableCell>
                                                                 <TableCell>
-                                                                    <TextField size="small" placeholder="Stok kodu girin" value={v.sku} onChange={(e) => handleVariantChange(v.id, 'sku', e.target.value)} sx={{ minWidth: 120, bgcolor: '#f5f5f5', '& fieldset': { border: 'none' } }} />
+                                                                    <TextField size="small" placeholder="Barkod girin" value={v.barcode} onChange={(e) => handleVariantChange(v.id, 'barcode', e.target.value)} sx={{ minWidth: 120, bgcolor: '#ffffff', '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e0e0e0' } }} />
                                                                 </TableCell>
                                                                 <TableCell>
-                                                                    <TextField size="small" placeholder="0" value={v.price} onChange={(e) => handleVariantChange(v.id, 'price', e.target.value)} sx={{ minWidth: 100, bgcolor: '#f5f5f5', '& fieldset': { border: 'none' } }} />
+                                                                    <TextField size="small" placeholder="Stok kodu girin" value={v.sku} onChange={(e) => handleVariantChange(v.id, 'sku', e.target.value)} sx={{ minWidth: 120, bgcolor: '#ffffff', '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e0e0e0' } }} />
                                                                 </TableCell>
                                                                 <TableCell>
-                                                                    <TextField size="small" placeholder="0" value={v.stock} onChange={(e) => handleVariantChange(v.id, 'stock', e.target.value)} sx={{ minWidth: 100, bgcolor: '#f5f5f5', '& fieldset': { border: 'none' } }} />
+                                                                    <TextField size="small" placeholder="0" value={v.price} onChange={(e) => handleVariantChange(v.id, 'price', e.target.value)} sx={{ minWidth: 100, bgcolor: '#ffffff', '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e0e0e0' } }} />
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    <TextField size="small" placeholder="0" value={v.stock} onChange={(e) => handleVariantChange(v.id, 'stock', e.target.value)} sx={{ minWidth: 100, bgcolor: '#ffffff', '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e0e0e0' } }} />
                                                                 </TableCell>
                                                             </TableRow>
                                                         );
@@ -760,7 +944,126 @@ const CreateProductPage: React.FC = () => {
                             </Paper>
                         </Box>
                     </>
-                ); case 3: // Ürün Görselleri
+                ); case 3: // Ürün Denetim Bilgileri
+
+                return (
+                    <Paper sx={{ p: 4, borderRadius: 2, minHeight: '60vh' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                            <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                Ürün Denetim Bilgileri
+                            </Typography>
+                            <Button 
+                                variant="text" 
+                                size="small" 
+                                color="primary" 
+                                onClick={() => setIsLegalInfoModalOpen(true)}
+                                sx={{ textTransform: 'none', fontWeight: 'bold' }}
+                            >
+                                Yasal Bilgi
+                            </Button>
+                        </Box>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+                            Yönetmelik gereği güvenlik uyarıları ve bilgilendirmelerin satış sayfasında yer alması zorunludur.
+                        </Typography>
+                        <Divider sx={{ mb: 4 }} />
+
+                        <Box sx={{ mb: 4 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                                <Typography variant="subtitle2" fontWeight="bold" color="text.secondary">Üretici Bilgileri</Typography>
+                                <Tooltip title="Türkiye'de yerleşik bulunan üretici bilgisi için sırasıyla üretici ticari unvanı, adresi ve e-posta/KEP adresini ekleyiniz. Türkiye'de yerleşik bir üretici bilgisi olmaması durumunda lütfen İthalatçı / Yetkili Temsilci / İfa Hizmet Sağlayıcı Bilgisi bölümünü doldurunuz." placement="top" arrow componentsProps={{ tooltip: { sx: { bgcolor: '#4285F4', color: 'white', fontSize: '13px', px: 2, py: 1.5, borderRadius: 1, maxWidth: 300 } }, arrow: { sx: { color: '#4285F4' } } }}>
+                                    <InfoIcon sx={{ fontSize: 16, color: '#9e9e9e', cursor: 'pointer' }} />
+                                </Tooltip>
+                            </Box>
+                            <Grid container spacing={3}>
+                                <Grid item xs={12} md={4}>
+                                    <TextField fullWidth size="small" placeholder="Üretici Adı" InputProps={{ endAdornment: <InputAdornment position="end"><Tooltip title="Türkiye'de yerleşik bulunan üretici bilgisi için sırasıyla üretici ticari unvanı, adresi ve e-posta/KEP adresini ekleyiniz. Türkiye'de yerleşik bir üretici bilgisi olmaması durumunda lütfen İthalatçı / Yetkili Temsilci / İfa Hizmet Sağlayıcı Bilgisi bölümünü doldurunuz." placement="top" arrow componentsProps={{ tooltip: { sx: { bgcolor: '#4285F4', color: 'white', fontSize: '13px', px: 2, py: 1.5, borderRadius: 1, maxWidth: 300 } }, arrow: { sx: { color: '#4285F4' } } }}><InfoIcon sx={{ fontSize: 20, color: '#546e7a', cursor: 'pointer' }} /></Tooltip></InputAdornment> }} />
+                                </Grid>
+                                <Grid item xs={12} md={4}>
+                                    <TextField fullWidth size="small" placeholder="Üretici Mail Adresi" />
+                                </Grid>
+                                <Grid item xs={12} md={4}>
+                                    <TextField fullWidth size="small" placeholder="Üretici Adres Bilgisi" />
+                                </Grid>
+                            </Grid>
+                        </Box>
+
+                        <Box sx={{ mb: 4 }}>
+                            <Typography variant="subtitle2" fontWeight="bold" color="text.secondary" sx={{ mb: 2 }}>İthalatçı Bilgileri</Typography>
+                            <Grid container spacing={3}>
+                                <Grid item xs={12} md={4}>
+                                    <TextField fullWidth size="small" placeholder="Birincil İthalatçı Adı" InputProps={{ endAdornment: <InputAdornment position="end"><Tooltip title="Türkiye'de yerleşik bulunan ithalatçı, yetkili temsilci veya ifa hizmet sağlayıcısı için ticari unvanı, adresi ve e-posta/KEP adresini ekleyiniz. Eğer ürünlerinizin Türkiye'de yerleşik bir üreticisi varsa, lütfen Üretici Bilgisi alanını doldurunuz." placement="top" arrow componentsProps={{ tooltip: { sx: { bgcolor: '#4285F4', color: 'white', fontSize: '13px', px: 2, py: 1.5, borderRadius: 1, maxWidth: 350 } }, arrow: { sx: { color: '#4285F4' } } }}><InfoIcon sx={{ fontSize: 20, color: '#546e7a', cursor: 'pointer' }} /></Tooltip></InputAdornment> }} />
+                                </Grid>
+                                <Grid item xs={12} md={4}>
+                                    <TextField fullWidth size="small" placeholder="Birincil İthalatçı Mail Adresi" />
+                                </Grid>
+                                <Grid item xs={12} md={4}>
+                                    <TextField fullWidth size="small" placeholder="Birincil İthalatçı Adres Bilgisi" />
+                                </Grid>
+                            </Grid>
+                            <Button variant="text" color="warning" startIcon={<AddIcon />} sx={{ mt: 2, fontWeight: 'bold', textTransform: 'none' }}>
+                                İthalatçı ekle
+                            </Button>
+                        </Box>
+
+                        <Box sx={{ mb: 4 }}>
+                            <Grid container spacing={3}>
+                                <Grid item xs={12} md={4}>
+                                    <Typography variant="caption" color="text.secondary" fontWeight="bold" sx={{ mb: 1, display: 'block' }}>CE Uygunluk Sembolü</Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <FormControl fullWidth size="small">
+                                            <Select defaultValue="Ürün görselinde bulunuyor">
+                                                <MenuItem value="Ürün görselinde bulunuyor">Ürün görselinde bulunuyor</MenuItem>
+                                                <MenuItem value="Bulunmuyor">Bulunmuyor</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                        <Tooltip title="Listelemiş olduğunuz ürün kategorisinde yer alan ürünlerde CE Uygunluk Sembolü bulunması gerekmektedir. Lütfen ürününüzün CE Uygunluk Sembolü içerdiğini gösteren paket görselini eklediğinizi onaylayın." placement="top" arrow componentsProps={{ tooltip: { sx: { bgcolor: '#4285F4', color: 'white', fontSize: '13px', px: 2, py: 1.5, borderRadius: 1, maxWidth: 300 } }, arrow: { sx: { color: '#4285F4' } } }}>
+                                            <InfoIcon sx={{ fontSize: 24, color: '#546e7a', cursor: 'pointer' }} />
+                                        </Tooltip>
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={12} md={8}>
+                                    <Typography variant="caption" color="text.secondary" fontWeight="bold" sx={{ mb: 1, display: 'block' }}>Kullanım Talimatı/Uyarıları</Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <TextField fullWidth size="small" placeholder="Kullanım Talimatı/Uyarıları" />
+                                        <Tooltip title="Lütfen ürünlerinize ait kullanım talimatı/ uyarıları bilgilerini ekleyiniz. Bu bilgileri ürünlerinize ilişkin kullanım açıklamaları, tüketici uyarıları veya yönetmelik kapsamında tüketicilerin ürünü kullanırken bilmesi gereken açıklama ve uyarılar olabilir." placement="top-end" arrow componentsProps={{ tooltip: { sx: { bgcolor: '#4285F4', color: 'white', fontSize: '13px', px: 2, py: 1.5, borderRadius: 1, maxWidth: 350 } }, arrow: { sx: { color: '#4285F4' } } }}>
+                                            <InfoIcon sx={{ fontSize: 24, color: '#546e7a', cursor: 'pointer' }} />
+                                        </Tooltip>
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        </Box>
+
+                        <Box>
+                            <Typography variant="caption" color="text.secondary" fontWeight="bold" sx={{ mb: 2, display: 'block' }}>Görsel Ürün Denetim Bilgileri</Typography>
+                            <Box sx={{ display: 'flex', gap: 2 }}>
+                                <Box component="label" sx={{ width: 100, height: 140, border: '1px dashed #ff9800', borderRadius: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', '&:hover': { bgcolor: '#fff3e0' }, p: 1, overflow: 'hidden' }}>
+                                    <input type="file" hidden accept="image/*" onChange={(e) => { if (e.target.files && e.target.files[0]) setPackageFrontImage(URL.createObjectURL(e.target.files[0])); }} />
+                                    {packageFrontImage ? (
+                                        <Box component="img" src={packageFrontImage} sx={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                    ) : (
+                                        <>
+                                            <AddIcon sx={{ color: '#ff9800', mb: 1 }} />
+                                            <Typography variant="caption" color="#ff9800" fontWeight="bold" align="center" lineHeight={1.2}>Paket Görseli</Typography>
+                                            <Typography variant="caption" color="#ff9800" fontWeight="bold" align="center" lineHeight={1.2}>(ön) Ekle</Typography>
+                                        </>
+                                    )}
+                                </Box>
+                                <Box component="label" sx={{ width: 100, height: 140, border: '1px dashed #ff9800', borderRadius: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', '&:hover': { bgcolor: '#fff3e0' }, p: 1, overflow: 'hidden' }}>
+                                    <input type="file" hidden accept="image/*" onChange={(e) => { if (e.target.files && e.target.files[0]) setPackageBackImage(URL.createObjectURL(e.target.files[0])); }} />
+                                    {packageBackImage ? (
+                                        <Box component="img" src={packageBackImage} sx={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                    ) : (
+                                        <>
+                                            <AddIcon sx={{ color: '#ff9800', mb: 1 }} />
+                                            <Typography variant="caption" color="#ff9800" fontWeight="bold" align="center" lineHeight={1.2}>Paket Görseli</Typography>
+                                            <Typography variant="caption" color="#ff9800" fontWeight="bold" align="center" lineHeight={1.2}>(arka) Ekle</Typography>
+                                        </>
+                                    )}
+                                </Box>
+                            </Box>
+                        </Box>
+                    </Paper>
+                ); case 5: // Ürün Görselleri
 
                 return (
                     <Paper sx={{ p: 4, borderRadius: 2, minHeight: '60vh' }}>
@@ -861,34 +1164,136 @@ const CreateProductPage: React.FC = () => {
                                 <InfoIcon color="primary" sx={{ fontSize: 28 }} /> Ürün Açıklaması
                             </Typography>
                             <Divider sx={{ mb: 4 }} />
-                            <Box sx={{
-                                bgcolor: 'white',
-                                border: '1px solid #e0e0e0',
-                                borderRadius: 1,
-                                overflow: 'hidden',
-                                '& .ql-toolbar': {
-                                    border: 'none',
-                                    borderBottom: '1px solid #e0e0e0',
-                                    bgcolor: '#fafafa',
-                                    p: 2
-                                },
-                                '& .ql-container': {
-                                    border: 'none',
-                                    minHeight: '400px',
-                                    fontSize: '1rem'
-                                },
-                                '& .ql-editor': {
-                                    minHeight: '400px',
-                                    p: 3
-                                }
-                            }}>
-                                <ReactQuill
-                                    theme="snow"
-                                    value={description}
-                                    onChange={setDescription}
-                                    placeholder="Ürününüzün detaylı ve ilgi çekici açıklamasını buraya yazabilirsiniz... (HTML desteklidir)"
-                                />
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                <Typography variant="subtitle1" fontWeight="bold">Ürün Açıklaması <Typography component="span" color="error">*</Typography></Typography>
+                                <Button 
+                                    variant="contained" 
+                                    color="secondary" 
+                                    startIcon={<AddIcon />}
+                                    onClick={() => setDescriptions(prev => [...prev, { id: `desc-${Date.now()}`, content: '' }])}
+                                >
+                                    Yeni Açıklama Bloğu Ekle
+                                </Button>
                             </Box>
+                            {descriptions.map((desc, index) => (
+                                <Box key={desc.id} sx={{ mb: 4, bgcolor: 'white', border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'hidden' }}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: '#f5f5f5', p: 1, borderBottom: '1px solid #e0e0e0' }}>
+                                        <Typography variant="subtitle2" color="text.secondary" sx={{ ml: 1 }}>Açıklama Bloku {index + 1}</Typography>
+                                        {descriptions.length > 1 && (
+                                            <Button 
+                                                size="small" 
+                                                color="error" 
+                                                onClick={() => setDescriptions(prev => prev.filter(d => d.id !== desc.id))}
+                                            >
+                                                Sil
+                                            </Button>
+                                        )}
+                                    </Box>
+                                    <Box sx={{
+                                        border: '1px solid #c4cdd5',
+                                        borderRadius: 1,
+                                        overflow: 'hidden',
+                                        bgcolor: '#f4f6f8'
+                                    }}>
+                                        {/* Custom Quill Toolbar Area */}
+                                        <Box sx={{ 
+                                            p: 1.5, 
+                                            borderBottom: '1px solid #c4cdd5',
+                                            bgcolor: '#f4f6f8',
+                                            '.ql-picker-label': { outline: 'none' }
+                                        }}>
+                                            <Box id={`toolbar-${desc.id}`}>
+                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, alignItems: 'center' }}>
+                                                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
+                                                        <button className="ql-bold" />
+                                                        <button className="ql-italic" />
+                                                        <button className="ql-underline" />
+                                                        <span className="ql-formats" style={{ marginRight: '8px' }}>
+                                                            <select className="ql-align" />
+                                                        </span>
+                                                        <span className="ql-formats" style={{ marginRight: '8px' }}>
+                                                            <select className="ql-size">
+                                                                <option value="small"></option>
+                                                                <option selected></option>
+                                                                <option value="large"></option>
+                                                                <option value="huge"></option>
+                                                            </select>
+                                                        </span>
+                                                        <span className="ql-formats" style={{ marginRight: '8px' }}>
+                                                            <button className="ql-list" value="ordered" />
+                                                            <button className="ql-list" value="bullet" />
+                                                        </span>
+                                                        <span className="ql-formats" style={{ marginRight: '8px' }}>
+                                                            <select className="ql-color" />
+                                                        </span>
+                                                        <button className="ql-link" />
+                                                        <button className="ql-image" />
+                                                    </Box>
+                                                    <Button
+                                                        variant="contained"
+                                                        size="small"
+                                                        sx={{ bgcolor: '#2d3748', color: 'white', '&:hover': { bgcolor: '#1a202c' }, textTransform: 'none', borderRadius: 1, px: 2, ml: 2, height: '32px' }}
+                                                        startIcon={<HtmlIcon fontSize="small"/>}
+                                                    >
+                                                        Html Göster
+                                                    </Button>
+                                                </Box>
+                                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                    <button className="ql-undo" style={{ marginRight: '8px', marginLeft: '4px' }}>
+                                                        <svg viewBox="0 0 18 18"> <polygon className="ql-fill ql-stroke" points="6 10 4 12 2 10 6 10"></polygon> <path className="ql-stroke" d="M8.09,13.91A4.6,4.6,0,0,0,9,14,5,5,0,1,0,4,9"></path> </svg>
+                                                    </button>
+                                                    <button className="ql-redo" style={{ marginRight: '8px' }}>
+                                                        <svg viewBox="0 0 18 18"> <polygon className="ql-fill ql-stroke" points="12 10 14 12 16 10 12 10"></polygon> <path className="ql-stroke" d="M9.91,13.91A4.6,4.6,0,0,1,9,14a5,5,0,1,1,5-5"></path> </svg>
+                                                    </button>
+                                                    <button className="ql-clean" style={{ marginRight: '16px' }} />
+                                                    
+                                                    <Button
+                                                        variant="contained"
+                                                        size="small"
+                                                        sx={{ bgcolor: '#ff2d85', color: 'white', '&:hover': { bgcolor: '#e01b6a' }, textTransform: 'none', fontWeight: 'bold', borderRadius: 1, px: 2, height: '32px' }}
+                                                        startIcon={<AutoAwesomeIcon sx={{ fontSize: '18px !important' }}/>}
+                                                    >
+                                                        Yapay Zeka ile hızlı açıklama oluştur
+                                                    </Button>
+                                                </Box>
+                                            </Box>
+                                        </Box>
+                                        <Box sx={{
+                                            bgcolor: 'white',
+                                            '& .ql-toolbar': { border: 'none', display: 'none' }, 
+                                            '& .ql-container': {
+                                                border: 'none',
+                                                minHeight: '250px',
+                                                fontSize: '1rem'
+                                            },
+                                        }}>
+
+                                            <ReactQuill
+                                                theme="snow"
+                                                value={desc.content}
+                                                onChange={(content) => {
+                                                    setDescriptions(prev => prev.map(d => d.id === desc.id ? { ...d, content } : d));
+                                                }}
+                                                placeholder="Ürününüzün detaylı açıklamasını buraya yazın..."
+                                                modules={{
+                                                    toolbar: {
+                                                        container: `#toolbar-${desc.id}`
+                                                    },
+                                                    history: {
+                                                        delay: 500,
+                                                        maxStack: 100,
+                                                        userOnly: true
+                                                    }
+                                                }}
+                                                formats={[
+                                                    'header', 'bold', 'italic', 'underline', 'strike', 'blockquote',
+                                                    'list', 'bullet', 'indent', 'link', 'image', 'video', 'align', 'size', 'color'
+                                                ]}
+                                            />
+                                        </Box>
+                                    </Box>
+                                </Box>
+                            ))}
                         </Box>
                     </Paper>
                 ); case 1: // Özellikler (Adım 2)
@@ -908,208 +1313,65 @@ const CreateProductPage: React.FC = () => {
                             </Box>
                         </Box>
                         <Paper sx={{ p: 4, borderRadius: 2 }}>
-                            {!productClass ? (
+                            {(!productClass && matchedFeatures.length === 0) ? (
                                 <Box sx={{ textAlign: 'center', py: 5, bgcolor: '#f5f5f5', borderRadius: 2, border: '1px dashed #bdbdbd' }}>
                                     <InfoIcon sx={{ fontSize: 48, color: '#9e9e9e', mb: 2 }} />
-                                    <Typography variant="h6" color="text.secondary">Özellikleri Görmek İçin Şablon Seçin</Typography>
-                                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Lütfen 'Temel Bilgiler' sekmesinden bir ürün sınıfı seçiniz.</Typography>
+                                    <Typography variant="h6" color="text.secondary">Özellikleri Görmek İçin Kategori veya Sınıf Seçin</Typography>
+                                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Lütfen 'Temel Bilgiler' sekmesinden bir kategori / ürün sınıfı seçiniz.</Typography>
                                     <Button variant="outlined" color="primary" sx={{ mt: 3 }} onClick={() => setActiveTab(0)}>
                                         Geri Dön
                                     </Button>
                                 </Box>
                             ) : (
                                 <Box>
-                                    {productClass === 'Tişört Şablonu' && (
-                                        <Box>
-                                            <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>Tişört Özellikleri:</Typography>
-                                            <Grid container spacing={3}>
-                                                <Grid item xs={12} sm={6} md={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableFabrics]}
-                                                        value={selectedFabric}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedFabric(availableFabrics) : setSelectedFabric(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" size="small" label="Kumaş Tipi*" placeholder="Seçin" sx={{ bgcolor: '#f5f5f5', '& fieldset': { border: 'none' } }} />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" />)}
-                                                    />
+                                    <Box sx={{ border: '1px solid #e0e0e0', borderTop: '2px solid #3f51b5', borderRadius: 1, p: 3 }}>
+                                        <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>{productClass ? `${productClass} Özel Teknik Detayları:` : 'Kategoriye Özel Teknik Detaylar:'}</Typography>
+                                        <Grid container spacing={3}>
+                                            {matchedFeatures.length > 0 ? matchedFeatures.map((feat) => (
+                                                <Grid item xs={12} sm={6} key={feat.id}>
+                                                    {feat.displayType === 'text' ? (
+                                                        <TextField
+                                                            fullWidth
+                                                            size="small"
+                                                            label={`${feat.name} *`}
+                                                            variant="outlined"
+                                                            value={(selectedDynamicFeatures[feat.id] as string) || ''}
+                                                            onChange={(e) => setSelectedDynamicFeatures(prev => ({ ...prev, [feat.id]: e.target.value }))}
+                                                        />
+                                                    ) : (
+                                                        <Autocomplete
+                                                            multiple={feat.displayType === 'multiple'}
+                                                            size="small"
+                                                            options={feat.displayType === 'multiple' ? ['Tümünü Seç', ...feat.values.map(v => v.name)] : feat.values.map(v => v.name)}
+                                                            value={
+                                                                feat.displayType === 'multiple'
+                                                                    ? ((selectedDynamicFeatures[feat.id] as string[]) || [])
+                                                                    : ((selectedDynamicFeatures[feat.id] as string) || null)
+                                                            }
+                                                            onChange={(_, newValue) => {
+                                                                if (feat.displayType === 'multiple') {
+                                                                    const arr = newValue as string[];
+                                                                    if (arr.includes('Tümünü Seç')) {
+                                                                        setSelectedDynamicFeatures(prev => ({ ...prev, [feat.id]: feat.values.map(v => v.name) }));
+                                                                    } else {
+                                                                        setSelectedDynamicFeatures(prev => ({ ...prev, [feat.id]: arr }));
+                                                                    }
+                                                                } else {
+                                                                    setSelectedDynamicFeatures(prev => ({ ...prev, [feat.id]: newValue as string }));
+                                                                }
+                                                            }}
+                                                            renderInput={(params) => <TextField {...params} variant="outlined" label={`${feat.name} *`} placeholder={`${feat.name} Seçin`} />}
+                                                            renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" />)}
+                                                        />
+                                                    )}
                                                 </Grid>
-                                                <Grid item xs={12} sm={6} md={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableCollars]}
-                                                        value={selectedCollar}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedCollar(availableCollars) : setSelectedCollar(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" size="small" label="Yaka Tipi*" placeholder="Seçin" sx={{ bgcolor: '#f5f5f5', '& fieldset': { border: 'none' } }} />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" />)}
-                                                    />
+                                            )) : (
+                                                <Grid item xs={12}>
+                                                    <Typography color="text.secondary">Bu sınıfa ait özel bir özellik henüz tanımlanmamış. Ürün Sınıfları menüsünden ekleyebilirsiniz.</Typography>
                                                 </Grid>
-                                            </Grid>
-                                        </Box>
-                                    )}
-
-                                    {productClass === 'Bilgisayar Şablonu' && (
-                                        <Box>
-                                            <Grid container spacing={4}>
-                                                <Grid item xs={12} sm={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableProcessors]}
-                                                        value={selectedProcessor}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedProcessor(availableProcessors) : setSelectedProcessor(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" size="small" label="İşlemci Tipi*" placeholder="Seçin" sx={{ bgcolor: '#f5f5f5', '& fieldset': { border: 'none' } }} />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" />)}
-                                                    />
-                                                </Grid>
-
-
-                                                <Grid item xs={12} sm={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableEmmc]}
-                                                        value={selectedEmmc}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedEmmc(availableEmmc) : setSelectedEmmc(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" size="small" label="eMMC Kapasitesi*" placeholder="Seçin" sx={{ bgcolor: '#f5f5f5', '& fieldset': { border: 'none' } }} />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" />)}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} sm={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableGpuMemoryType]}
-                                                        value={selectedGpuMemoryType}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedGpuMemoryType(availableGpuMemoryType) : setSelectedGpuMemoryType(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" size="small" label="Ekran Kartı Bellek Tipi*" placeholder="Seçin" sx={{ bgcolor: '#f5f5f5', '& fieldset': { border: 'none' } }} />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" />)}
-                                                    />
-                                                </Grid>
-
-                                                <Grid item xs={12} sm={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableScreenPanel]}
-                                                        value={selectedScreenPanel}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedScreenPanel(availableScreenPanel) : setSelectedScreenPanel(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" size="small" label="Ekran Panel Tipi*" placeholder="Seçin" sx={{ bgcolor: '#f5f5f5', '& fieldset': { border: 'none' } }} />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" />)}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} sm={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableProcessorGen]}
-                                                        value={selectedProcessorGen}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedProcessorGen(availableProcessorGen) : setSelectedProcessorGen(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" size="small" label="İşlemci Nesli*" placeholder="Seçin" sx={{ bgcolor: '#f5f5f5', '& fieldset': { border: 'none' } }} />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" />)}
-                                                    />
-                                                </Grid>
-
-                                                <Grid item xs={12} sm={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableMaxSpeed]}
-                                                        value={selectedMaxSpeed}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedMaxSpeed(availableMaxSpeed) : setSelectedMaxSpeed(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" size="small" label="Maksimum İşlemci Hızı*" placeholder="Seçin" sx={{ bgcolor: '#f5f5f5', '& fieldset': { border: 'none' } }} />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" />)}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} sm={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableMemorySpeed]}
-                                                        value={selectedMemorySpeed}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedMemorySpeed(availableMemorySpeed) : setSelectedMemorySpeed(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" size="small" label="Bellek Hızı*" placeholder="Seçin" sx={{ bgcolor: '#f5f5f5', '& fieldset': { border: 'none' } }} />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" />)}
-                                                    />
-                                                </Grid>
-
-                                                <Grid item xs={12} sm={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableBluetooth]}
-                                                        value={selectedBluetooth}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedBluetooth(availableBluetooth) : setSelectedBluetooth(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" size="small" label="Bluetooth Özelliği*" placeholder="Seçin" sx={{ bgcolor: '#f5f5f5', '& fieldset': { border: 'none' } }} />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" />)}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} sm={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableWeight]}
-                                                        value={selectedWeight}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedWeight(availableWeight) : setSelectedWeight(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" size="small" label="Cihaz Ağırlığı*" placeholder="Seçin" sx={{ bgcolor: '#f5f5f5', '& fieldset': { border: 'none' } }} />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" />)}
-                                                    />
-                                                </Grid>
-
-                                                <Grid item xs={12} sm={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableTouch]}
-                                                        value={selectedTouch}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedTouch(availableTouch) : setSelectedTouch(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" size="small" label="Dokunmatik Ekran*" placeholder="Seçin" sx={{ bgcolor: '#f5f5f5', '& fieldset': { border: 'none' } }} />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" />)}
-                                                    />
-                                                </Grid>
-
-
-                                                <Grid item xs={12} sm={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableGpu]}
-                                                        value={selectedGpu}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedGpu(availableGpu) : setSelectedGpu(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" size="small" label="Ekran Kartı*" placeholder="Seçin" sx={{ bgcolor: '#f5f5f5', '& fieldset': { border: 'none' } }} />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" />)}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} sm={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableGpuMemory]}
-                                                        value={selectedGpuMemory}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedGpuMemory(availableGpuMemory) : setSelectedGpuMemory(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" size="small" label="Ekran Kartı Hafızası*" placeholder="Seçin" sx={{ bgcolor: '#f5f5f5', '& fieldset': { border: 'none' } }} />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" />)}
-                                                    />
-                                                </Grid>
-                                            </Grid>
-                                        </Box>
-                                    )}
-
-
-                                    {productClass === 'Ayakkabı Şablonu' && (
-                                        <Box sx={{ border: '1px solid #e0e0e0', borderTop: '2px solid #f44336', borderRadius: 1, p: 3 }}>
-                                            <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>Ayakkabı Özellikleri:</Typography>
-                                            <Grid container spacing={3}>
-                                                <Grid item xs={12} sm={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableMaterials]}
-                                                        value={selectedMaterial}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedMaterial(availableMaterials) : setSelectedMaterial(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" label="Dış Materyal" placeholder="Materyal Seçin" />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" />)}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} sm={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableHeels]}
-                                                        value={selectedHeel}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedHeel(availableHeels) : setSelectedHeel(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" label="Topuk Boyu" placeholder="Topuk Boyu Seçin" />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" />)}
-                                                    />
-                                                </Grid>
-                                            </Grid>
-                                        </Box>
-                                    )}
+                                            )}
+                                        </Grid>
+                                    </Box>
                                 </Box>
                             )}
                         </Paper>
@@ -1133,36 +1395,40 @@ const CreateProductPage: React.FC = () => {
                                 </Box>
                             ) : (
                                 <Box>
-                                    {productClass === 'Tişört Şablonu' && (
-                                        <Box sx={{ border: '1px solid #e0e0e0', borderTop: '2px solid #ff9800', borderRadius: 1, p: 3 }}>
+                                    {matchedOptions.some(o => o.name.toLowerCase().includes('renk') || o.name.toLowerCase().includes('beden')) && (
+                                        <Box sx={{ border: '1px solid #e0e0e0', borderTop: '2px solid #ff9800', borderRadius: 1, p: 3, mb: 3 }}>
                                             <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>Renk ve Beden Seçenekleri:</Typography>
                                             <Grid container spacing={3}>
-                                                <Grid item xs={12} sm={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableColors]}
-                                                        value={selectedColors}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedColors(availableColors) : setSelectedColors(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" label="Renk Seçimleri" placeholder="Renk Seçin" />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" color="primary" />)}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} sm={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableSizes]}
-                                                        value={selectedSizes}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedSizes(availableSizes) : setSelectedSizes(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" label="Beden Seçimleri" placeholder="Beden Seçin" />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" color="secondary" />)}
-                                                    />
-                                                </Grid>
+                                                {matchedOptions.some(o => o.name.toLowerCase().includes('renk')) && (
+                                                    <Grid item xs={12} sm={6}>
+                                                        <Autocomplete
+                                                            multiple
+                                                            options={['Tümünü Seç', ...availableColors]}
+                                                            value={selectedColors}
+                                                            onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedColors(availableColors) : setSelectedColors(newValue)}
+                                                            renderInput={(params) => <TextField {...params} variant="outlined" label="Renk Seçimleri" placeholder="Renk Seçin" />}
+                                                            renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" color="primary" />)}
+                                                        />
+                                                    </Grid>
+                                                )}
+                                                {matchedOptions.some(o => o.name.toLowerCase().includes('beden')) && (
+                                                    <Grid item xs={12} sm={6}>
+                                                        <Autocomplete
+                                                            multiple
+                                                            options={['Tümünü Seç', ...availableSizes]}
+                                                            value={selectedSizes}
+                                                            onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedSizes(availableSizes) : setSelectedSizes(newValue)}
+                                                            renderInput={(params) => <TextField {...params} variant="outlined" label="Beden Seçimleri" placeholder="Beden Seçin" />}
+                                                            renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" color="secondary" />)}
+                                                        />
+                                                    </Grid>
+                                                )}
                                             </Grid>
                                         </Box>
                                     )}
 
-                                    {productClass === 'Ayakkabı Şablonu' && (
-                                        <Box sx={{ border: '1px solid #e0e0e0', borderTop: '2px solid #ff9800', borderRadius: 1, p: 3 }}>
+                                    {matchedOptions.some(o => o.name.toLowerCase().includes('numara') || o.name.toLowerCase().includes('ayakkabı')) && (
+                                        <Box sx={{ border: '1px solid #e0e0e0', borderTop: '2px solid #ff9800', borderRadius: 1, p: 3, mb: 3 }}>
                                             <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>Numara Seçenekleri:</Typography>
                                             <Grid container spacing={3}>
                                                 <Grid item xs={12} sm={6}>
@@ -1179,35 +1445,39 @@ const CreateProductPage: React.FC = () => {
                                         </Box>
                                     )}
 
-                                    {productClass === 'Bilgisayar Şablonu' && (
-                                        <Box sx={{ border: '1px solid #e0e0e0', borderTop: '2px solid #ff9800', borderRadius: 1, p: 3 }}>
+                                    {matchedOptions.some(o => o.name.toLowerCase().includes('ram') || o.name.toLowerCase().includes('ekran')) && (
+                                        <Box sx={{ border: '1px solid #e0e0e0', borderTop: '2px solid #ff9800', borderRadius: 1, p: 3, mb: 3 }}>
                                             <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>RAM Kapasitesi ve Ekran Boyutu Seçenekleri:</Typography>
                                             <Grid container spacing={3}>
-                                                <Grid item xs={12} sm={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableRams]}
-                                                        value={selectedRam}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedRam(availableRams) : setSelectedRam(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" label="RAM Seçimleri" placeholder="RAM Seçin" />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" color="primary" />)}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} sm={6}>
-                                                    <Autocomplete
-                                                        multiple
-                                                        options={['Tümünü Seç', ...availableScreenSize]}
-                                                        value={selectedScreenSize}
-                                                        onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedScreenSize(availableScreenSize) : setSelectedScreenSize(newValue)}
-                                                        renderInput={(params) => <TextField {...params} variant="outlined" label="Ekran Boyutu Seçimleri" placeholder="Ekran Boyutu Seçin" />}
-                                                        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" color="secondary" />)}
-                                                    />
-                                                </Grid>
+                                                {matchedOptions.some(o => o.name.toLowerCase().includes('ram')) && (
+                                                    <Grid item xs={12} sm={6}>
+                                                        <Autocomplete
+                                                            multiple
+                                                            options={['Tümünü Seç', ...availableRams]}
+                                                            value={selectedRam}
+                                                            onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedRam(availableRams) : setSelectedRam(newValue)}
+                                                            renderInput={(params) => <TextField {...params} variant="outlined" label="RAM Seçimleri" placeholder="RAM Seçin" />}
+                                                            renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" color="primary" />)}
+                                                        />
+                                                    </Grid>
+                                                )}
+                                                {matchedOptions.some(o => o.name.toLowerCase().includes('ekran')) && (
+                                                    <Grid item xs={12} sm={6}>
+                                                        <Autocomplete
+                                                            multiple
+                                                            options={['Tümünü Seç', ...availableScreenSize]}
+                                                            value={selectedScreenSize}
+                                                            onChange={(_, newValue) => newValue.includes('Tümünü Seç') ? setSelectedScreenSize(availableScreenSize) : setSelectedScreenSize(newValue)}
+                                                            renderInput={(params) => <TextField {...params} variant="outlined" label="Ekran Boyutu Seçimleri" placeholder="Ekran Boyutu Seçin" />}
+                                                            renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} size="small" color="secondary" />)}
+                                                        />
+                                                    </Grid>
+                                                )}
                                             </Grid>
                                         </Box>
                                     )}
 
-                                    {productClass !== 'Tişört Şablonu' && productClass !== 'Ayakkabı Şablonu' && productClass !== 'Bilgisayar Şablonu' && (
+                                    {matchedOptions.length === 0 && (
                                         <Box sx={{ textAlign: 'center', py: 4 }}>
                                             <Typography color="text.secondary">Bu ürün sınıfı için eklenebilir ek bir varyant seçeneği (renk, beden, numara vb.) bulunmamaktadır.</Typography>
                                         </Box>
@@ -1235,7 +1505,8 @@ const CreateProductPage: React.FC = () => {
     const nameProgress = productName.length > 0 ? 100 : 0;
     const imageProgress = Math.min((images.length / 5) * 100, 100);
     const featureProgress = productClass ? 100 : 0;
-    const descProgress = Math.min((description.length / 50) * 100, 100);
+    const getDescLen = () => descriptions.reduce((sum, d) => sum + d.content.replace(/<[^>]*>?/gm, '').length, 0);
+    const descProgress = Math.min((getDescLen() / 50) * 100, 100);
     const totalProgress = Math.round((nameProgress + imageProgress + featureProgress + descProgress) / 4);
 
     return (
@@ -1342,7 +1613,7 @@ const CreateProductPage: React.FC = () => {
                                         <InfoIcon sx={{ fontSize: 16, color: '#9e9e9e' }} />
                                         <Typography variant="body2" fontWeight="500" color="text.secondary">Ürün açıklamalarını detaylı doldur</Typography>
                                     </Box>
-                                    <LinearProgress variant="determinate" value={Math.min((description.length / 50) * 100, 100)} sx={{ height: 8, borderRadius: 4, bgcolor: '#e0e0e0', '& .MuiLinearProgress-bar': { bgcolor: '#ff6a00' } }} />
+                                    <LinearProgress variant="determinate" value={descProgress} sx={{ height: 8, borderRadius: 4, bgcolor: '#e0e0e0', '& .MuiLinearProgress-bar': { bgcolor: '#ff6a00' } }} />
                                 </Box>
                             </Grid>
                         </Grid>
@@ -1633,6 +1904,122 @@ const CreateProductPage: React.FC = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Yasal Bilgi Modalı */}
+            <Dialog open={isLegalInfoModalOpen} onClose={() => setIsLegalInfoModalOpen(false)} maxWidth="md" fullWidth>
+                <DialogTitle sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <InfoIcon color="primary" />
+                    Yasal Bilgi
+                </DialogTitle>
+                <DialogContent dividers>
+                    <Typography variant="body1" sx={{ mb: 2 }}>
+                        Yönetmelik gereği güvenlik uyarıları ve bilgilendirmelerin satış sayfasında yer alması zorunludur. Lütfen ilgili alanları eksiksiz ve doğru bir şekilde doldurduğunuzdan emin olun. 
+                        Eksik veya hatalı bilgi girilmesi halinde tüm yasal sorumluluk satıcıya aittir.
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 2 }}>
+                        - <strong>Üretici Bilgileri:</strong> Ürünü üreten firmanın resmi adı, iletişim kurulabilecek bir e-posta adresi veya KEP adresi ve açık adresidir.
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 2 }}>
+                        - <strong>İthalatçı Bilgileri:</strong> Eğer ürün ithal edilmişse, Türkiye'de yerleşik ithalatçı firmanın bilgileri girilmelidir. 
+                        Birden fazla ithalatçı olması durumunda "İthalatçı ekle" butonunu kullanabilirsiniz.
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 2 }}>
+                        - <strong>CE Uygunluk Sembolü ve Uyarılar:</strong> Ürün grubuna göre alınması gereken güvenlik ve uygunluk işaretleri ürün ambalajında bulunmalıdır. 
+                        Varsa ürünün kullanım talimatları ve güvenlik uyarıları "Kullanım Talimatı / Uyarıları" alanından veya paket görseli yüklenerek alıcılara sunulmalıdır.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setIsLegalInfoModalOpen(false)} variant="contained" color="primary" sx={{ textTransform: 'none', fontWeight: 'bold' }}>
+                        Anladım
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Beden Tablosu Modalı */}
+            <Dialog open={isSizeChartModalOpen} onClose={() => setIsSizeChartModalOpen(false)} maxWidth="lg" fullWidth>
+                <DialogTitle sx={{ fontWeight: 'bold' }}>
+                    Beden Tablosu Ekle
+                </DialogTitle>
+                <DialogContent dividers sx={{ bgcolor: '#fbfbfb' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+                        <InfoIcon fontSize="small" />
+                        <Typography variant="body2">Ölçü değerlerinin tamamı santimetre (cm) cinsinden olmalıdır.</Typography>
+                    </Box>
+
+                    <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 2 }}>
+                        <Table size="small">
+                            <TableHead sx={{ bgcolor: '#f5f7fa' }}>
+                                <TableRow>
+                                    <TableCell><strong>Kalıp İsmi</strong></TableCell>
+                                    <TableCell><strong>US Beden</strong></TableCell>
+                                    <TableCell><strong>UK Beden</strong></TableCell>
+                                    <TableCell><strong>EU-TR Beden</strong></TableCell>
+                                    <TableCell><strong>Bel (cm)</strong></TableCell>
+                                    <TableCell><strong>Basen-Kalça (cm)</strong></TableCell>
+                                    <TableCell><strong>Boyun</strong></TableCell>
+                                    <TableCell><strong>Göğüs Genişliği (cm)</strong></TableCell>
+                                    <TableCell></TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {sizeChartData.map((row) => (
+                                    <TableRow key={row.id}>
+                                        <TableCell><TextField size="small" value={row.name} onChange={(e) => setSizeChartData(prev => prev.map(r => r.id === row.id ? { ...r, name: e.target.value } : r))} sx={{ bgcolor: '#fff' }} /></TableCell>
+                                        <TableCell><TextField size="small" value={row.us} onChange={(e) => setSizeChartData(prev => prev.map(r => r.id === row.id ? { ...r, us: e.target.value } : r))} sx={{ bgcolor: '#fff' }} /></TableCell>
+                                        <TableCell><TextField size="small" value={row.uk} onChange={(e) => setSizeChartData(prev => prev.map(r => r.id === row.id ? { ...r, uk: e.target.value } : r))} sx={{ bgcolor: '#fff' }} /></TableCell>
+                                        <TableCell><TextField size="small" value={row.eu} onChange={(e) => setSizeChartData(prev => prev.map(r => r.id === row.id ? { ...r, eu: e.target.value } : r))} sx={{ bgcolor: '#fff' }} /></TableCell>
+                                        <TableCell><TextField size="small" value={row.waist} onChange={(e) => setSizeChartData(prev => prev.map(r => r.id === row.id ? { ...r, waist: e.target.value } : r))} sx={{ bgcolor: '#fff' }} /></TableCell>
+                                        <TableCell><TextField size="small" value={row.hip} onChange={(e) => setSizeChartData(prev => prev.map(r => r.id === row.id ? { ...r, hip: e.target.value } : r))} sx={{ bgcolor: '#fff' }} /></TableCell>
+                                        <TableCell><TextField size="small" value={row.neck} onChange={(e) => setSizeChartData(prev => prev.map(r => r.id === row.id ? { ...r, neck: e.target.value } : r))} sx={{ bgcolor: '#fff' }} /></TableCell>
+                                        <TableCell><TextField size="small" value={row.chest} onChange={(e) => setSizeChartData(prev => prev.map(r => r.id === row.id ? { ...r, chest: e.target.value } : r))} sx={{ bgcolor: '#fff' }} /></TableCell>
+                                        <TableCell>
+                                            <Button size="small" color="error" onClick={() => setSizeChartData(prev => prev.filter(r => r.id !== row.id))} sx={{ minWidth: 0, p: 1 }}>X</Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+
+                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                        <Button 
+                            variant="outlined" 
+                            color="warning" 
+                            startIcon={<AddIcon />} 
+                            onClick={() => setSizeChartData(prev => [...prev, { id: `sc-${Date.now()}`, name: '', us: '', uk: '', eu: '', waist: '', hip: '', neck: '', chest: '' }])}
+                            sx={{ borderRadius: 6, textTransform: 'none', px: 3, fontWeight: 'bold' }}
+                        >
+                            Beden Ekle
+                        </Button>
+                    </Box>
+                </DialogContent>
+                <DialogActions sx={{ p: 2, justifyContent: 'space-between', alignItems: 'center', bgcolor: '#fff', borderTop: '1px solid #eee' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Button variant="outlined" component="label" sx={{ textTransform: 'none', borderRadius: 2, borderColor: '#e0e0e0', color: '#757575', display: 'flex', gap: 1 }}>
+                            <InsertPhotoIcon fontSize="small" />
+                            {sizeChartImage ? 'Görseli Değiştir' : 'Tablo Görseli Ekle'}
+                            <input type="file" hidden accept="image/*" onChange={(e) => { if (e.target.files && e.target.files[0]) { setSizeChartImage(URL.createObjectURL(e.target.files[0])); } }} />
+                        </Button>
+                        {sizeChartImage && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>
+                                <img src={sizeChartImage} alt="Tablo Görseli" style={{ maxHeight: 36, borderRadius: 4, border: '1px solid #ccc' }} />
+                                <IconButton size="small" color="error" onClick={() => setSizeChartImage(null)} sx={{ ml: 1 }}>
+                                    <DeleteIcon fontSize="small" />
+                                </IconButton>
+                            </Box>
+                        )}
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Button onClick={() => setIsSizeChartModalOpen(false)} variant="outlined" color="warning" sx={{ textTransform: 'none', fontWeight: 'bold', borderRadius: 2, px: 4 }}>
+                            İptal
+                        </Button>
+                        <Button onClick={() => setIsSizeChartModalOpen(false)} variant="contained" sx={{ bgcolor: '#e0e0e0', color: '#757575', textTransform: 'none', fontWeight: 'bold', borderRadius: 2, px: 4, '&:hover': { bgcolor: '#d5d5d5' } }}>
+                            Beden Tablosu Tanımla
+                        </Button>
+                    </Box>
+                </DialogActions>
+            </Dialog>
+
         </Box>
     );
 };

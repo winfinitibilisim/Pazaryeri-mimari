@@ -11,3 +11,14 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Custom Quill Toolbar Styles */
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value]:not([data-value="small"]):not([data-value="large"]):not([data-value="huge"])::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value]:not([data-value="small"]):not([data-value="large"]):not([data-value="huge"])::before,
+.ql-snow .ql-picker.ql-size .ql-picker-label::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item::before {
+    content: 'Yazı Boyutu' !important;
+}
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="small"]::before { content: 'Küçük' !important; }
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="large"]::before { content: 'Büyük' !important; }
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="huge"]::before { content: 'Çok Büyük' !important; }

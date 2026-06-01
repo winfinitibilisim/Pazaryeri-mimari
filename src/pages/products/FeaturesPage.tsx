@@ -37,64 +37,31 @@ import {
     Checklist as ChecklistIcon
 } from '@mui/icons-material';
 
-// Typings
-type FeatureDisplayType = 'single' | 'multiple' | 'text';
+import { useProductFeatures } from '../../contexts/ProductFeatureContext';
+// import { FeatureDisplayType, FeatureValue, ProductFeature } from '../../contexts/ProductFeatureContext'; // if needed later, but they might already be defined locally
 
-interface FeatureValue {
+import PageHeader from '../../components/layout/PageHeader';
+import FilterPanel from '../../components/common/FilterPanel';
+
+// Typings
+export type FeatureDisplayType = 'single' | 'multiple' | 'text';
+
+export interface FeatureValue {
     id: string;
     name: string;
 }
 
-interface ProductFeature {
+export interface ProductFeature {
     id: string;
     name: string;
     displayType: FeatureDisplayType;
     values: FeatureValue[];
     isActive: boolean;
+    isRequired?: boolean;
 }
 
-// Mock Data
-const initialFeatures: ProductFeature[] = [
-    {
-        id: 'f2',
-        name: 'Enerji Sınıfı',
-        displayType: 'single',
-        isActive: true,
-        values: [
-            { id: 'v5', name: 'A+++' },
-            { id: 'v6', name: 'A++' },
-            { id: 'v7', name: 'A+' },
-            { id: 'v8', name: 'A' },
-            { id: 'v9', name: 'B' }
-        ]
-    },
-    {
-        id: 'f4',
-        name: 'Kumaş Tipi',
-        displayType: 'multiple',
-        isActive: false,
-        values: [
-            { id: 'v14', name: 'Pamuk' },
-            { id: 'v15', name: 'Polyester' },
-            { id: 'v16', name: 'Elastan' },
-            { id: 'v17', name: 'Viskon' }
-        ]
-    },
-    {
-        id: 'f5',
-        name: 'Garanti Süresi',
-        displayType: 'text',
-        isActive: true,
-        values: [
-            { id: 'v18', name: '1 Yıl' },
-            { id: 'v19', name: '2 Yıl' },
-            { id: 'v20', name: '3 Yıl' }
-        ]
-    }
-];
-
 const FeaturesPage: React.FC = () => {
-    const [features, setFeatures] = useState<ProductFeature[]>(initialFeatures);
+    const { features, setFeatures } = useProductFeatures();
     const [searchTerm, setSearchTerm] = useState('');
 
     // Modal States
@@ -106,6 +73,7 @@ const FeaturesPage: React.FC = () => {
         name: '',
         displayType: 'single',
         isActive: true,
+        isRequired: false,
         values: []
     });
     const [newValueInput, setNewValueInput] = useState('');
@@ -121,7 +89,7 @@ const FeaturesPage: React.FC = () => {
             setFormData({ ...feature });
         } else {
             setEditingFeature(null);
-            setFormData({ name: '', displayType: 'single', isActive: true, values: [] });
+            setFormData({ name: '', displayType: 'single', isActive: true, isRequired: false, values: [] });
         }
         setNewValueInput('');
         setOpenModal(true);
@@ -143,6 +111,7 @@ const FeaturesPage: React.FC = () => {
                 name: formData.name || '',
                 displayType: formData.displayType || 'single',
                 isActive: formData.isActive || false,
+                isRequired: formData.isRequired || false,
                 values: formData.values || []
             };
             setFeatures(prev => [...prev, newFeature]);
@@ -218,31 +187,32 @@ const FeaturesPage: React.FC = () => {
     return (
         <Box sx={{ width: '100%' }}>
             {/* Header & Actions */}
-            <Paper sx={{ p: 2, mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-                <TextField
-                    placeholder="Özellik Ara... (Örn: RAM)"
-                    variant="outlined"
-                    size="small"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    sx={{ minWidth: { xs: '100%', sm: '300px' } }}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <SearchIcon color="action" />
-                            </InputAdornment>
-                        ),
-                    }}
-                />
-                <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => handleOpenModal()}
-                    sx={{ bgcolor: '#2a6496', '&:hover': { bgcolor: '#1e4c70' } }}
-                >
-                    Yeni Özellik Ekle
-                </Button>
-            </Paper>
+            <PageHeader
+                title="Özellikler"
+                actionButton={
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => handleOpenModal()}
+                        sx={{
+                            bgcolor: '#fff',
+                            color: '#3949ab',
+                            '&:hover': { bgcolor: '#f5f5f5' },
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            boxShadow: 'none'
+                        }}
+                    >
+                        Yeni Özellik Ekle
+                    </Button>
+                }
+            />
+            <FilterPanel
+                searchTerm={searchTerm}
+                onSearchChange={(e) => setSearchTerm(e.target.value)}
+                searchPlaceholder="Özellik Ara... (Örn: RAM)"
+            />
 
             {/* Main Table */}
             <TableContainer component={Paper}>
@@ -250,6 +220,7 @@ const FeaturesPage: React.FC = () => {
                     <TableHead sx={{ bgcolor: '#f5f5f5' }}>
                         <TableRow>
                             <TableCell sx={{ fontWeight: 600 }}>Özellik Adı</TableCell>
+                            <TableCell sx={{ fontWeight: 600 }}>Zorunlu</TableCell>
                             <TableCell sx={{ fontWeight: 600 }}>Seçim Tipi</TableCell>
                             <TableCell sx={{ fontWeight: 600 }}>Değerler</TableCell>
                             <TableCell align="center" sx={{ fontWeight: 600 }}>Durum</TableCell>
@@ -262,6 +233,11 @@ const FeaturesPage: React.FC = () => {
                                 <TableRow key={feature.id} hover>
                                     <TableCell>
                                         <Typography variant="body1" fontWeight={500}>{feature.name}</Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant="body2" color={feature.isRequired ? 'error' : 'text.secondary'}>
+                                            {feature.isRequired ? 'Evet' : 'Hayır'}
+                                        </Typography>
                                     </TableCell>
                                     <TableCell>
                                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -326,7 +302,7 @@ const FeaturesPage: React.FC = () => {
                 </DialogTitle>
                 <DialogContent dividers>
                     <Grid container spacing={2}>
-                        <Grid item xs={12} sm={8}>
+                        <Grid item xs={12} sm={6}>
                             <TextField
                                 label="Özellik Adı (örn: RAM, Kumaş Tipi)"
                                 fullWidth
@@ -336,7 +312,7 @@ const FeaturesPage: React.FC = () => {
                                 required
                             />
                         </Grid>
-                        <Grid item xs={12} sm={4}>
+                        <Grid item xs={12} sm={6} sx={{ display: 'flex', gap: 2 }}>
                             <FormControlLabel
                                 control={
                                     <Switch
@@ -346,6 +322,17 @@ const FeaturesPage: React.FC = () => {
                                     />
                                 }
                                 label="Aktif"
+                                sx={{ mt: 1 }}
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={formData.isRequired || false}
+                                        onChange={(e) => setFormData({ ...formData, isRequired: e.target.checked })}
+                                        color="primary"
+                                    />
+                                }
+                                label="Zorunlu"
                                 sx={{ mt: 1 }}
                             />
                         </Grid>

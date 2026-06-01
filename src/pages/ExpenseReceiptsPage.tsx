@@ -2,55 +2,33 @@ import React from 'react';
 import { Box, Typography, Paper, Button, Grid, Card, CardContent } from '@mui/material';
 import { Receipt as ReceiptIcon, TrendingUp as TrendingUpIcon, Assessment as AssessmentIcon, Add as AddIcon } from '@mui/icons-material';
 import ExpenseReceiptList from '../components/expenseReceipt/ExpenseReceiptList';
+import PageHeader from '../components/layout/PageHeader';
 
 const ExpenseReceiptsPage: React.FC = () => {
   return (
     <Box sx={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
-      {/* Modern Header with Gradient */}
-      <Box sx={{
-        background: 'linear-gradient(135deg, #25638f 0%, #1e4a6f 100%)',
-        color: 'white',
-        p: 4,
-        mb: 3
-      }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-            <Box sx={{
-              p: 2,
-              borderRadius: 3,
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              backdropFilter: 'blur(10px)'
-            }}>
-              <ReceiptIcon sx={{ fontSize: 40 }} />
-            </Box>
-            <Box>
-              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-                Gider Fişleri
-              </Typography>
-              <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                Harcama kayıtlarını yönetin ve takip edin
-              </Typography>
-            </Box>
-          </Box>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            sx={{
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              color: 'white',
-              borderRadius: 2,
-              px: 3,
-              py: 1.5,
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.3)'
-              }
-            }}
-          >
-            Yeni Gider Fişi
-          </Button>
-        </Box>
+      {/* Modern Header with PageHeader */}
+      <Box sx={{ width: '100%', mb: 4 }}>
+        <PageHeader
+          title="Gider Fişleri"
+          actionButton={
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              sx={{
+                bgcolor: '#fff',
+                color: '#3949ab',
+                '&:hover': { bgcolor: '#f5f5f5' },
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: 'none'
+              }}
+            >
+              Yeni Gider Fişi
+            </Button>
+          }
+        />
       </Box>
 
       <Box sx={{ px: 4, pb: 4 }}>

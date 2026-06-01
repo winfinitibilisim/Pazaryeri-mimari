@@ -22,6 +22,8 @@ import {
     RadioButtonUnchecked
 } from '@mui/icons-material';
 import AddBrandDialog from '../components/AddBrandDialog';
+import PageHeader from '../components/layout/PageHeader';
+import FilterPanel from '../components/common/FilterPanel';
 
 interface Brand {
   id: string;
@@ -85,6 +87,7 @@ const BrandRow: React.FC<{ brand: Brand; }> = ({ brand }) => {
 const BrandsPage: FC = () => {
     const [brands, setBrands] = useState(sampleBrands);
     const [dialogOpen, setDialogOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const handleOpenAddDialog = () => {
         setDialogOpen(true);
@@ -119,19 +122,36 @@ const BrandsPage: FC = () => {
         });
     };
     return (
-        <Paper sx={{ p: 2 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h5" gutterBottom component="div">
-                    Markalar
-                </Typography>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<Add />} onClick={handleOpenAddDialog}
-                >
-                    Yeni Marka Ekle
-                </Button>
-            </Box>
+        <Box sx={{ width: '100%' }}>
+            <PageHeader
+                title="Markalar"
+                actionButton={
+                    <Button
+                        variant="contained"
+                        startIcon={<Add />}
+                        onClick={handleOpenAddDialog}
+                        sx={{
+                            bgcolor: '#fff',
+                            color: '#3949ab',
+                            '&:hover': { bgcolor: '#f5f5f5' },
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            boxShadow: 'none'
+                        }}
+                    >
+                        Yeni Marka Ekle
+                    </Button>
+                }
+            />
+            
+            <FilterPanel
+                searchTerm={searchTerm}
+                onSearchChange={(e) => setSearchTerm(e.target.value)}
+                searchPlaceholder="Marka Ara..."
+            />
+            
+            <Paper sx={{ p: 2, borderTopLeftRadius: 8, borderTopRightRadius: 8, borderBottomLeftRadius: 8, borderBottomRightRadius: 8, mt: -1 }}>
             <TableContainer component={Paper} elevation={3}>
                 <Table aria-label="brands table">
                     <TableHead>
@@ -154,7 +174,8 @@ const BrandsPage: FC = () => {
                 onClose={handleCloseDialog}
                 onAddBrand={handleAddBrand}
             />
-        </Paper>
+            </Paper>
+        </Box>
     );
 };
 

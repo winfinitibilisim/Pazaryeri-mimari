@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import {
@@ -16,9 +16,27 @@ import {
   Avatar,
   Chip,
   IconButton,
-  SelectChangeEvent,
+  InputAdornment,
+  Checkbox,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  Tooltip,
+  LinearProgress,
   TextField,
-  InputAdornment
+  Popover,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  Tabs,
+  Tab
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -26,12 +44,20 @@ import {
   Search as SearchIcon,
   Delete as DeleteIcon,
   Edit as EditIcon,
-  FilterList as FilterIcon
+  FilterList as FilterIcon,
+  MoreVert as MoreVertIcon,
+  ContentCopy as ContentCopyIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  Inventory as InventoryIcon,
+  KeyboardArrowDown as KeyboardArrowDownIcon,
+  KeyboardArrowUp as KeyboardArrowUpIcon
 } from '@mui/icons-material';
 
 import ExportButton from '../components/common/ExportButton';
 import QuickAddProductModal from '../components/common/QuickAddProductModal';
-import AccordionFilter from '../components/common/AccordionFilter';
+import FilterPanel from '../components/common/FilterPanel';
+import PageHeader from '../components/layout/PageHeader';
 import { productFilterConfig } from '../utils/filterConfigs';
 import ProductDetailModal from '../components/common/ProductDetailModal';
 // Dil desteği için LanguageContext'i içe aktarıyoruz
@@ -62,6 +88,10 @@ interface Product {
   color: string;
   date: string;
   order?: number; // Sıralama için eklenen alan
+  store?: string; // Mağaza/Satıcı bilgisi
+  buyboxRank?: number | null;
+  buyboxCompetitors?: { seller: string; price: number; rank: number }[];
+  infoLevel?: 'Güçlü' | 'Orta' | 'Zayıf';
 }
 
 const ProductsPage: React.FC = () => {
@@ -69,6 +99,7 @@ const ProductsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [page, setPage] = useState<number>(0);
+  const [activeTab, setActiveTab] = useState<string>('all');
   const [selectedColor, setSelectedColor] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
@@ -76,6 +107,45 @@ const ProductsPage: React.FC = () => {
   const [quickAddModalOpen, setQuickAddModalOpen] = useState<boolean>(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [advancedFilters, setAdvancedFilters] = useState<Record<string, any>>({});
+  
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [menuProduct, setMenuProduct] = useState<Product | null>(null);
+
+  const [buyboxAnchorEl, setBuyboxAnchorEl] = useState<null | HTMLElement>(null);
+  const [buyboxProduct, setBuyboxProduct] = useState<Product | null>(null);
+
+  const [infoAnchorEl, setInfoAnchorEl] = useState<null | HTMLElement>(null);
+  const [infoProduct, setInfoProduct] = useState<Product | null>(null);
+
+  const [bulkPriceModalOpen, setBulkPriceModalOpen] = useState(false);
+  const [bulkPriceOperation, setBulkPriceOperation] = useState<'increase' | 'decrease' | 'set'>('increase');
+  const [bulkPriceType, setBulkPriceType] = useState<'percentage' | 'amount'>('percentage');
+  const [bulkPriceValue, setBulkPriceValue] = useState<string>('');
+
+  const handleBuyboxOpen = (event: React.MouseEvent<HTMLElement>, product: Product) => {
+    setBuyboxAnchorEl(event.currentTarget);
+    setBuyboxProduct(product);
+  };
+  const handleBuyboxClose = () => {
+    setBuyboxAnchorEl(null);
+    setBuyboxProduct(null);
+  };
+
+  const handleInfoOpen = (event: React.MouseEvent<HTMLElement>, product: Product) => {
+    setInfoAnchorEl(event.currentTarget);
+    setInfoProduct(product);
+  };
+  const handleInfoClose = () => {
+    setInfoAnchorEl(null);
+    setInfoProduct(null);
+  };
+
+  // Sürükleyerek kaydırma için state ve ref
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   const { t } = useLanguage();
 
@@ -164,7 +234,10 @@ const ProductsPage: React.FC = () => {
       qty: 125,
       imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop&auto=format&q=80',
       color: 'Kırmızı',
-      date: '2023-05-15'
+      date: '2023-05-15',
+      store: 'Moda Dünyası',
+      buyboxRank: null,
+      infoLevel: 'Orta'
     },
     {
       id: '2',
@@ -180,7 +253,10 @@ const ProductsPage: React.FC = () => {
       qty: 84,
       imageUrl: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=300&h=300&fit=crop&auto=format&q=80',
       color: 'Mavi',
-      date: '2023-05-10'
+      date: '2023-05-10',
+      store: 'Denim Center',
+      buyboxRank: null,
+      infoLevel: 'Güçlü'
     },
     {
       id: '3',
@@ -196,7 +272,17 @@ const ProductsPage: React.FC = () => {
       qty: 36,
       imageUrl: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300&h=300&fit=crop&auto=format&q=80',
       color: 'Siyah',
-      date: '2023-05-05'
+      date: '2023-05-05',
+      store: 'Moda Dünyası',
+      buyboxRank: 6,
+      buyboxCompetitors: [
+        { seller: 'AHEL SAĞLIK', price: 1340.00, rank: 1 },
+        { seller: 'Natureller', price: 1350.00, rank: 2 },
+        { seller: 'YESİL PAZAR', price: 1530.00, rank: 3 },
+        { seller: 'Yeşilyurt Doğal Ürünler', price: 1540.00, rank: 4 },
+        { seller: 'Winfiniti A.Ş', price: 1750.00, rank: 6 }
+      ],
+      infoLevel: 'Güçlü'
     },
     {
       id: '4',
@@ -212,7 +298,8 @@ const ProductsPage: React.FC = () => {
       qty: 0,
       imageUrl: 'https://images.unsplash.com/photo-1603252109303-2751441dd157?w=300&h=300&fit=crop&auto=format&q=80',
       color: 'Beyaz',
-      date: '2023-04-28'
+      date: '2023-04-28',
+      store: 'Klasik Giyim'
     },
     {
       id: '5',
@@ -228,7 +315,8 @@ const ProductsPage: React.FC = () => {
       qty: 42,
       imageUrl: 'https://images.unsplash.com/photo-1577789140096-85a8fb016270?w=300&h=300&fit=crop&auto=format&q=80',
       color: 'Yeşil',
-      date: '2023-04-20'
+      date: '2023-04-20',
+      store: 'Triko Evi'
     },
     {
       id: '6',
@@ -244,7 +332,8 @@ const ProductsPage: React.FC = () => {
       qty: 15,
       imageUrl: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=300&h=300&fit=crop&auto=format&q=80',
       color: 'Gri',
-      date: '2023-05-20'
+      date: '2023-05-20',
+      store: 'Tech Store'
     },
     {
       id: '7',
@@ -260,7 +349,8 @@ const ProductsPage: React.FC = () => {
       qty: 45,
       imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop&auto=format&q=80',
       color: 'Siyah',
-      date: '2023-05-18'
+      date: '2023-05-18',
+      store: 'Tech Store'
     }
   ]);
 
@@ -275,6 +365,7 @@ const ProductsPage: React.FC = () => {
         "Ürün ID": product.id,
         "Ürün Adı": product.name,
         "Kategori": product.category,
+        "Mağaza": product.store || '-',
         "Fiyat": product.price,
         "Stok": product.stock,
         "Durum": product.status,
@@ -318,6 +409,79 @@ const ProductsPage: React.FC = () => {
 
   const handleAddNew = () => {
     navigate('/products/create');
+  };
+
+  const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.checked) {
+      setSelectedProductIds(paginatedProducts.map(p => p.id));
+    } else {
+      setSelectedProductIds([]);
+    }
+  };
+
+  const handleSelectOne = (event: React.ChangeEvent<HTMLInputElement>, id: string) => {
+    if (event.target.checked) {
+      setSelectedProductIds(prev => [...prev, id]);
+    } else {
+      setSelectedProductIds(prev => prev.filter(selectedId => selectedId !== id));
+    }
+  };
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, product: Product) => {
+    setAnchorEl(event.currentTarget);
+    setMenuProduct(product);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setMenuProduct(null);
+  };
+
+  const handleDeleteSelected = () => {
+    setProducts(prev => prev.filter(p => !selectedProductIds.includes(p.id)));
+    setSelectedProductIds([]);
+    notifySuccess("Seçili ürünler silindi.");
+  };
+
+  const handleStatusChangeSelected = (status: 'Aktif' | 'Pasif') => {
+    setProducts(prev => prev.map(p => selectedProductIds.includes(p.id) ? { ...p, status } : p));
+    setSelectedProductIds([]);
+    notifySuccess(`Seçili ürünler ${status} yapıldı.`);
+  };
+
+  const handleBulkPriceUpdate = () => {
+    const value = parseFloat(bulkPriceValue);
+    if (isNaN(value) || value < 0) {
+      notifyError("Geçerli bir değer giriniz.");
+      return;
+    }
+
+    setProducts(prev => prev.map(p => {
+      if (selectedProductIds.includes(p.id)) {
+        let newPrice = p.salePrice;
+        if (bulkPriceOperation === 'set') {
+          newPrice = value;
+        } else if (bulkPriceOperation === 'increase') {
+          if (bulkPriceType === 'percentage') {
+            newPrice = newPrice * (1 + value / 100);
+          } else {
+            newPrice = newPrice + value;
+          }
+        } else if (bulkPriceOperation === 'decrease') {
+          if (bulkPriceType === 'percentage') {
+            newPrice = newPrice * (1 - value / 100);
+          } else {
+            newPrice = Math.max(0, newPrice - value);
+          }
+        }
+        return { ...p, salePrice: newPrice, price: newPrice };
+      }
+      return p;
+    }));
+    
+    setBulkPriceModalOpen(false);
+    setBulkPriceValue('');
+    notifySuccess(`${selectedProductIds.length} ürünün fiyatı güncellendi.`);
   };
 
   const handleAdvancedFilterChange = (newFilters: Record<string, any>) => {
@@ -369,6 +533,30 @@ const ProductsPage: React.FC = () => {
     acc[product.category].push(product);
     return acc;
   }, {});
+
+  // Sürükle-bırak scroll işlemleri
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!tableContainerRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - tableContainerRef.current.offsetLeft);
+    setScrollLeft(tableContainerRef.current.scrollLeft);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !tableContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - tableContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // Sürükleme hızını ayarlamak için çarpan
+    tableContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
 
   // Sürükle-bırak işleyicisi
   const handleDragEnd = (result: DropResult) => {
@@ -451,9 +639,43 @@ const ProductsPage: React.FC = () => {
       return String(product[key as keyof Product]).toLowerCase().includes(String(value).toLowerCase());
     });
 
+    // Tab filter
+    let matchesTab = true;
+    if (activeTab === 'onSale') matchesTab = product.status === 'Aktif' && product.stock > 0;
+    else if (activeTab === 'soldOut') matchesTab = product.stock === 0;
+    else if (activeTab === 'closed') matchesTab = product.status === 'Pasif';
+    else if (activeTab === 'locked') matchesTab = false;
+
     // Tüm filtreleri birleştir
-    return matchesSearch && matchesColor && matchesCategory && matchesAdvancedFilters;
+    return matchesSearch && matchesColor && matchesCategory && matchesAdvancedFilters && matchesTab;
   });
+
+  const counts = {
+    all: products.length,
+    onSale: products.filter(p => p.status === 'Aktif' && p.stock > 0).length,
+    soldOut: products.filter(p => p.stock === 0).length,
+    closed: products.filter(p => p.status === 'Pasif').length,
+    locked: 0,
+  };
+
+  const TabLabel = ({ label, count }: { label: string, count: number }) => (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      {label}
+      {count > 0 && (
+        <Box sx={{ 
+          bgcolor: activeTab === label.toLowerCase() ? '#fff6f0' : '#f5f5f5', 
+          color: activeTab === label.toLowerCase() ? '#ff6b00' : 'text.secondary',
+          px: 1, 
+          py: 0.2, 
+          borderRadius: 4, 
+          fontSize: '0.75rem',
+          fontWeight: 600
+        }}>
+          {count}
+        </Box>
+      )}
+    </Box>
+  );
 
   // Filtrelenmiş ürünleri kategoriye göre grupla
   const filteredGroupedByCategory = filteredProducts.reduce<Record<string, Product[]>>((acc, product) => {
@@ -480,272 +702,296 @@ const ProductsPage: React.FC = () => {
 
   return (
     <Box sx={{ width: '100%', maxWidth: '100%' }}>
-      {/* Temel Butonlar ve Arama Çubuğu */}
-      <Paper sx={{ mb: 3, p: 2, borderRadius: 2, width: '100%' }}>
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: 'center', gap: { xs: 2, md: 1 } }}>
-          {/* Arama Çubuğu */}
-          <TextField
-            placeholder="Ürün adı, SKU veya kategori ara..."
-            variant="outlined"
-            size="small"
-            value={searchTerm}
-            onChange={handleSearchChange}
-            sx={{
-              flex: { xs: 1, md: 1 },
-              width: { xs: '100%', md: 'auto' },
-              '& .MuiOutlinedInput-root': {
-                borderRadius: '8px',
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'primary.main',
-                },
-              },
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon color="action" />
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          {/* Butonlar */}
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: { xs: 'flex-end', md: 'flex-end' }, width: { xs: '100%', md: 'auto' } }}>
-            <IconButton
-              onClick={() => setFilterOpen(!filterOpen)}
-              size="small"
-              sx={{ border: '1px solid #e0e0e0', p: 1 }}
-            >
-              <FilterIcon fontSize="small" />
-            </IconButton>
-
-            <ExportButton onClick={handleExport} />
-
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => setQuickAddModalOpen(true)}
-              sx={{ ml: 1 }}
-            >
-              Hızlı Ekle
-            </Button>
-
+      <PageHeader
+        title="Ürünler"
+        actionButton={
+          <Box sx={{ display: 'flex', gap: 2 }}>
             <Button
               variant="contained"
               startIcon={<AddIcon />}
               onClick={handleAddNew}
               sx={{
-                bgcolor: '#2a6496',
-                '&:hover': { bgcolor: '#1e4c70' },
+                bgcolor: '#fff',
+                color: '#3949ab',
+                '&:hover': { bgcolor: '#f5f5f5' },
                 borderRadius: 2,
                 textTransform: 'none',
-                ml: { md: 1 }
+                fontWeight: 600,
+                boxShadow: 'none'
               }}
             >
-              {t('productsPage.addProduct')}
+              Ürün Ekle
             </Button>
+            <ExportButton
+              onClick={handleExport}
+              label="Excel"
+              endIcon={<KeyboardArrowDownIcon />}
+              sx={{
+                bgcolor: '#fff',
+                color: '#3949ab',
+                '&:hover': { bgcolor: '#f5f5f5' },
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: 'none'
+              }}
+            />
           </Box>
-        </Box>
-      </Paper>
+        }
+      />
+      <FilterPanel
+        searchTerm={searchTerm}
+        onSearchChange={handleSearchChange}
+        searchPlaceholder="Ara..."
+        fields={productFilterConfig}
+        onAdvancedSearch={handleAdvancedFilterChange}
+        initialValues={advancedFilters}
+      />
 
-      {/* Merkezi Filtre Bileşeni */}
-      {filterOpen && (
-        <AccordionFilter
-          title="Ürün Filtreleri"
-          fields={productFilterConfig}
-          onSearch={handleAdvancedFilterChange}
-          initialValues={advancedFilters}
-          searchPlaceholder={t('productsPage.search')}
-        />
+      {/* Durum Sekmeleri */}
+      <Box sx={{ borderBottom: 1, borderColor: '#eee', mb: 2, bgcolor: '#fff', borderRadius: 2, px: 2, pt: 1 }}>
+        <Tabs 
+          value={activeTab} 
+          onChange={(e, newValue) => { setActiveTab(newValue); setPage(0); }}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{
+            '& .MuiTab-root': {
+              textTransform: 'none',
+              fontWeight: 600,
+              fontSize: '0.95rem',
+              color: 'text.secondary',
+              minHeight: 48,
+              mr: 2,
+              '&.Mui-selected': {
+                color: '#ff6b00',
+              }
+            },
+            '& .MuiTabs-indicator': {
+              backgroundColor: '#ff6b00',
+              height: 3,
+              borderRadius: '3px 3px 0 0'
+            }
+          }}
+        >
+          <Tab value="all" label={<TabLabel label="Tümü" count={counts.all} />} />
+          <Tab value="onSale" label={<TabLabel label="Satışta" count={counts.onSale} />} />
+          <Tab value="soldOut" label={<TabLabel label="Tükendi" count={counts.soldOut} />} />
+          <Tab value="closed" label={<TabLabel label="Satışa kapalı" count={counts.closed} />} />
+          <Tab value="locked" label={<TabLabel label="Kilitli" count={counts.locked} />} />
+        </Tabs>
+      </Box>
+
+      {/* Toplu İşlem Çubuğu */}
+      {selectedProductIds.length > 0 && (
+        <Paper sx={{ mb: 2, p: 1.5, display: 'flex', alignItems: 'center', bgcolor: 'primary.light', color: 'primary.contrastText', borderRadius: 2 }}>
+          <Typography variant="body1" sx={{ flexGrow: 1, fontWeight: 500 }}>
+            {selectedProductIds.length} ürün seçildi
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button size="small" variant="contained" color="info" onClick={() => setBulkPriceModalOpen(true)} startIcon={<EditIcon />}>Fiyat Güncelle</Button>
+            <Button size="small" variant="contained" color="success" onClick={() => handleStatusChangeSelected('Aktif')} startIcon={<CheckCircleIcon />}>Aktif Yap</Button>
+            <Button size="small" variant="contained" color="warning" onClick={() => handleStatusChangeSelected('Pasif')} startIcon={<CancelIcon />}>Pasif Yap</Button>
+            <Button size="small" variant="contained" color="error" onClick={handleDeleteSelected} startIcon={<DeleteIcon />}>Sil</Button>
+          </Box>
+        </Paper>
       )}
 
       {/* Ürün Tablosu */}
       <Paper sx={{ mb: 3, p: 0, borderRadius: 2, overflow: 'hidden', width: '100%', maxWidth: '100%' }}>
-        <TableContainer sx={{ width: '100%' }}>
-          <Table sx={{ width: '100%', tableLayout: 'fixed' }}>
+        <TableContainer 
+          ref={tableContainerRef}
+          onMouseDown={handleMouseDown}
+          onMouseLeave={handleMouseLeave}
+          onMouseUp={handleMouseUp}
+          onMouseMove={handleMouseMove}
+          sx={{ 
+            width: '100%', 
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            cursor: isDragging ? 'grabbing' : 'grab',
+            userSelect: isDragging ? 'none' : 'auto', // Seçimi engelle
+            touchAction: 'pan-x'
+          }}
+        >
+          <Table sx={{ minWidth: 1500 }}>
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                <TableCell width="25%">{t('productsPage.table.product')}</TableCell>
-                <TableCell width="10%">{t('productsPage.table.sku')}</TableCell>
-                <TableCell width="8%">{t('productsPage.table.stock')}</TableCell>
-                <TableCell width="10%" align="right">Alış Fiyatı</TableCell>
-                <TableCell width="10%" align="right">Satış Fiyatı</TableCell>
-                <TableCell width="8%" align="center">Para Birimi</TableCell>
-                <TableCell width="8%" align="center">{t('productsPage.table.quantity')}</TableCell>
-                <TableCell width="10%" align="center">{t('productsPage.table.status')}</TableCell>
-                <TableCell width="11%" align="center">{t('productsPage.table.actions')}</TableCell>
+              <TableRow sx={{ backgroundColor: '#fcfcfc', borderBottom: '2px solid #eee' }}>
+                <TableCell padding="checkbox" sx={{ width: 50, borderRight: '1px solid #eee' }}>
+                  <Checkbox 
+                    color="primary"
+                    indeterminate={selectedProductIds.length > 0 && selectedProductIds.length < paginatedProducts.length}
+                    checked={paginatedProducts.length > 0 && selectedProductIds.length === paginatedProducts.length}
+                    onChange={handleSelectAll}
+                  />
+                </TableCell>
+                <TableCell sx={{ minWidth: 250, borderRight: '1px solid #eee' }}><Typography variant="subtitle2" fontWeight={600} color="text.secondary">Ürün bilgisi</Typography></TableCell>
+                <TableCell sx={{ minWidth: 100, borderRight: '1px solid #eee' }} align="center"><Typography variant="subtitle2" fontWeight={600} color="text.secondary">Buybox sırası</Typography></TableCell>
+                <TableCell sx={{ minWidth: 200, borderRight: '1px solid #eee' }}><Typography variant="subtitle2" fontWeight={600} color="text.secondary">Komisyon ve Vade (KDV Hariç)</Typography></TableCell>
+                <TableCell sx={{ minWidth: 130, borderRight: '1px solid #eee' }}><Typography variant="subtitle2" fontWeight={600} color="text.secondary">Fiyat</Typography></TableCell>
+                <TableCell sx={{ minWidth: 140, borderRight: '1px solid #eee' }}><Typography variant="subtitle2" fontWeight={600} color="text.secondary">Rekabetçi fiyatlar</Typography></TableCell>
+                <TableCell sx={{ minWidth: 150, borderRight: '1px solid #eee' }}><Typography variant="subtitle2" fontWeight={600} color="text.secondary">Son 10 gün en düşük fiyat</Typography></TableCell>
+                <TableCell sx={{ minWidth: 150, borderRight: '1px solid #eee' }} align="center"><Typography variant="subtitle2" fontWeight={600} color="text.secondary">Ürün bilgi seviyesi</Typography></TableCell>
+                <TableCell sx={{ minWidth: 120, borderRight: '1px solid #eee' }}><Typography variant="subtitle2" fontWeight={600} color="text.secondary">Stok miktarı</Typography></TableCell>
+                <TableCell sx={{ minWidth: 120, borderRight: '1px solid #eee' }}><Typography variant="subtitle2" fontWeight={600} color="text.secondary">Kargoya veriliş süresi</Typography></TableCell>
+                <TableCell sx={{ minWidth: 150, borderRight: '1px solid #eee' }}><Typography variant="subtitle2" fontWeight={600} color="text.secondary">Satıcı stok kodu</Typography></TableCell>
+                <TableCell sx={{ minWidth: 80 }} align="center"><Typography variant="subtitle2" fontWeight={600} color="text.secondary">İşlemler</Typography></TableCell>
               </TableRow>
             </TableHead>
-            <DragDropContext onDragEnd={handleDragEnd}>
-              {/* Kategoriye göre gruplandırılmış ürünleri göster */}
+            <TableBody>
               {Object.entries(filteredGroupedByCategory)
                 .filter(([_, products]) => products.some(p => paginatedProducts.includes(p)))
                 .map(([category, products]) => (
-                  <Droppable droppableId={category} key={category}>
-                    {(provided) => (
-                      <TableBody
-                        {...provided.droppableProps}
-                        ref={provided.innerRef}
-                      >
-                        {/* Kategori başlığı */}
-                        <TableRow>
-                          <TableCell colSpan={7} sx={{ backgroundColor: '#f9f9f9', py: 1 }}>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                              {category} ({products.length})
-                            </Typography>
+                  <React.Fragment key={category}>
+                    {/* Kategori başlığı */}
+                    <TableRow>
+                      <TableCell colSpan={12} sx={{ backgroundColor: '#f9f9f9', py: 1 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                          {category} ({products.length})
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                    {/* Kategori ürünleri */}
+                    {products
+                      .filter(product => paginatedProducts.includes(product))
+                      .map((product, index) => (
+                        <TableRow
+                          key={product.id}
+                          hover
+                        >
+                          <TableCell padding="checkbox" sx={{ borderRight: '1px solid #eee' }}>
+                            <Checkbox
+                              checked={selectedProductIds.includes(product.id)}
+                              onChange={(e) => handleSelectOne(e, product.id)}
+                            />
                           </TableCell>
-                        </TableRow>
-                        {/* Kategori ürünleri */}
-                        {products
-                          .filter(product => paginatedProducts.includes(product))
-                          .map((product, index) => (
-                            <Draggable key={product.id} draggableId={product.id} index={index}>
-                              {(provided, snapshot) => (
-                                <TableRow
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  hover
+                          <TableCell sx={{ borderRight: '1px solid #eee' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <Avatar
+                                src={product.imageUrl}
+                                variant="square"
+                                sx={{
+                                  mr: 2,
+                                  width: 50,
+                                  height: 60,
+                                  bgcolor: '#fff',
+                                  border: '1px solid #e0e0e0',
+                                  borderRadius: 1,
+                                  objectFit: 'contain'
+                                }}
+                              />
+                              <Box sx={{ display: 'flex', flexDirection: 'column', maxWidth: '250px' }}>
+                                <Typography
+                                  variant="body2"
+                                  fontWeight={500}
                                   sx={{
-                                    backgroundColor: snapshot.isDragging ? 'rgba(63, 81, 181, 0.08)' : 'inherit',
-                                    ...provided.draggableProps.style,
+                                    fontSize: '0.85rem',
+                                    lineHeight: 1.3,
+                                    color: '#2c3e50',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical'
                                   }}
                                 >
-                                  <TableCell>
-                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                      <Avatar
-                                        src={product.imageUrl}
-                                        variant="rounded"
-                                        sx={{
-                                          mr: 2,
-                                          width: 100,
-                                          height: 100,
-                                          bgcolor: '#f0f0f0',
-                                          border: '1px solid #e0e0e0',
-                                          borderRadius: 1
-                                        }}
-                                      />
-                                      <Box>
-                                        <Typography
-                                          variant="body2"
-                                          fontWeight={500}
-                                          sx={{
-                                            fontSize: '0.875rem',
-                                            lineHeight: 1.4,
-                                            color: '#333',
-                                            letterSpacing: '0.01em',
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            display: '-webkit-box',
-                                            WebkitLineClamp: 2,
-                                            WebkitBoxOrient: 'vertical',
-                                            maxWidth: '100%'
-                                          }}
-                                        >
-                                          {product.name}
-                                        </Typography>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
-                                          <Avatar
-                                            sx={{
-                                              width: 20,
-                                              height: 20,
-                                              mr: 0.5,
-                                              bgcolor:
-                                                product.category === 'Electronics' ? '#e8e6ff' :
-                                                  product.category === 'Giyim' ? '#e6f7ff' :
-                                                    product.category === 'Accessories' ? '#ffebe6' :
-                                                      product.category === 'Shoes' ? '#e6ffe8' :
-                                                        product.category === 'Office' ? '#fff9e6' :
-                                                          product.category === 'Home Decor' ? '#e6f9ff' : '#f0f0f0'
-                                            }}
-                                          >
-                                            {product.category === 'Electronics' ? (
-                                              <Box component="span" sx={{ color: '#5045e4', fontSize: 12 }}>💻</Box>
-                                            ) : product.category === 'Giyim' ? (
-                                              <Box component="span" sx={{ color: '#4091db', fontSize: 12 }}>👕</Box>
-                                            ) : product.category === 'Accessories' ? (
-                                              <Box component="span" sx={{ color: '#e44545', fontSize: 12 }}>🎧</Box>
-                                            ) : product.category === 'Shoes' ? (
-                                              <Box component="span" sx={{ color: '#45e454', fontSize: 12 }}>👟</Box>
-                                            ) : product.category === 'Office' ? (
-                                              <Box component="span" sx={{ color: '#e4a045', fontSize: 12 }}>💼</Box>
-                                            ) : product.category === 'Home Decor' ? (
-                                              <Box component="span" sx={{ color: '#45c4e4', fontSize: 12 }}>🏠</Box>
-                                            ) : (
-                                              <Box component="span" sx={{ color: '#808080', fontSize: 12 }}>📦</Box>
-                                            )}
-                                          </Avatar>
-                                          <Typography variant="caption" color="text.secondary">{product.category}</Typography>
-                                        </Box>
-                                      </Box>
-                                    </Box>
-                                  </TableCell>
-                                  <TableCell>{product.sku}</TableCell>
-                                  <TableCell>{product.stock}</TableCell>
-                                  <TableCell align="right">
-                                    <Typography variant="body2" color="text.secondary">
-                                      {product.purchasePrice.toFixed(2)} {getCurrencySymbol(product.currency)}
-                                    </Typography>
-                                  </TableCell>
-                                  <TableCell align="right">
-                                    <Typography variant="body2" fontWeight={500}>
-                                      {product.salePrice.toFixed(2)} {getCurrencySymbol(product.currency)}
-                                    </Typography>
-                                  </TableCell>
-                                  <TableCell align="center">
-                                    <Chip
-                                      label={product.currency}
-                                      size="small"
-                                      variant="outlined"
-                                      sx={{
-                                        fontSize: '0.75rem',
-                                        height: '24px',
-                                        borderColor: '#e0e0e0',
-                                        color: '#666'
-                                      }}
-                                    />
-                                  </TableCell>
-                                  <TableCell align="center">{product.qty}</TableCell>
-                                  <TableCell align="center">
-                                    <Chip
-                                      label={product.status}
-                                      size="small"
-                                      sx={{
-                                        color: product.status === 'Aktif' ? '#1976d2' : '#7f8c8d',
-                                        backgroundColor: product.status === 'Aktif' ? 'rgba(25, 118, 210, 0.1)' : 'rgba(127, 140, 141, 0.1)',
-                                        borderRadius: '4px',
-                                        fontWeight: 500,
-                                      }}
-                                    />
-                                  </TableCell>
-                                  <TableCell align="center">
-                                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                                      <IconButton
-                                        size="small"
-                                        sx={{ mr: 1 }}
-                                        color="info"
-                                        onClick={() => handleViewProduct(product)}
-                                      >
-                                        <VisibilityIcon fontSize="small" />
-                                      </IconButton>
-                                      <IconButton size="small" sx={{ mr: 1 }} color="primary">
-                                        <EditIcon fontSize="small" />
-                                      </IconButton>
-                                      <IconButton size="small" color="error">
-                                        <DeleteIcon fontSize="small" />
-                                      </IconButton>
-                                    </Box>
-                                  </TableCell>
-                                </TableRow>
-                              )}
-                            </Draggable>
-                          ))}
-                        {provided.placeholder}
-                      </TableBody>
-                    )}
-                  </Droppable>
+                                  {product.name}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'flex', gap: 1 }}>
+                                  <span>SKU: <b style={{ color: '#8e8e8e', fontWeight: 400 }}>{product.sku}</b></span>
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </TableCell>
+                          <TableCell align="center" sx={{ borderRight: '1px solid #eee', bgcolor: '#fafafa' }}>
+                            {product.buyboxRank ? (
+                              <Typography variant="body2" sx={{ fontWeight: 600, color: '#333' }}>{product.buyboxRank}</Typography>
+                            ) : (
+                              <Chip label="-" size="small" sx={{ bgcolor: '#f1f2f6', color: '#576574', fontWeight: 600, height: 24 }} />
+                            )}
+                          </TableCell>
+                          <TableCell sx={{ borderRight: '1px solid #eee' }}>
+                            <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#555' }}>Komisyon: %17 - 24 iş günü</Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#777', mt: 0.5 }}>Tutar: {(product.salePrice * 0.17).toFixed(2)} TL</Typography>
+                          </TableCell>
+                          <TableCell sx={{ borderRight: '1px solid #eee', bgcolor: '#f0fdf4' }}>
+                              <TextField 
+                                size="small" 
+                                defaultValue={product.salePrice.toFixed(2)}
+                                InputProps={{
+                                    startAdornment: <InputAdornment position="start" sx={{ '& p': { fontSize: '0.9rem' } }}>₺</InputAdornment>
+                                }}
+                                sx={{ width: '100px', '& input': { p: 0.5, fontSize: '0.85rem' }, bgcolor: '#fff', borderRadius: 1 }}
+                              />
+                          </TableCell>
+                          <TableCell sx={{ borderRight: '1px solid #eee' }}>
+                            {product.buyboxCompetitors && product.buyboxCompetitors.length > 0 ? (
+                              <Box 
+                                onClick={(e) => handleBuyboxOpen(e, product)}
+                                sx={{ display: 'flex', flexDirection: 'column', cursor: 'pointer', '&:hover': { bgcolor: '#f9f9f9' }, p: 0.5, borderRadius: 1 }}
+                              >
+                                <Typography variant="caption" color="text.secondary">Buybox kazanan</Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                  <Typography variant="body2" fontWeight={600} color="text.primary">
+                                    {product.buyboxCompetitors[0].price.toFixed(2)} TL
+                                  </Typography>
+                                  <KeyboardArrowDownIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+                                </Box>
+                              </Box>
+                            ) : (
+                              <Typography variant="body2" color="text.secondary">-</Typography>
+                            )}
+                          </TableCell>
+                          <TableCell sx={{ borderRight: '1px solid #eee' }}>
+                              <Typography variant="body2" sx={{ color: '#555', fontSize: '0.85rem' }}>{product.salePrice.toFixed(2)} ₺</Typography>
+                          </TableCell>
+                          <TableCell align="center" sx={{ borderRight: '1px solid #eee' }}>
+                            <Box 
+                              onClick={(e) => handleInfoOpen(e, product)}
+                              sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, cursor: 'pointer', '&:hover': { bgcolor: '#f9f9f9' }, p: 0.5, borderRadius: 1 }}
+                            >
+                              <Typography 
+                                variant="body2" 
+                                fontWeight={600} 
+                                color={product.infoLevel === 'Güçlü' ? 'success.main' : product.infoLevel === 'Orta' ? 'warning.main' : 'error.main'}
+                              >
+                                {product.infoLevel || (product.stock > 100 ? 'Güçlü' : product.stock > 20 ? 'Orta' : 'Zayıf')}
+                              </Typography>
+                              {(product.infoLevel && product.infoLevel !== 'Güçlü') ? (
+                                <KeyboardArrowDownIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+                              ) : null}
+                            </Box>
+                          </TableCell>
+                          <TableCell sx={{ borderRight: '1px solid #eee' }}>
+                              <TextField 
+                                size="small" 
+                                defaultValue={product.stock}
+                                InputProps={{
+                                    startAdornment: <InputAdornment position="start"><InventoryIcon sx={{ fontSize: 16, color: '#999' }} /></InputAdornment>
+                                }}
+                                sx={{ width: '80px', '& input': { p: 0.5, fontSize: '0.85rem' }, bgcolor: '#fff', borderRadius: 1 }}
+                              />
+                          </TableCell>
+                          <TableCell sx={{ borderRight: '1px solid #eee' }}>
+                              <Typography variant="body2" sx={{ color: '#555' }}>1</Typography>
+                          </TableCell>
+                          <TableCell sx={{ borderRight: '1px solid #eee' }}>
+                              <Typography variant="body2" sx={{ color: '#555' }}>{product.sku}</Typography>
+                          </TableCell>
+                          <TableCell align="center" sx={{ bgcolor: '#fafafa' }}>
+                            <IconButton
+                              size="small"
+                              onClick={(e) => handleMenuOpen(e, product)}
+                              sx={{ bgcolor: '#eee' }}
+                            >
+                              <MoreVertIcon fontSize="small" />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </React.Fragment>
                 ))}
-            </DragDropContext>
+            </TableBody>
           </Table>
         </TableContainer>
 
@@ -763,6 +1009,42 @@ const ProductsPage: React.FC = () => {
         />
       </Paper>
 
+      {/* Dropdown Menu for rows */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        PaperProps={{
+          elevation: 2,
+          sx: { minWidth: 150, borderRadius: 2, mt: 0.5 }
+        }}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      >
+        <MenuItem onClick={() => { handleViewProduct(menuProduct!); handleMenuClose(); }}>
+          <ListItemIcon><VisibilityIcon fontSize="small" color="info" /></ListItemIcon>
+          Görüntüle
+        </MenuItem>
+        <MenuItem onClick={handleMenuClose}>
+          <ListItemIcon><EditIcon fontSize="small" color="primary" /></ListItemIcon>
+          Düzenle
+        </MenuItem>
+        <MenuItem onClick={handleMenuClose}>
+          <ListItemIcon><ContentCopyIcon fontSize="small" color="secondary" /></ListItemIcon>
+          Kopyala
+        </MenuItem>
+        <MenuItem onClick={() => {
+          if (menuProduct) {
+            setProducts(prev => prev.filter(p => p.id !== menuProduct.id));
+            notifySuccess("Ürün silindi.");
+          }
+          handleMenuClose();
+        }}>
+          <ListItemIcon><DeleteIcon fontSize="small" color="error" /></ListItemIcon>
+          Sil
+        </MenuItem>
+      </Menu>
+
       {/* Ürün Detay Modalı */}
       <ProductDetailModal
         open={detailModalOpen}
@@ -775,6 +1057,108 @@ const ProductsPage: React.FC = () => {
         open={quickAddModalOpen}
         onClose={() => setQuickAddModalOpen(false)}
       />
+
+      {/* Popovers */}
+      <Popover
+        open={Boolean(buyboxAnchorEl)}
+        anchorEl={buyboxAnchorEl}
+        onClose={handleBuyboxClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+        PaperProps={{
+          sx: { p: 2, minWidth: 250, mt: 1, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }
+        }}
+      >
+        <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>BUYBOX FİYATLARI</Typography>
+        {buyboxProduct?.buyboxCompetitors?.map((comp, i) => (
+          <Box key={i} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Typography variant="body2" fontWeight={700} color={i === 0 ? 'success.main' : 'warning.main'}>{comp.rank}</Typography>
+              <Typography variant="body2" color={'text.primary'}>{comp.seller}</Typography>
+            </Box>
+            <Typography variant="body2" fontWeight={600} color={i === 0 ? 'text.primary' : 'text.secondary'}>{comp.price.toFixed(2)} TL</Typography>
+          </Box>
+        ))}
+      </Popover>
+
+      <Popover
+        open={Boolean(infoAnchorEl)}
+        anchorEl={infoAnchorEl}
+        onClose={handleInfoClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+        PaperProps={{
+          sx: { p: 2, minWidth: 320, maxWidth: 350, mt: 1, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }
+        }}
+      >
+        <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary', lineHeight: 1.5 }}>
+          Ürün bilgilerinizin <b>iyileştirmeye</b> ihtiyacı var. Satışlarınızı artırmak için <b>ürün adı, görsel, açıklama ve özellikleri</b> eksiksiz doldurun.
+        </Typography>
+        <Button variant="outlined" color="warning" fullWidth startIcon={<EditIcon />} sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}>
+          Ürün bilgilerini güncelle
+        </Button>
+      </Popover>
+
+      {/* Toplu Fiyat Güncelleme Modalı */}
+      <Dialog open={bulkPriceModalOpen} onClose={() => setBulkPriceModalOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 600, fontSize: '1.2rem', pb: 1 }}>Toplu Fiyat Güncelle</DialogTitle>
+        <DialogContent dividers>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 1 }}>
+            <FormControl fullWidth size="small">
+              <InputLabel>İşlem Türü</InputLabel>
+              <Select
+                value={bulkPriceOperation}
+                label="İşlem Türü"
+                onChange={(e) => setBulkPriceOperation(e.target.value as any)}
+              >
+                <MenuItem value="increase">Fiyatı Artır</MenuItem>
+                <MenuItem value="decrease">Fiyatı Düşür</MenuItem>
+                <MenuItem value="set">Sabit Fiyat Yap</MenuItem>
+              </Select>
+            </FormControl>
+
+            {bulkPriceOperation !== 'set' && (
+              <FormControl component="fieldset">
+                <Typography variant="body2" color="text.secondary" gutterBottom>Değer Türü</Typography>
+                <RadioGroup
+                  row
+                  value={bulkPriceType}
+                  onChange={(e) => setBulkPriceType(e.target.value as any)}
+                >
+                  <FormControlLabel value="percentage" control={<Radio size="small" />} label="Yüzde (%)" />
+                  <FormControlLabel value="amount" control={<Radio size="small" />} label="Tutar (₺)" />
+                </RadioGroup>
+              </FormControl>
+            )}
+
+            <TextField
+              fullWidth
+              size="small"
+              label={bulkPriceOperation === 'set' ? 'Yeni Fiyat (₺)' : `Değer (${bulkPriceType === 'percentage' ? '%' : '₺'})`}
+              type="number"
+              value={bulkPriceValue}
+              onChange={(e) => setBulkPriceValue(e.target.value)}
+              InputProps={{ inputProps: { min: 0 } }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setBulkPriceModalOpen(false)} color="inherit" sx={{ textTransform: 'none', fontWeight: 600 }}>İptal</Button>
+          <Button onClick={handleBulkPriceUpdate} variant="contained" color="primary" sx={{ px: 3, textTransform: 'none', fontWeight: 600 }}>Güncelle</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

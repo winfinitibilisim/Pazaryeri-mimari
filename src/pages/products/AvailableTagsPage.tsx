@@ -34,6 +34,9 @@ import {
     LocalOffer as LocalOfferIcon
 } from '@mui/icons-material';
 
+import PageHeader from '../../components/layout/PageHeader';
+import FilterPanel from '../../components/common/FilterPanel';
+
 // --- Typings ---
 type TagColorTheme = 'default' | 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success';
 
@@ -133,31 +136,32 @@ const AvailableTagsPage: React.FC = () => {
     return (
         <Box sx={{ width: '100%' }}>
             {/* Header & Actions */}
-            <Paper sx={{ p: 2, mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-                <TextField
-                    placeholder="Etiket Ara... (Örn: ÇOK SATAN)"
-                    variant="outlined"
-                    size="small"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    sx={{ minWidth: { xs: '100%', sm: '300px' } }}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <SearchIcon color="action" />
-                            </InputAdornment>
-                        ),
-                    }}
-                />
-                <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => handleOpenModal()}
-                    sx={{ bgcolor: '#2a6496', '&:hover': { bgcolor: '#1e4c70' } }}
-                >
-                    Yeni Etiket (Badge) Ekle
-                </Button>
-            </Paper>
+            <PageHeader
+                title="Etiketler"
+                actionButton={
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => handleOpenModal()}
+                        sx={{
+                            bgcolor: '#fff',
+                            color: '#3949ab',
+                            '&:hover': { bgcolor: '#f5f5f5' },
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            boxShadow: 'none'
+                        }}
+                    >
+                        Yeni Etiket Ekle
+                    </Button>
+                }
+            />
+            <FilterPanel
+                searchTerm={searchTerm}
+                onSearchChange={(e) => setSearchTerm(e.target.value)}
+                searchPlaceholder="Etiket Ara... (Örn: ÇOK SATAN)"
+            />
 
             {/* Main Table */}
             <TableContainer component={Paper}>

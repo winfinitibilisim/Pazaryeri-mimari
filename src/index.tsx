@@ -4,6 +4,9 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { CategoryProvider } from './contexts/CategoryContext';
+import { ProductFeatureProvider } from './contexts/ProductFeatureContext';
+import { ProductOptionProvider } from './contexts/ProductOptionContext';
+import { ProductClassProvider } from './contexts/ProductClassContext';
 
 // i18n yapılandırmasını içe aktar
 import './i18n/i18n';
@@ -14,7 +17,13 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <CategoryProvider>
-      <App />
+      <ProductFeatureProvider>
+        <ProductOptionProvider>
+          <ProductClassProvider>
+            <App />
+          </ProductClassProvider>
+        </ProductOptionProvider>
+      </ProductFeatureProvider>
     </CategoryProvider>
   </React.StrictMode>
 );

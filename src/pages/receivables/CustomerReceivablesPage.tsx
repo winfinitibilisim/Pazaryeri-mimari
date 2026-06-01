@@ -41,6 +41,8 @@ import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import tr from 'date-fns/locale/tr';
 import AddReceivableDialog, { NewReceivable } from '../../components/receivables/AddReceivableDialog';
+import PageHeader from '../../components/layout/PageHeader';
+import FilterPanel from '../../components/common/FilterPanel';
 
 // Veri tipleri
 export type StatusType = 'paid' | 'not_due' | 'overdue';
@@ -175,80 +177,59 @@ const CustomerReceivablesPage: React.FC = () => {
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
       <Paper sx={{ p: 3, m: 2, borderRadius: 2, boxShadow: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h5" gutterBottom component="div">
-            {t('customerReceivablesPage.title')}
-          </Typography>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setAddDialogOpen(true)}>
-            {t('customerReceivablesPage.addReceivable')}
-          </Button>
-        </Box>
+        <PageHeader
+          title={t('customerReceivablesPage.title')}
+          actionButton={
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setAddDialogOpen(true)}
+              sx={{
+                bgcolor: '#fff',
+                color: '#3949ab',
+                '&:hover': { bgcolor: '#f5f5f5' },
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: 'none'
+              }}
+            >
+              {t('customerReceivablesPage.addReceivable')}
+            </Button>
+          }
+        />
 
-        <Accordion expanded={filtersOpen} onChange={() => setFiltersOpen(!filtersOpen)} sx={{ mb: 2, border: '1px solid #e0e0e0', boxShadow: 'none' }}>
-          <AccordionSummary expandIcon={<FilterListIcon />} aria-controls="filters-content" id="filters-header">
-            <Typography>{t('filters', 'Filtreler')}</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Grid container spacing={2} sx={{ flexDirection: 'column' }}>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  placeholder={t('customerReceivablesPage.searchPlaceholder')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel>{t('customerReceivablesPage.status')}</InputLabel>
-                  <Select
-                    multiple
-                    value={statusFilter}
-                    onChange={handleStatusChange}
-                    renderValue={(selected) => selected.map(s => t(`customerReceivablesPage.${s}`)).join(', ')}
-                    label={t('customerReceivablesPage.status')}
-                  >
-                    {statusOptions.map((status) => (
-                      <MenuItem key={status} value={status}>
-                        <Checkbox checked={statusFilter.indexOf(status) > -1} />
-                        <ListItemText primary={t(`customerReceivablesPage.${status}`)} />
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-                <DatePicker
-                  label={t('customerReceivablesPage.startDate')}
-                  value={dateRange.start}
-                  onChange={(newValue: Date | null) => setDateRange({ ...dateRange, start: newValue })}
-                  renderInput={(params) => <TextField {...params} fullWidth />}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <DatePicker
-                  label={t('customerReceivablesPage.endDate')}
-                  value={dateRange.end}
-                  onChange={(newValue: Date | null) => setDateRange({ ...dateRange, end: newValue })}
-                  renderInput={(params) => <TextField {...params} fullWidth />}
-                />
-              </Grid>
-              <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button variant="outlined" onClick={clearFilters}>
-                  {t('customerReceivablesPage.clearFilters')}
-                </Button>
-              </Grid>
-            </Grid>
-          </AccordionDetails>
-        </Accordion>
+        <FilterPanel
+          searchTerm={searchQuery}
+          onSearchChange={(e) => setSearchQuery(e.target.value)}
+          searchPlaceholder={t('customerReceivablesPage.searchPlaceholder')}
+          fields={[
+            {
+              id: 'status',
+              label: t('customerReceivablesPage.status'),
+              type: 'select',
+              options: statusOptions.map((status) => ({
+                value: status,
+                label: t(`customerReceivablesPage.${status}`)
+              }))
+            },
+            {
+              id: 'startDate',
+              label: t('customerReceivablesPage.startDate'),
+              type: 'date'
+            },
+            {
+              id: 'endDate',
+              label: t('customerReceivablesPage.endDate'),
+              type: 'date'
+            }
+          ]}
+          onAdvancedSearch={(values: any) => {
+            if (values.status) setStatusFilter([values.status]);
+            if (values.startDate) setDateRange((prev) => ({ ...prev, start: values.startDate }));
+            if (values.endDate) setDateRange((prev) => ({ ...prev, end: values.endDate }));
+          }}
+        />
 
         <TableContainer component={Paper} sx={{ borderRadius: 2, border: '1px solid #e0e0e0' }}>
           <Table sx={{ minWidth: 650 }} aria-label="customer receivables table">

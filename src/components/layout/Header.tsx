@@ -26,14 +26,11 @@ import DeletedItemsDialog from './DeletedItemsDialog';
 import HelpDialog from './HelpDialog';
 import SettingsMenu from './SettingsMenu';
 
-interface HeaderProps {
-  open: boolean;
-  onToggle: () => void;
-}
+interface HeaderProps {}
 
 
 
-const Header: React.FC<HeaderProps> = ({ open, onToggle }) => {
+const Header: React.FC = () => {
   const navigate = useNavigate();
   const [notificationsAnchor, setNotificationsAnchor] = useState<null | HTMLElement>(null);
   const [profileAnchor, setProfileAnchor] = useState<null | HTMLElement>(null);
@@ -158,26 +155,6 @@ const Header: React.FC<HeaderProps> = ({ open, onToggle }) => {
       <Toolbar>
         <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <IconButton
-              color="inherit"
-              aria-label="toggle menu"
-              onClick={onToggle}
-              edge="start"
-              sx={{
-                marginRight: 2,
-                zIndex: 1300,
-                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' },
-                padding: '8px',
-                borderRadius: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" fill="currentColor" />
-              </svg>
-            </IconButton>
             <Box 
               onClick={handleLogoClick}
               sx={{ 
